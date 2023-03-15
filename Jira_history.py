@@ -4,8 +4,8 @@ from jira import JIRA
 
 
 
-# Пишем JQL запрос для выборки нужных нам заявок для импорта
-# Запрос ниже выгружаете данные по задачам обновленным вчера и по выбранным проектам
+# Пишем JQL запрос для выборки нужных нам задач для импорта
+# Запрос ниже выгружает задачи обновленные вчера из определенных проектов
 JQL = 'project in (yourpoject_1, yourpoject_2) AND Updated>=startOfDay(-1d) AND Updated<=startOfDay(0d)'
 # Создаем подключение к серверу
 jira = JIRA(
@@ -15,7 +15,7 @@ jira = JIRA(
 # Выгружаем список задач по нашему JQL запросу
 # maxResults - максимальное количество выгружаемых задач
 jira_key = jira.search_issues(JQL, maxResults=1000)
-# Перебираем циклом список задач, получаем их ID и записывам в history_log
+# Перебираем циклом список задач, получаем их ID, грузим историю по каждому ID и записывам в history_log
 history_log = []
 for keyid in range(len(jira_key)):
     issue = jira.issue(str(jira_key[keyid]), expand='changelog')
