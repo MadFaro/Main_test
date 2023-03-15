@@ -15,7 +15,7 @@ jira = JIRA(
 # Выгружаем список задач по нашему JQL запросу
 # maxResults - максимальное количество выгружаемых задач
 jira_key = jira.search_issues(JQL, maxResults=1000)
-# Перебираем циклом список задач, получаем их ID и записывам в history_log
+# Перебираем циклом список задач, получаем их ID, грузим историю по каждому ID и записывам в history_log
 history_log = []
 for keyid in range(len(jira_key)):
     issue = jira.issue(str(jira_key[keyid]), expand='changelog')
