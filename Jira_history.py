@@ -1,34 +1,11 @@
-﻿import pandas as pd
-from jira import JIRA
-
-
-
-
-# Пишем JQL запрос для выборки нужных нам задач для импорта
-# Запрос ниже выгружает задачи обновленные вчера из определенных проектов
-JQL = 'project in (yourpoject_1, yourpoject_2) AND Updated>=startOfDay(-1d) AND Updated<=startOfDay(0d)'
-# Создаем подключение к серверу
-jira = JIRA(
-                options={'server': 'https://yourjiraserver'}, 
-                basic_auth=('username', 'password')
-            )
-# Выгружаем список задач по нашему JQL запросу
-# maxResults - максимальное количество выгружаемых задач
-jira_key = jira.search_issues(JQL, maxResults=1000)
-# Перебираем циклом список задач, получаем их ID, грузим историю по каждому ID и записывам в history_log
-history_log = []
-for keyid in range(len(jira_key)):
-    issue = jira.issue(str(jira_key[keyid]), expand='changelog')
-    changelog = issue.changelog
-    for history in changelog.histories:
-        for change in history.items:
-            if change.field == 'status':
-                statuses = {}
-                statuses['ID'] = str(jira_key[keyid])
-                statuses['fromString'] = change.fromString
-                statuses['toString'] = change.toString
-                statuses['created'] = history.created
-                statuses['author'] = history.author.displayName
-                history_log.append(statuses)
-# Сохраняем histiry_log как файл Excel
-pd.DataFrame(history_log).to_excel('jira.xlsx', index=False)
+﻿SELECT start_time, end_time, MAX(parallel_chats) AS max_parallel_chats
+FROM (
+    SELECT start_time, end_time, SUM(case when chat_count > 3 then 3 else chat_count end) OVER (ORDER BY start_time) AS parallel_chats
+    FROM (
+        SELECT start_time, end_time, COUNT(*) OVER (ORDER BY start_time, end_time) AS chat_count
+        FROM your_table
+        WHERE start_time >= :start_date
+        AND end_time <= :end_date
+    )
+)
+GROUP BY start_time, end_time;
