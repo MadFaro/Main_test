@@ -14,30 +14,39 @@ def load_audio_data(audio_file):
     left_channel_bytes = (left_channel * np.iinfo(np.int16).max).astype(np.int16).tobytes()
     return left_channel_bytes, sample_rate
 
-def process_audio_file(audio_file, model, phrases):
-    audio_data, sample_rate = load_audio_data(audio_file)
-    recognizer = vosk.KaldiRecognizer(model, sample_rate)
-    recognizer.AcceptWaveform(audio_data)
-    result = recognizer.FinalResult()
-    text = result['text']
-    check_phrases(text, phrases)
-    return {'audio_file': audio_file, 'text': text, 'found_phrases': check_phrases(text, phrases)}
+def check_phrases(text, phrases):
+    tokens = nltk.word_tokenize(text)
+    found_phrases = []
+    for phrase in phrases:
+        phrase_tokens = nltk.word_tokenize(phrase)
+        if all(token in tokens for token in phrase_tokens):
+            found_phrases.append(phrase)
+    return found_phrases
 
-def find_words(audio_files, model, phrases):
+def process_audio_files(audio_files, model, phrases):
     results = []
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = []
-        for audio_file in audio_files:
-            future = executor.submit(process_audio_file, audio_file, model, phrases)
-            futures.append(future)
-        for future in concurrent.futures.as_completed(futures):
-            result = future.result()
-            results.append(result)
+    for audio_file in audio_files:
+        audio_data, sample_rate = load_audio_data(audio_file)
+        recognizer = vosk.KaldiRecognizer(model, sample_rate)
+        recognizer.AcceptWaveform(audio_data)
+        result = recognizer.FinalResult()
+        text = result['text']
+        found_phrases = check_phrases(text, phrases)
+        results.append({'audio_file': audio_file, 'text': text, 'found_phrases': found_phrases})
+    return results
+
+def find_words(audio_files, model, phrases, batch_size):
+    results = []
+    for i in range(0, len(audio_files), batch_size):
+        batch_files = audio_files[i:i+batch_size]
+        batch_results = process_audio_files(batch_files, model, phrases)
+        results.extend(batch_results)
     return results
 
 if __name__ == '__main__':
     model = vosk.Model(model_path)
     audio_files = [os.path.join(audio_directory, filename) for filename in os.listdir(audio_directory) if filename.endswith('.wav')]
     phrases = ["пример текста", "мы будем", "не найдена"]
-    found_words = find_words(audio_files, model, phrases)
+    batch_size = 10
+    found_words = find_words(audio_files, model, phrases, batch_size)
     print(found_words)
