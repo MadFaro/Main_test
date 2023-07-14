@@ -1,8 +1,8 @@
 Sub РаскраситьРезультаты()
     Dim rng As Range
-    Dim dataRange As Range
+    Dim опытныйRange As Range
+    Dim новичокRange As Range
     Dim cell As Range
-    Dim rowCount As Long
     Dim percentile30 As Double
     Dim percentile70 As Double
     Dim опытныйValues() As Double
@@ -12,60 +12,67 @@ Sub РаскраситьРезультаты()
     
     ' Выбор диапазона, в котором нужно раскрасить результаты
     Set rng = Selection
-    Set dataRange = rng.Columns(2) ' Выбор только второго столбца
-    rowCount = dataRange.Rows.Count
+    Set опытныйRange = rng.SpecialCells(xlCellTypeConstants, xlTextValues).Offset(0, 1).Resize(1, 1)
+    Set новичокRange = rng.SpecialCells(xlCellTypeConstants, xlTextValues).Offset(0, 1).Resize(1, 1)
     
     ' Создание отдельных массивов для опытных и новичков
-    опытныйCount = Application.WorksheetFunction.CountIf(rng.Columns(1), "Опытный")
-    новичокCount = Application.WorksheetFunction.CountIf(rng.Columns(1), "Новичок")
+    опытныйCount = опытныйRange.Cells.Count
+    новичокCount = новичокRange.Cells.Count
     ReDim опытныйValues(1 To опытныйCount)
     ReDim новичокValues(1 To новичокCount)
     
     ' Заполнение массивов значениями для опытных и новичков
     Dim i As Long
-    Dim j As Long
     i = 1
-    j = 1
-    For Each cell In rng.Columns(1)
-        If cell.Value = "Опытный" Then
-            опытныйValues(i) = cell.Offset(0, 1).Value
+    For Each cell In опытныйRange
+        If IsNumeric(cell.Value) Then
+            опытныйValues(i) = cell.Value
             i = i + 1
-        ElseIf cell.Value = "Новичок" Then
-            новичокValues(j) = cell.Offset(0, 1).Value
-            j = j + 1
+        End If
+    Next cell
+    
+    i = 1
+    For Each cell In новичокRange
+        If IsNumeric(cell.Value) Then
+            новичокValues(i) = cell.Value
+            i = i + 1
         End If
     Next cell
     
     ' Расчет и раскраска для опытных
-    For Each cell In rng.Columns(2)
-        If IsNumeric(cell.Offset(0, -1).Value) And cell.Offset(0, -1).Value = "Опытный" Then
-            percentile30 = CalculatePercentile(опытныйValues, 0.3)
-            percentile70 = CalculatePercentile(опытныйValues, 0.7)
-            
-            ' Применение соответствующей заливки
-            If cell.Value >= percentile70 Then
-                cell.Interior.Color = RGB(255, 0, 0) ' Красный цвет
-            ElseIf cell.Value <= percentile30 Then
-                cell.Interior.Color = RGB(0, 255, 0) ' Зеленый цвет
-            Else
-                cell.Interior.Color = RGB(255, 255, 0) ' Желтый цвет
+    For Each cell In опытныйRange
+        percentile30 = CalculatePercentile(опытныйValues, 0.3)
+        percentile70 = CalculatePercentile(опытныйValues, 0.7)
+        
+        ' Применение соответствующей заливки
+        If IsNumeric(cell.Offset(0, -1).Value) Then
+            If cell.Offset(0, -1).Value = "Опытный" Then
+                If cell.Value >= percentile70 Then
+                    cell.Offset(0, -1).Interior.Color = RGB(255, 0, 0) ' Красный цвет
+                ElseIf cell.Value <= percentile30 Then
+                    cell.Offset(0, -1).Interior.Color = RGB(0, 255, 0) ' Зеленый цвет
+                Else
+                    cell.Offset(0, -1).Interior.Color = RGB(255, 255, 0) ' Желтый цвет
+                End If
             End If
         End If
     Next cell
     
     ' Расчет и раскраска для новичков
-    For Each cell In rng.Columns(2)
-        If IsNumeric(cell.Offset(0, -1).Value) And cell.Offset(0, -1).Value = "Новичок" Then
-            percentile30 = CalculatePercentile(новичокValues, 0.3)
-            percentile70 = CalculatePercentile(новичокValues, 0.7)
-            
-            ' Применение соответствующей заливки
-            If cell.Value >= percentile70 Then
-                cell.Interior.Color = RGB(255, 0, 0) ' Красный цвет
-            ElseIf cell.Value <= percentile30 Then
-                cell.Interior.Color = RGB(0, 255, 0) ' Зеленый цвет
-            Else
-                cell.Interior.Color = RGB(255, 255, 0) ' Желтый цвет
+    For Each cell In новичокRange
+        percentile30 = CalculatePercentile(новичокValues, 0.3)
+        percentile70 = CalculatePercentile(новичокValues, 0.7)
+        
+        ' Применение соответствующей заливки
+        If IsNumeric(cell.Offset(0, -1).Value) Then
+            If cell.Offset(0, -1).Value = "Новичок" Then
+                If cell.Value >= percentile70 Then
+                    cell.Offset(0, -1).Interior.Color = RGB(255, 0, 0) ' Красный цвет
+                ElseIf cell.Value <= percentile30 Then
+                    cell.Offset(0, -1).Interior.Color = RGB(0, 255, 0) ' Зеленый цвет
+                Else
+                    cell.Offset(0, -1).Interior.Color = RGB(255, 255, 0) ' Желтый цвет
+                End If
             End If
         End If
     Next cell
@@ -127,5 +134,3 @@ Sub QuickSort(arr() As Double, left As Long, right As Long)
         Call QuickSort(arr, i, right)
     End If
 End Sub
-
-
