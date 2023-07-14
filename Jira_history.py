@@ -6,32 +6,36 @@ Sub РаскраситьРезультаты()
     Dim greenCount As Long
     Dim redCount As Long
     Dim yellowCount As Long
-    Dim minValue As Double
-    Dim maxValue As Double
+    Dim sortedRange As Range
+    Dim percentile30 As Double
     
     ' Выбор диапазона, в котором нужно раскрасить результаты
     Set rng = Selection
     Set dataRange = rng
     rowCount = dataRange.Rows.Count
     
-    ' Определение минимального и максимального значения в выбранном диапазоне
-    minValue = WorksheetFunction.Min(dataRange)
-    maxValue = WorksheetFunction.Max(dataRange)
-    
-    ' Вычисление пороговых значений для каждого цвета
+    ' Определение числа строк, соответствующего 30% лучших значений
     greenCount = Round(rowCount * 0.3)
-    redCount = Round(rowCount * 0.3)
-    yellowCount = rowCount - greenCount - redCount
     
-    ' Проверка и раскраска каждой строки в соответствии с процентами
+    ' Сортировка диапазона по возрастанию
+    Set sortedRange = dataRange.Resize(, 1).Offset(, 1)
+    sortedRange.Value = dataRange.Value
+    sortedRange.Sort Key1:=sortedRange, Order1:=xlAscending, Header:=xlNo
+    
+    ' Определение значения, соответствующего 30% лучших значений
+    percentile30 = sortedRange.Cells(greenCount).Value
+    
+    ' Проверка и раскраска каждой строки в соответствии с процентным значением
     For Each cell In dataRange
-        If cell.Value >= maxValue - (maxValue - minValue) * 0.3 Then
+        If cell.Value >= percentile30 Then
             cell.Interior.Color = RGB(255, 0, 0) ' Красный цвет
-        ElseIf cell.Value <= minValue + (maxValue - minValue) * 0.3 Then
+        ElseIf cell.Value < percentile30 Then
             cell.Interior.Color = RGB(0, 255, 0) ' Зеленый цвет
-        Else
-            cell.Interior.Color = RGB(255, 255, 0) ' Желтый цвет
         End If
     Next cell
+    
+    ' Очистка временного диапазона, используемого для сортировки
+    sortedRange.Clear
 End Sub
+
 
