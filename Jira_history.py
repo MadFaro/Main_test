@@ -19,8 +19,8 @@ Sub РаскраситьРезультаты()
         Set valueColumn = rng.Columns(2) ' Столбец с числовыми значениями
         
         ' Расчет процентилей для каждой категории
-        percentile30 = CalculatePercentile(categoryColumn, valueColumn, cell.Offset(0, -1).Value, 0.3)
-        percentile70 = CalculatePercentile(categoryColumn, valueColumn, cell.Offset(0, -1).Value, 0.7)
+        percentile30 = CalculatePercentile(categoryColumn, valueColumn, cell.Offset(0, -1).Text, 0.3)
+        percentile70 = CalculatePercentile(categoryColumn, valueColumn, cell.Offset(0, -1).Text, 0.7)
         
         ' Применение соответствующей заливки
         If cell.Value >= percentile70 Then
