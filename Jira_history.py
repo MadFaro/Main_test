@@ -38,7 +38,7 @@ Sub РаскраситьРезультаты()
     
     ' Расчет и раскраска для опытных
     For Each cell In rng.Columns(2)
-        If cell.Offset(0, -1).Value = "Опытный" Then
+        If IsNumeric(cell.Offset(0, -1).Value) And cell.Offset(0, -1).Value = "Опытный" Then
             percentile30 = CalculatePercentile(опытныйValues, 0.3)
             percentile70 = CalculatePercentile(опытныйValues, 0.7)
             
@@ -55,7 +55,7 @@ Sub РаскраситьРезультаты()
     
     ' Расчет и раскраска для новичков
     For Each cell In rng.Columns(2)
-        If cell.Offset(0, -1).Value = "Новичок" Then
+        If IsNumeric(cell.Offset(0, -1).Value) And cell.Offset(0, -1).Value = "Новичок" Then
             percentile30 = CalculatePercentile(новичокValues, 0.3)
             percentile70 = CalculatePercentile(новичокValues, 0.7)
             
@@ -127,8 +127,5 @@ Sub QuickSort(arr() As Double, left As Long, right As Long)
         Call QuickSort(arr, i, right)
     End If
 End Sub
-
-
-
 
 
