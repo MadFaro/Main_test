@@ -1,47 +1,22 @@
 Sub РаскраситьРезультаты()
     Dim rng As Range
-    Dim dataRange As Range
-    Dim values() As Variant
+    Dim опытныйRange As Range
+    Dim новичокRange As Range
     Dim опытныйValues() As Variant
     Dim новичокValues() As Variant
     Dim i As Long
     
     ' Выбор диапазона с данными
-    Set rng = Range("A1:B14")
-    Set dataRange = rng.Resize(rng.Rows.Count, 1) ' Выбор только первого столбца (категория)
+    Set rng = Selection
     
-    ' Получение значений из выбранного столбца
-    values = dataRange.Value
+    ' Выделение столбца "Опытный"
+    Set опытныйRange = Range(Cells(1, 1), Cells(rng.Rows.Count, 1))
+    ' Выделение столбца "Значение"
+    Set новичокRange = Range(Cells(1, 2), Cells(rng.Rows.Count, 2))
     
-    ' Определение размеров массивов для опытных и новичков
-    Dim опытныйCount As Long
-    Dim новичокCount As Long
-    For i = 1 To UBound(values)
-        If values(i, 1) = "Опытный" Then
-            опытныйCount = опытныйCount + 1
-        ElseIf values(i, 1) = "Новичок" Then
-            новичокCount = новичокCount + 1
-        End If
-    Next i
-    
-    ' Создание массивов для опытных и новичков
-    ReDim опытныйValues(1 To опытныйCount)
-    ReDim новичокValues(1 To новичокCount)
-    
-    ' Заполнение массивов значениями для опытных и новичков
-    Dim опытныйIndex As Long
-    Dim новичокIndex As Long
-    опытныйIndex = 1
-    новичокIndex = 1
-    For i = 1 To UBound(values)
-        If values(i, 1) = "Опытный" Then
-            опытныйValues(опытныйIndex) = values(i, 2)
-            опытныйIndex = опытныйIndex + 1
-        ElseIf values(i, 1) = "Новичок" Then
-            новичокValues(новичокIndex) = values(i, 2)
-            новичокIndex = новичокIndex + 1
-        End If
-    Next i
+    ' Получение значений из столбцов
+    опытныйValues = опытныйRange.Value
+    новичокValues = новичокRange.Value
     
     ' Расчет и раскраска для опытных
     Dim опытный30 As Double
@@ -49,14 +24,14 @@ Sub РаскраситьРезультаты()
     опытный30 = CalculatePercentile(опытныйValues, 0.3)
     опытный70 = CalculatePercentile(опытныйValues, 0.7)
     
-    For i = 1 To UBound(values)
-        If values(i, 1) = "Опытный" Then
-            If values(i, 2) >= опытный70 Then
-                rng.Cells(i, 2).Interior.Color = RGB(255, 0, 0) ' Красный цвет
-            ElseIf values(i, 2) <= опытный30 Then
-                rng.Cells(i, 2).Interior.Color = RGB(0, 255, 0) ' Зеленый цвет
+    For i = 1 To UBound(опытныйValues)
+        If опытныйValues(i, 1) = "Опытный" Then
+            If новичокValues(i, 1) >= опытный70 Then
+                новичокRange.Cells(i, 1).Interior.Color = RGB(255, 0, 0) ' Красный цвет
+            ElseIf новичокValues(i, 1) <= опытный30 Then
+                новичокRange.Cells(i, 1).Interior.Color = RGB(0, 255, 0) ' Зеленый цвет
             Else
-                rng.Cells(i, 2).Interior.Color = RGB(255, 255, 0) ' Желтый цвет
+                новичокRange.Cells(i, 1).Interior.Color = RGB(255, 255, 0) ' Желтый цвет
             End If
         End If
     Next i
@@ -67,14 +42,14 @@ Sub РаскраситьРезультаты()
     новичок30 = CalculatePercentile(новичокValues, 0.3)
     новичок70 = CalculatePercentile(новичокValues, 0.7)
     
-    For i = 1 To UBound(values)
-        If values(i, 1) = "Новичок" Then
-            If values(i, 2) >= новичок70 Then
-                rng.Cells(i, 2).Interior.Color = RGB(255, 0, 0) ' Красный цвет
-            ElseIf values(i, 2) <= новичок30 Then
-                rng.Cells(i, 2).Interior.Color = RGB(0, 255, 0) ' Зеленый цвет
+    For i = 1 To UBound(новичокValues)
+        If опытныйValues(i, 1) = "Новичок" Then
+            If новичокValues(i, 1) >= новичок70 Then
+                новичокRange.Cells(i, 1).Interior.Color = RGB(255, 0, 0) ' Красный цвет
+            ElseIf новичокValues(i, 1) <= новичок30 Then
+                новичокRange.Cells(i, 1).Interior.Color = RGB(0, 255, 0) ' Зеленый цвет
             Else
-                rng.Cells(i, 2).Interior.Color = RGB(255, 255, 0) ' Желтый цвет
+                новичокRange.Cells(i, 1).Interior.Color = RGB(255, 255, 0) ' Желтый цвет
             End If
         End If
     Next i
