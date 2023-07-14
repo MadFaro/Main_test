@@ -1,72 +1,97 @@
 Sub РаскраситьРезультаты()
     Dim rng As Range
     Dim dataRange As Range
-    Dim cell As Range
-    Dim rowCount As Long
-    Dim percentile30 As Double
-    Dim percentile70 As Double
-    Dim categoryColumn As Range
-    Dim valueColumn As Range
-    
-    ' Выбор диапазона, в котором нужно раскрасить результаты
-    Set rng = Selection
-    Set dataRange = rng.Columns(2) ' Выбор только второго столбца
-    rowCount = dataRange.Rows.Count
-    
-    ' Проверка и раскраска каждой ячейки во втором столбце в соответствии с процентным значением
-    For Each cell In dataRange
-        Set categoryColumn = rng.Columns(1) ' Столбец с категориями ("Опытный" или "Новичок")
-        Set valueColumn = rng.Columns(2) ' Столбец с числовыми значениями
-        
-        ' Расчет процентилей для каждой категории
-        percentile30 = CalculatePercentile(categoryColumn, valueColumn, cell.Offset(0, -1).Text, 0.3)
-        percentile70 = CalculatePercentile(categoryColumn, valueColumn, cell.Offset(0, -1).Text, 0.7)
-        
-        ' Применение соответствующей заливки
-        If cell.Value >= percentile70 Then
-            cell.Interior.Color = RGB(255, 0, 0) ' Красный цвет
-        ElseIf cell.Value <= percentile30 Then
-            cell.Interior.Color = RGB(0, 255, 0) ' Зеленый цвет
-        Else
-            cell.Interior.Color = RGB(255, 255, 0) ' Желтый цвет
-        End If
-    Next cell
-End Sub
-
-Function CalculatePercentile(categoryColumn As Range, valueColumn As Range, category As String, percentile As Double) As Double
-    Dim categoryValues As Range
-    Dim valueRange As Range
+    Dim values() As Variant
+    Dim опытныйValues() As Variant
+    Dim новичокValues() As Variant
     Dim i As Long
-    Dim values() As Double
-    Dim count As Long
     
-    ' Определение диапазона значений для указанной категории
-    Set categoryValues = categoryColumn.Cells
-    Set valueRange = valueColumn.Cells
+    ' Выбор диапазона с данными
+    Set rng = Range("A1:B14")
+    Set dataRange = rng.Resize(rng.Rows.Count, 1) ' Выбор только первого столбца (категория)
     
-    ' Подсчет количества значений для указанной категории
-    count = Application.WorksheetFunction.CountIf(categoryValues, category)
+    ' Получение значений из выбранного столбца
+    values = dataRange.Value
     
-    ' Заполнение массива значениями для указанной категории
-    ReDim values(1 To count)
-    For i = 1 To count
-        If categoryValues.Cells(i).Text = category Then
-            values(i) = valueRange.Cells(i).Value
+    ' Определение размеров массивов для опытных и новичков
+    Dim опытныйCount As Long
+    Dim новичокCount As Long
+    For i = 1 To UBound(values)
+        If values(i, 1) = "Опытный" Then
+            опытныйCount = опытныйCount + 1
+        ElseIf values(i, 1) = "Новичок" Then
+            новичокCount = новичокCount + 1
         End If
     Next i
     
-    ' Сортировка массива значений по возрастанию
-    Call QuickSort(values, 1, count)
+    ' Создание массивов для опытных и новичков
+    ReDim опытныйValues(1 To опытныйCount)
+    ReDim новичокValues(1 To новичокCount)
     
-    ' Вычисление процентиля для указанной категории
-    CalculatePercentile = values(Application.WorksheetFunction.RoundUp(percentile * count, 0))
+    ' Заполнение массивов значениями для опытных и новичков
+    Dim опытныйIndex As Long
+    Dim новичокIndex As Long
+    опытныйIndex = 1
+    новичокIndex = 1
+    For i = 1 To UBound(values)
+        If values(i, 1) = "Опытный" Then
+            опытныйValues(опытныйIndex) = values(i, 2)
+            опытныйIndex = опытныйIndex + 1
+        ElseIf values(i, 1) = "Новичок" Then
+            новичокValues(новичокIndex) = values(i, 2)
+            новичокIndex = новичокIndex + 1
+        End If
+    Next i
+    
+    ' Расчет и раскраска для опытных
+    Dim опытный30 As Double
+    Dim опытный70 As Double
+    опытный30 = CalculatePercentile(опытныйValues, 0.3)
+    опытный70 = CalculatePercentile(опытныйValues, 0.7)
+    
+    For i = 1 To UBound(values)
+        If values(i, 1) = "Опытный" Then
+            If values(i, 2) >= опытный70 Then
+                rng.Cells(i, 2).Interior.Color = RGB(255, 0, 0) ' Красный цвет
+            ElseIf values(i, 2) <= опытный30 Then
+                rng.Cells(i, 2).Interior.Color = RGB(0, 255, 0) ' Зеленый цвет
+            Else
+                rng.Cells(i, 2).Interior.Color = RGB(255, 255, 0) ' Желтый цвет
+            End If
+        End If
+    Next i
+    
+    ' Расчет и раскраска для новичков
+    Dim новичок30 As Double
+    Dim новичок70 As Double
+    новичок30 = CalculatePercentile(новичокValues, 0.3)
+    новичок70 = CalculatePercentile(новичокValues, 0.7)
+    
+    For i = 1 To UBound(values)
+        If values(i, 1) = "Новичок" Then
+            If values(i, 2) >= новичок70 Then
+                rng.Cells(i, 2).Interior.Color = RGB(255, 0, 0) ' Красный цвет
+            ElseIf values(i, 2) <= новичок30 Then
+                rng.Cells(i, 2).Interior.Color = RGB(0, 255, 0) ' Зеленый цвет
+            Else
+                rng.Cells(i, 2).Interior.Color = RGB(255, 255, 0) ' Желтый цвет
+            End If
+        End If
+    Next i
+End Sub
+
+Function CalculatePercentile(values() As Variant, percentile As Double) As Double
+    Dim sortedValues() As Variant
+    sortedValues = values
+    Call QuickSort(sortedValues, LBound(sortedValues), UBound(sortedValues))
+    CalculatePercentile = sortedValues(Application.WorksheetFunction.RoundUp(percentile * UBound(sortedValues), 0))
 End Function
 
-Sub QuickSort(arr() As Double, left As Long, right As Long)
+Sub QuickSort(arr() As Variant, left As Long, right As Long)
     Dim i As Long
     Dim j As Long
-    Dim pivot As Double
-    Dim temp As Double
+    Dim pivot As Variant
+    Dim temp As Variant
     
     i = left
     j = right
