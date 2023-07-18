@@ -1,11 +1,9 @@
 Function GetPercentile(sortedValues() As Double, percentile As Double) As Double
     Dim count As Long
     
-    If IsEmpty(sortedValues) Or Len(sortedValues) = 0 Then
-        count = 0
-    Else
-        count = UBound(sortedValues) - LBound(sortedValues) + 1
-    End If
+    On Error Resume Next
+    count = UBound(sortedValues) - LBound(sortedValues) + 1
+    On Error GoTo 0
     
     If count <= 0 Then
         GetPercentile = 0
