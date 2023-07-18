@@ -1,13 +1,9 @@
 Function GetPercentile(sortedValues() As Double, percentile As Double) As Double
     Dim count As Long
     
-    If Not IsEmpty(sortedValues) And UBound(sortedValues) >= LBound(sortedValues) Then
-        count = Application.WorksheetFunction.Count(sortedValues)
-    Else
-        count = 0
-    End If
+    count = UBound(sortedValues) - LBound(sortedValues) + 1
     
-    If count = 0 Then
+    If count <= 0 Or LBound(sortedValues) > UBound(sortedValues) Then
         GetPercentile = 0
         Exit Function
     End If
@@ -29,5 +25,6 @@ Function GetPercentile(sortedValues() As Double, percentile As Double) As Double
         GetPercentile = sortedValues(k) + d * (sortedValues(k + 1) - sortedValues(k))
     End If
 End Function
+
 
 
