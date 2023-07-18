@@ -1,10 +1,10 @@
 Function GetPercentile(sortedValues() As Double, percentile As Double) As Double
     Dim count As Long
     
-    If Not IsEmpty(sortedValues) Then
-        count = UBound(sortedValues) - LBound(sortedValues) + 1
-    Else
+    If IsEmpty(sortedValues) Or Len(sortedValues) = 0 Then
         count = 0
+    Else
+        count = UBound(sortedValues) - LBound(sortedValues) + 1
     End If
     
     If count <= 0 Then
@@ -29,6 +29,7 @@ Function GetPercentile(sortedValues() As Double, percentile As Double) As Double
         GetPercentile = sortedValues(k) + d * (sortedValues(k + 1) - sortedValues(k))
     End If
 End Function
+
 
 
 
