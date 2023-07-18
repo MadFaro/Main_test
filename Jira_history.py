@@ -1,23 +1,37 @@
-Sub color_value_rating()
+Sub color_value_rating_division()
     Dim rng As Range, cell As Range
-    Dim percentile30 As Double, percentile70 As Double
     Dim columnCount As Integer
+    Dim flagRange As Range, valueRange As Range
+    Dim flagCell As Range, valueCell As Range
     
     Set rng = Selection
     columnCount = rng.Columns.Count
     
-    For col = 1 To columnCount
-        percentile30 = WorksheetFunction.Percentile(rng.Columns(col), 0.3)
-        percentile70 = WorksheetFunction.Percentile(rng.Columns(col), 0.7)
+    Set flagRange = rng.Columns(1)
+    
+    For col = 2 To columnCount
+        Set valueRange = rng.Columns(col)
         
-        For Each cell In rng.Columns(col).Cells
-            If cell.Value >= percentile70 Then
-                cell.Interior.Color = RGB(146, 208, 80)
-            ElseIf cell.Value <= percentile30 Then
-                cell.Interior.Color = RGB(255, 0, 0)
-            Else
-                cell.Interior.Color = RGB(255, 255, 0)
+        For Each flagCell In flagRange.Cells
+            Set valueCell = valueRange.Cells(flagCell.Row - rng.Row + 1)
+            
+            If flagCell.value = "Îïûòíûé" Then
+                If valueCell.value >= 30 Then
+                    valueCell.Interior.Color = RGB(146, 208, 80)
+                ElseIf valueCell.value >= 20 Then
+                    valueCell.Interior.Color = RGB(255, 255, 0)
+                ElseIf valueCell.value >= 10 Then
+                    valueCell.Interior.Color = RGB(255, 0, 0)
+                End If
+            ElseIf flagCell.value = "Íîâè÷îê" Then
+                If valueCell.value >= 30 Then
+                    valueCell.Interior.Color = RGB(146, 208, 80)
+                ElseIf valueCell.value >= 20 Then
+                    valueCell.Interior.Color = RGB(255, 255, 0)
+                ElseIf valueCell.value >= 10 Then
+                    valueCell.Interior.Color = RGB(255, 0, 0)
+                End If
             End If
-        Next cell
+        Next flagCell
     Next col
 End Sub
