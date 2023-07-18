@@ -22,54 +22,57 @@ Sub color_value_rating()
     rowCount = valuesRange.Rows.Count
     columnCount = valuesRange.Columns.Count
     
-    Dim percentile30() As Double, percentile70() As Double
-    ReDim percentile30(1 To columnCount, 1 To 2) As Double
-    ReDim percentile70(1 To columnCount, 1 To 2) As Double
-    
     Dim col As Long
     For col = 1 To columnCount
         Dim currentColumn As Range
         Set currentColumn = valuesRange.Columns(col)
         
-        Dim percentile30_flag1 As Double, percentile70_flag1 As Double
-        Dim percentile30_flag2 As Double, percentile70_flag2 As Double
-        percentile30_flag1 = 0
-        percentile70_flag1 = 0
-        percentile30_flag2 = 0
-        percentile70_flag2 = 0
+        Dim flagCount As Long
+        flagCount = rngFlags.areas.Count
         
-        Dim row As Long
-        For row = 1 To rowCount
+        Dim percentile30() As Double, percentile70() As Double
+        ReDim percentile30(1 To flagCount) As Double
+        ReDim percentile70(1 To flagCount) As Double
+        
+        Dim flagIndex As Long
+        For flagIndex = 1 To flagCount
+            Dim flagRange As Range
+            Set flagRange = rngFlags.areas(flagIndex)
+            
+            Dim percentile30_flag As Double, percentile70_flag As Double
+            percentile30_flag = 0
+            percentile70_flag = 0
+            
+            Dim row As Long
+            For row = 1 To rowCount
+                If flagRange.Cells(row, 1).value = "Опытный" Then
+                    ProcessValue currentColumn.Cells(row), percentile30_flag, percentile70_flag
+                End If
+            Next row
+            
+            percentile30(flagIndex) = percentile30_flag
+            percentile70(flagIndex) = percentile70_flag
+        Next flagIndex
+        
+        Dim rowIndex As Long
+        For rowIndex = 1 To rowCount
             Dim flagValue As String
-            flagValue = rngFlags.Cells(row, 1).value
+            flagValue = rngFlags.Cells(rowIndex, 1).value
+            
+            Dim flagIndexToUse As Long
+            For flagIndex = 1 To flagCount
+                Dim flagRange1 As Range
+                Set flagRange1 = rngFlags.areas(flagIndex)
+                If flagRange1.Cells(1, 1).value = flagValue Then
+                    flagIndexToUse = flagIndex
+                    Exit For
+                End If
+            Next flagIndex
             
             If flagValue = "Опытный" Then
-                ProcessValue currentColumn.Cells(row), percentile30_flag1, percentile70_flag1
-            ElseIf flagValue = "Новичок" Then
-                ProcessValue currentColumn.Cells(row), percentile30_flag2, percentile70_flag2
+                ColorCell currentColumn.Cells(rowIndex), percentile30(flagIndexToUse), percentile70(flagIndexToUse)
             End If
-        Next row
-        
-        percentile30(col, 1) = percentile30_flag1
-        percentile70(col, 1) = percentile70_flag1
-        percentile30(col, 2) = percentile30_flag2
-        percentile70(col, 2) = percentile70_flag2
-    Next col
-    
-    For col = 1 To columnCount
-        Dim currentColumn1 As Range
-        Set currentColumn1 = valuesRange.Columns(col)
-        
-        For row = 1 To rowCount
-            Dim flagValue1 As String
-            flagValue1 = rngFlags.Cells(row, 1).value
-            
-            If flagValue1 = "Опытный" Then
-                ColorCell currentColumn1.Cells(row), percentile30(col, 1), percentile70(col, 1)
-            ElseIf flagValue1 = "Новичок" Then
-                ColorCell currentColumn1.Cells(row), percentile30(col, 2), percentile70(col, 2)
-            End If
-        Next row
+        Next rowIndex
     Next col
 End Sub
 
@@ -90,10 +93,10 @@ End Sub
 
 Sub ColorCell(ByVal cell As Range, ByVal percentile30 As Double, ByVal percentile70 As Double)
     If cell.value >= percentile70 Then
-        cell.Interior.Color = RGB(146, 208, 80) ' Зеленый
+        cell.Interior.Color = RGB(146, 208, 80)
     ElseIf cell.value <= percentile30 Then
-        cell.Interior.Color = RGB(255, 0, 0) ' Красный
+        cell.Interior.Color = RGB(255, 0, 0)
     Else
-        cell.Interior.Color = RGB(255, 255, 0) ' Желтый
+        cell.Interior.Color = RGB(255, 255, 0)
     End If
 End Sub
