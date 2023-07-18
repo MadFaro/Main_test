@@ -40,20 +40,25 @@ Sub color_value_rating_division()
             flagValue1 = rngFlags.Cells(row, 1).Value
             
             If flagValue1 = "Опытный" Then
-                ColorCell currentColumn1.Cells(row), percentiles(col, 1), percentiles(col, 2)
+                ColorCell currentColumn1.Cells(row), percentiles(col, 1), percentiles(col, 2), "Опытный"
             ElseIf flagValue1 = "Новичок" Then
-                ColorCell currentColumn1.Cells(row), percentiles(col, 1), percentiles(col, 2)
+                ColorCell currentColumn1.Cells(row), percentiles(col, 1), percentiles(col, 2), "Новичок"
             End If
         Next row
     Next col
 End Sub
 
-Sub ColorCell(ByVal cell As Range, ByVal percentile30 As Double, ByVal percentile70 As Double)
-    If cell.Value >= percentile70 Then
+Sub ColorCell(ByVal cell As Range, ByVal percentile30 As Double, ByVal percentile70 As Double, ByVal flagValue As String)
+    If cell.Value >= percentile70 And flagValue = "Опытный" Then
         cell.Interior.Color = RGB(146, 208, 80)
-    ElseIf cell.Value <= percentile30 Then
+    ElseIf cell.Value >= percentile70 And flagValue = "Новичок" Then
+        cell.Interior.Color = RGB(0, 176, 240)
+    ElseIf cell.Value <= percentile30 And flagValue = "Опытный" Then
         cell.Interior.Color = RGB(255, 0, 0)
+    ElseIf cell.Value <= percentile30 And flagValue = "Новичок" Then
+        cell.Interior.Color = RGB(255, 192, 0)
     Else
         cell.Interior.Color = RGB(255, 255, 0)
     End If
 End Sub
+
