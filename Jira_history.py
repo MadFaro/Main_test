@@ -22,38 +22,16 @@ Sub color_value_rating()
     rowCount = valuesRange.Rows.Count
     columnCount = valuesRange.Columns.Count
     
-    Dim percentile30() As Double, percentile70() As Double
-    ReDim percentile30(1 To columnCount, 1 To 2) As Double
-    ReDim percentile70(1 To columnCount, 1 To 2) As Double
+    Dim percentiles() As Variant
+    ReDim percentiles(1 To columnCount, 1 To 2) As Variant
     
     Dim col As Long
     For col = 1 To columnCount
         Dim currentColumn As Range
         Set currentColumn = valuesRange.Columns(col)
         
-        Dim percentile30_flag1 As Double, percentile70_flag1 As Double
-        Dim percentile30_flag2 As Double, percentile70_flag2 As Double
-        percentile30_flag1 = 0
-        percentile70_flag1 = 0
-        percentile30_flag2 = 0
-        percentile70_flag2 = 0
-        
-        Dim row As Long
-        For row = 1 To rowCount
-            Dim flagValue As String
-            flagValue = rngFlags.Cells(row, 1).value
-            
-            If flagValue = "Опытный" Then
-                ProcessValue currentColumn.Cells(row), percentile30_flag1, percentile70_flag1
-            ElseIf flagValue = "Новичок" Then
-                ProcessValue currentColumn.Cells(row), percentile30_flag2, percentile70_flag2
-            End If
-        Next row
-        
-        percentile30(col, 1) = percentile30_flag1
-        percentile70(col, 1) = percentile70_flag1
-        percentile30(col, 2) = percentile30_flag2
-        percentile70(col, 2) = percentile70_flag2
+        percentiles(col, 1) = WorksheetFunction.Percentile(currentColumn, 0.3)
+        percentiles(col, 2) = WorksheetFunction.Percentile(currentColumn, 0.7)
     Next col
     
     For col = 1 To columnCount
@@ -65,27 +43,12 @@ Sub color_value_rating()
             flagValue1 = rngFlags.Cells(row, 1).value
             
             If flagValue1 = "Опытный" Then
-                ColorCell currentColumn1.Cells(row), percentile30(col, 1), percentile70(col, 1)
+                ColorCell currentColumn1.Cells(row), percentiles(col, 1), percentiles(col, 2)
             ElseIf flagValue1 = "Новичок" Then
-                ColorCell currentColumn1.Cells(row), percentile30(col, 2), percentile70(col, 2)
+                ColorCell currentColumn1.Cells(row), percentiles(col, 1), percentiles(col, 2)
             End If
         Next row
     Next col
-End Sub
-
-Sub ProcessValue(ByVal cell As Range, ByRef percentile30 As Double, ByRef percentile70 As Double)
-    If Not IsEmpty(cell) Then
-        If percentile30 = 0 Then
-            percentile30 = cell.value
-            percentile70 = cell.value
-        Else
-            If cell.value < percentile30 Then
-                percentile30 = cell.value
-            ElseIf cell.value > percentile70 Then
-                percentile70 = cell.value
-            End If
-        End If
-    End If
 End Sub
 
 Sub ColorCell(ByVal cell As Range, ByVal percentile30 As Double, ByVal percentile70 As Double)
