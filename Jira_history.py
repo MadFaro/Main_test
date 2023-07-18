@@ -1,17 +1,14 @@
-Sub color_value_rating()
+Sub color_value_rating_division()
     Dim rngFlags As Range
     Dim rngValues As Range
     
     Dim selectedRange As Range
     Set selectedRange = Selection
+    Set rngFlags = selectedRange.Areas(1).Columns(1)
     
-    ' Определение диапазона флагов
-    Set rngFlags = selectedRange.areas(1).Columns(1)
-    
-    ' Определение диапазона значений
     Dim valuesRange As Range
-    If selectedRange.areas.Count > 1 Then
-        Set valuesRange = selectedRange.areas(2)
+    If selectedRange.Areas.Count > 1 Then
+        Set valuesRange = selectedRange.Areas(2)
     Else
         Set valuesRange = selectedRange.Offset(0, 1).Resize(selectedRange.Rows.Count, selectedRange.Columns.Count - 1)
     End If
@@ -40,7 +37,7 @@ Sub color_value_rating()
         
         For row = 1 To rowCount
             Dim flagValue1 As String
-            flagValue1 = rngFlags.Cells(row, 1).value
+            flagValue1 = rngFlags.Cells(row, 1).Value
             
             If flagValue1 = "Опытный" Then
                 ColorCell currentColumn1.Cells(row), percentiles(col, 1), percentiles(col, 2)
@@ -52,11 +49,11 @@ Sub color_value_rating()
 End Sub
 
 Sub ColorCell(ByVal cell As Range, ByVal percentile30 As Double, ByVal percentile70 As Double)
-    If cell.value >= percentile70 Then
-        cell.Interior.Color = RGB(146, 208, 80) ' Зеленый
-    ElseIf cell.value <= percentile30 Then
-        cell.Interior.Color = RGB(255, 0, 0) ' Красный
+    If cell.Value >= percentile70 Then
+        cell.Interior.Color = RGB(146, 208, 80)
+    ElseIf cell.Value <= percentile30 Then
+        cell.Interior.Color = RGB(255, 0, 0)
     Else
-        cell.Interior.Color = RGB(255, 255, 0) ' Желтый
+        cell.Interior.Color = RGB(255, 255, 0)
     End If
 End Sub
