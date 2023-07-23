@@ -3,16 +3,16 @@ Option Explicit
 Dim networkPath
 networkPath = "\\server\share\путь\к\файлу.xlsx" ' Замените на путь к вашему файлу на сетевом диске
 
-Dim objWMIService, colLocks, objLock
-Set objWMIService = GetObject("winmgmts:\\.\root\CIMV2")
+Dim fso, lockFile
+Set fso = CreateObject("Scripting.FileSystemObject")
 
-' Получаем список блокировок для файла
-Set colLocks = objWMIService.ExecQuery("SELECT * FROM Win32_SMBShare WHERE Name = '" & networkPath & "'")
+' Проверяем, существует ли временный файл блокировки
+lockFile = fso.GetFile(networkPath & ".xlsx" & ".lock")
 
-If colLocks.Count > 0 Then
-    ' Файл заблокирован другим пользователем
-    WScript.Echo "Файл заблокирован для редактирования другим пользователем."
+If fso.FileExists(lockFile) Then
+    ' Файл заблокирован для редактирования
+    WScript.Echo "Файл заблокирован для редактирования."
 Else
-    ' Файл доступен для редактирования
+    ' Файл не заблокирован и доступен для редактирования
     WScript.Echo "Файл доступен для редактирования."
 End If
