@@ -1,87 +1,25 @@
-Sub color_value_rating_division()
-    Dim rngFlags As Range
-    Dim rngValues As Range
-    
-    Dim selectedRange As Range
-    Set selectedRange = Selection
-    Set rngFlags = selectedRange.Areas(1).Columns(1)
-    
-    Dim valuesRange As Range
-    If selectedRange.Areas.count > 1 Then
-        Set valuesRange = selectedRange.Areas(2)
-    Else
-        Set valuesRange = selectedRange.Offset(0, 1).Resize(selectedRange.Rows.count, selectedRange.Columns.count - 1)
-    End If
-    
-    Dim rowCount As Long
-    Dim columnCount As Long
-    
-    rowCount = valuesRange.Rows.count
-    columnCount = valuesRange.Columns.count
-    
-    Dim percentilesExp() As Variant
-    Dim percentilesNov() As Variant
-    ReDim percentilesExp(1 To columnCount, 1 To 2) As Variant
-    ReDim percentilesNov(1 To columnCount, 1 To 2) As Variant
-    
-    Dim col As Long
-    For col = 1 To columnCount
-        Dim currentColumn As Range
-        Set currentColumn = valuesRange.Columns(col)
-        
-        Dim expValues() As Double
-        Dim novValues() As Double
-        Dim expCount As Long
-        Dim novCount As Long
-        
-        expCount = 0
-        novCount = 0
-        
-        Dim i As Long
-        For i = 1 To rowCount
-            If rngFlags.Cells(i, 1).value = "Опытный" Then
-                expCount = expCount + 1
-                ReDim Preserve expValues(1 To expCount) As Double
-                expValues(expCount) = currentColumn.Cells(i, 1).value
-            ElseIf rngFlags.Cells(i, 1).value = "Новичок" Then
-                novCount = novCount + 1
-                ReDim Preserve novValues(1 To novCount) As Double
-                novValues(novCount) = currentColumn.Cells(i, 1).value
-            End If
-        Next i
+Option Explicit
 
-        QuickSort expValues, 1, expCount
-        QuickSort novValues, 1, novCount
+Dim networkPath
+networkPath = "\\server\share\путь\к\файлу.xlsx" ' Замените на путь к вашему файлу на сетевом диске
 
-        Dim percentile30Exp As Double
-        Dim percentile30Nov As Double
-        Dim percentile70Exp As Double
-        Dim percentile70Nov As Double
-        
-        percentile30Exp = GetPercentile(expValues, 0.3)
-        percentile30Nov = GetPercentile(novValues, 0.3)
-        percentile70Exp = GetPercentile(expValues, 0.7)
-        percentile70Nov = GetPercentile(novValues, 0.7)
-        
-        percentilesExp(col, 1) = percentile30Exp
-        percentilesExp(col, 2) = percentile70Exp
-        percentilesNov(col, 1) = percentile30Nov
-        percentilesNov(col, 2) = percentile70Nov
-    Next col
-    
-    For col = 1 To columnCount
-        For i = 1 To rowCount
-            Dim flagValue As String
-            flagValue = rngFlags.Cells(i, 1).value
-            
-            If flagValue = "Опытный" Then
-                ColorCell valuesRange.Cells(i, col), percentilesExp(col, 1), percentilesExp(col, 2)
-            ElseIf flagValue = "Новичок" Then
-                ColorCell valuesRange.Cells(i, col), percentilesNov(col, 1), percentilesNov(col, 2)
-            End If
-        Next i
-    Next col
-End Sub
+Dim excelApp, excelWorkbook
+Set excelApp = CreateObject("Excel.Application")
 
+' Пытаемся открыть файл
+On Error Resume Next
+Set excelWorkbook = excelApp.Workbooks.Open(networkPath, False, True) ' False - не открывать в режиме редактирования
+On Error GoTo 0
+
+If excelWorkbook Is Nothing Then
+    ' Файл заблокирован для редактирования
+    WScript.Echo "Файл заблокирован для редактирования."
+Else
+    ' Файл доступен для редактирования
+    WScript.Echo "Файл доступен для редактирования."
+    excelWorkbook.Close False ' Закрываем файл без сохранения, так как он открыт только для проверки блокировки
+End If
+
+excelApp.Quit
 
 
