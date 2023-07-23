@@ -3,23 +3,19 @@ Option Explicit
 Dim networkPath
 networkPath = "\\server\share\путь\к\файлу.xlsx" ' Замените на путь к вашему файлу на сетевом диске
 
-Dim excelApp, excelWorkbook
-Set excelApp = CreateObject("Excel.Application")
+Dim fso, file
+Set fso = CreateObject("Scripting.FileSystemObject")
 
-' Пытаемся открыть файл
+' Пытаемся открыть файл на чтение
 On Error Resume Next
-Set excelWorkbook = excelApp.Workbooks.Open(networkPath, False, True) ' False - не открывать в режиме редактирования
+Set file = fso.OpenTextFile(networkPath, 1, False) ' 1 - режим только чтение
 On Error GoTo 0
 
-If excelWorkbook Is Nothing Then
-    ' Файл заблокирован для редактирования
-    WScript.Echo "Файл заблокирован для редактирования."
-Else
+If Err.Number = 0 Then
     ' Файл доступен для редактирования
     WScript.Echo "Файл доступен для редактирования."
-    excelWorkbook.Close False ' Закрываем файл без сохранения, так как он открыт только для проверки блокировки
+    file.Close
+Else
+    ' Файл заблокирован для редактирования
+    WScript.Echo "Файл заблокирован для редактирования."
 End If
-
-excelApp.Quit
-
-
