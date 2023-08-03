@@ -11,8 +11,10 @@ batch_size = 10  # Размер пакета для обработки
 def load_audio_data(audio_file):
     audio_data, sample_rate = sf.read(audio_file)
     left_channel = audio_data[:, 0]
+    right_channel = audio_data[:, 1]
     left_channel_bytes = (left_channel * np.iinfo(np.int16).max).astype(np.int16).tobytes()
-    return left_channel_bytes, sample_rate
+    right_channel_bytes = (right_channel * np.iinfo(np.int16).max).astype(np.int16).tobytes()
+    return left_channel_bytes, right_channel_bytes, sample_rate
 
 def process_audio_batch(operator_batch, client_batch, model, sample_rate):
     operator_recognizer = vosk.KaldiRecognizer(model, sample_rate)
@@ -39,21 +41,19 @@ def find_words(audio_files, model):
         client_batch = []
         sample_rate = None
         for audio_file in audio_files:
-            audio_data, sr = load_audio_data(audio_file)
+            left_audio, right_audio, sr = load_audio_data(audio_file)
             
             if sample_rate is None:
                 sample_rate = sr
             
-            if len(operator_batch) < batch_size:
-                operator_batch.append(audio_data)
-            else:
-                client_batch.append(audio_data)
-                
-                if len(client_batch) == batch_size:
-                    future = executor.submit(process_audio_batch, operator_batch, client_batch, model, sample_rate)
-                    futures.append(future)
-                    operator_batch = []
-                    client_batch = []
+            operator_batch.append(left_audio)
+            client_batch.append(right_audio)
+            
+            if len(operator_batch) == batch_size:
+                future = executor.submit(process_audio_batch, operator_batch, client_batch, model, sample_rate)
+                futures.append(future)
+                operator_batch = []
+                client_batch = []
         
         if operator_batch:
             future = executor.submit(process_audio_batch, operator_batch, client_batch, model, sample_rate)
@@ -61,8 +61,10 @@ def find_words(audio_files, model):
             
         for future in concurrent.futures.as_completed(futures):
             operator_text, client_text = future.result()
-            results.append((operator_text, client_text))
+            for operator_phrase, client_phrase in zip(operator_text, client_text):
+                results.append((operator_phrase, client_phrase))
     return results
+
 
 if __name__ == '__main__':
     model = vosk.Model(model_path)
