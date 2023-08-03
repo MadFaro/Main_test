@@ -1,88 +1,74 @@
-import pandas as pd
-import cx_Oracle
-import holidays
-from sqlalchemy import create_engine
-from sklearn.metrics import mean_absolute_error
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Conv1D, MaxPooling1D, Dropout
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.optimizers import Adam
+import vosk
+import soundfile as sf
+import numpy as np
+import os
+import concurrent.futures
 
+model_path = r'vosk-model-ru-0.22'
+audio_directory = 'audio/'
+batch_size = 10  # Размер пакета для обработки
 
-holidays_ru = holidays.Russia(years=2023)
-# Конект к БД
-connect_str = lambda: cx_Oracle.connect(user='', password='', dsn = '')
-connect = create_engine("oracle://", creator=connect_str)
+def load_audio_data(audio_file):
+    audio_data, sample_rate = sf.read(audio_file)
+    left_channel = audio_data[:, 0]
+    left_channel_bytes = (left_channel * np.iinfo(np.int16).max).astype(np.int16).tobytes()
+    return left_channel_bytes, sample_rate
 
-sql = """
-        select day as datetime, sum(CALLSOFFERED) as calls from (
-        Select trunc(INTERVAL, 'HH24') as day, sum(CALLSOFFERED) as CALLSOFFERED
-        from ANALYTICS.TOLOG_TEMP_ML1
-        where INTERVAL < date'2023-06-01' and FULLNAME in 
-        ('CCM_PG_1.SG_DDO_ActiveCredit',
-        'CCM_PG_1.SG_DDO_DebetCard',
-        'CCM_PG_1.SG_Operator')
-        group by trunc(INTERVAL, 'HH24')
-        union
-        Select trunc(V0, 'HH24') as day, sum(v5) as CALLSOFFERED
-        from ANALYTICS.TOLOG_TEMP_ML2
-        where V0 < date'2023-06-01'
-        group by trunc(V0, 'HH24')) a
-        group by day
-        order by day
-        """
+def process_audio_batch(operator_batch, client_batch, model, sample_rate):
+    operator_recognizer = vosk.KaldiRecognizer(model, sample_rate)
+    client_recognizer = vosk.KaldiRecognizer(model, sample_rate)
+    operator_text = []
+    client_text = []
+    
+    for operator_audio, client_audio in zip(operator_batch, client_batch):
+        operator_recognizer.AcceptWaveform(operator_audio)
+        operator_result = operator_recognizer.Result()
+        operator_text.append(operator_result["text"])
+        
+        client_recognizer.AcceptWaveform(client_audio)
+        client_result = client_recognizer.Result()
+        client_text.append(client_result["text"])
+    
+    return operator_text, client_text
 
-# Данные для обучения
-df = pd.read_sql(sql, connect)
-df['datetime'] = pd.to_datetime(df['datetime'], format='%d.%m.%Y')
-df.sort_values(by='datetime', inplace=True)
-df['day_of_week'] = df['datetime'].dt.dayofweek.astype(int)
-df['start_week'] = df['datetime'].dt.dayofweek.isin([0]).astype(int)
-df['hour'] = df['datetime'].dt.hour.astype(int)
-df['start'] = df['datetime'].dt.day.isin([1, 2, 3]).astype(int)
-df['end'] = df['datetime'].dt.is_month_end.astype(int)
-df['day'] = df['datetime'].dt.day.astype(int)
-df['month'] = df['datetime'].dt.month.astype(int)
-df['holidays'] = df['datetime'].dt.date.isin(holidays_ru).astype(int)
-df_normalized = df.copy()
-df_normalized.drop('datetime', axis=1, inplace=True)
-df_normalized[['calls', 'month', 'day_of_week', 'start_week', 'day', 'start' , 'end',
-               'holidays', 'hour']] = df[['calls', 'month', 'day_of_week', 'start_week', 'day', 'start' , 'end',
-               'holidays', 'hour']] / df[['calls', 'month', 'day_of_week', 'start_week', 'day', 'start' , 'end',
-               'holidays', 'hour']].max()
+def find_words(audio_files, model):
+    results = []
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        operator_batch = []
+        client_batch = []
+        sample_rate = None
+        for audio_file in audio_files:
+            audio_data, sr = load_audio_data(audio_file)
+            
+            if sample_rate is None:
+                sample_rate = sr
+            
+            if len(operator_batch) < batch_size:
+                operator_batch.append(audio_data)
+            else:
+                client_batch.append(audio_data)
+                
+                if len(client_batch) == batch_size:
+                    future = executor.submit(process_audio_batch, operator_batch, client_batch, model, sample_rate)
+                    futures.append(future)
+                    operator_batch = []
+                    client_batch = []
+        
+        if operator_batch:
+            future = executor.submit(process_audio_batch, operator_batch, client_batch, model, sample_rate)
+            futures.append(future)
+            
+        for future in concurrent.futures.as_completed(futures):
+            operator_text, client_text = future.result()
+            results.append((operator_text, client_text))
+    return results
 
-# Контроль переобучения по эпохам
-early = EarlyStopping(monitor='loss', min_delta=0.0001, patience=5, verbose=2, mode='auto')
-check = ModelCheckpoint('model.h5', monitor='loss', verbose=2, save_best_only=False, mode='auto')
-callbacks = [early, check]
-
-# Создание модели
-model = Sequential()
-model.add(LSTM(66, activation='tanh', input_shape=(8, 1), return_sequences = True))
-model.add(LSTM(66, activation='relu'))
-model.add(Dense(1))
-model.compile(optimizer=Adam(learning_rate=0.006), loss='mse', metrics=['mae'])
-
-# Обучение
-X_train = df_normalized[['month', 'day_of_week', 'start_week', 'day', 'start', 'end', 'holidays', 'hour']].values.reshape((df_normalized.shape[0], 8, 1))
-y_train = df_normalized['calls'].values.reshape((df_normalized.shape[0], 1))
-model.fit(X_train, y_train, epochs=300, batch_size=720, verbose=1, callbacks=callbacks)
-
-# Таблица для прогноза
-next_days = pd.date_range(start=(df['datetime'].max()+pd.Timedelta(hours=1)), periods=61*24, freq='1H')
-X_pred = pd.DataFrame({'datetime': next_days})
-X_pred['hour'] = X_pred['datetime'].dt.hour.astype(int)
-X_pred['day_of_week'] = X_pred['datetime'].dt.dayofweek.astype(int)
-X_pred['start_week'] = X_pred['datetime'].dt.dayofweek.isin([0]).astype(int)
-X_pred['day'] = X_pred['datetime'].dt.day.astype(int)
-X_pred['start'] = X_pred['datetime'].dt.day.isin([1, 2, 3]).astype(int)
-X_pred['end'] = X_pred['datetime'].dt.is_month_end.astype(int)
-X_pred['month'] = X_pred['datetime'].dt.month.astype(int)
-X_pred['holidays'] = X_pred['datetime'].dt.date.isin(holidays_ru).astype(int)
-X_pred_formatted = (X_pred[['month', 'day_of_week', 'start_week', 'day', 'start', 'end', 'holidays', 'hour']] / df[['month', 'day_of_week', 'start_week', 'day', 'start', 'end', 'holidays', 'hour']].max()).values.reshape((X_pred.shape[0], 8, 1))
-
-# Прогноз
-predictions_normalized = model.predict(X_pred_formatted)
-predictions = predictions_normalized * df['calls'].max()
-X_pred['predictions'] = predictions
-X_pred.to_excel('test.xlsx')
+if __name__ == '__main__':
+    model = vosk.Model(model_path)
+    audio_files = [os.path.join(audio_directory, filename) for filename in os.listdir(audio_directory) if filename.endswith('.wav')]
+    found_words = find_words(audio_files, model)
+    for operator_text, client_text in found_words:
+        for operator_phrase, client_phrase in zip(operator_text, client_text):
+            print(f"- Оператор: {operator_phrase}")
+            print(f"- Клиент: {client_phrase}")
