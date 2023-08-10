@@ -96,103 +96,88 @@ Sub color_value_rating_division()
     Dim yellowCount As Long
     yellowCount = rowCount - greenCount - redCount
     
-    Dim greenCells() As Range
-    Dim redCells() As Range
-    Dim yellowCells() As Range
-    
-    Dim gIndex As Long
-    Dim rIndex As Long
-    Dim yIndex As Long
-    
-    gIndex = 0
-    rIndex = 0
-    yIndex = 0
+    Dim targetYellowCount As Long
+    targetYellowCount = yellowCount
     
     For col = 1 To columnCount
+        Dim currentColumn As Range
+        Set currentColumn = valuesRange.Columns(col)
+        
         For i = 1 To rowCount
             Dim flagValue As String
             flagValue = rngFlags.Cells(i, 1).Value
             Dim value As Double
-            value = valuesRange.Cells(i, col).Value
+            value = currentColumn.Cells(i, 1).Value
             
             If flagValue = "Îïûòíûé" Then
                 If value <= percentilesExp(col, 1) Then
-                    gIndex = gIndex + 1
-                    ReDim Preserve greenCells(1 To gIndex) As Range
-                    Set greenCells(gIndex) = valuesRange.Cells(i, col)
+                    If greenCount > 0 Then
+                        currentColumn.Cells(i, 1).Interior.Color = RGB(146, 208, 80)
+                        greenCount = greenCount - 1
+                    Else
+                        If targetYellowCount > 0 Then
+                            currentColumn.Cells(i, 1).Interior.Color = RGB(255, 255, 0)
+                            targetYellowCount = targetYellowCount - 1
+                        Else
+                            currentColumn.Cells(i, 1).Interior.ColorIndex = xlNone
+                        End If
+                    End If
                 ElseIf value >= percentilesExp(col, 2) Then
-                    rIndex = rIndex + 1
-                    ReDim Preserve redCells(1 To rIndex) As Range
-                    Set redCells(rIndex) = valuesRange.Cells(i, col)
+                    If redCount > 0 Then
+                        currentColumn.Cells(i, 1).Interior.Color = RGB(255, 0, 0)
+                        redCount = redCount - 1
+                    Else
+                        If targetYellowCount > 0 Then
+                            currentColumn.Cells(i, 1).Interior.Color = RGB(255, 255, 0)
+                            targetYellowCount = targetYellowCount - 1
+                        Else
+                            currentColumn.Cells(i, 1).Interior.ColorIndex = xlNone
+                        End If
+                    End If
+                Else
+                    If targetYellowCount > 0 Then
+                        currentColumn.Cells(i, 1).Interior.Color = RGB(255, 255, 0)
+                        targetYellowCount = targetYellowCount - 1
+                    Else
+                        currentColumn.Cells(i, 1).Interior.ColorIndex = xlNone
+                    End If
                 End If
             ElseIf flagValue = "Íîâè÷îê" Then
                 If value <= percentilesNov(col, 1) Then
-                    gIndex = gIndex + 1
-                    ReDim Preserve greenCells(1 To gIndex) As Range
-                    Set greenCells(gIndex) = valuesRange.Cells(i, col)
+                    If greenCount > 0 Then
+                        currentColumn.Cells(i, 1).Interior.Color = RGB(146, 208, 80)
+                        greenCount = greenCount - 1
+                    Else
+                        If targetYellowCount > 0 Then
+                            currentColumn.Cells(i, 1).Interior.Color = RGB(255, 255, 0)
+                            targetYellowCount = targetYellowCount - 1
+                        Else
+                            currentColumn.Cells(i, 1).Interior.ColorIndex = xlNone
+                        End If
+                    End If
                 ElseIf value >= percentilesNov(col, 2) Then
-                    rIndex = rIndex + 1
-                    ReDim Preserve redCells(1 To rIndex) As Range
-                    Set redCells(rIndex) = valuesRange.Cells(i, col)
+                    If redCount > 0 Then
+                        currentColumn.Cells(i, 1).Interior.Color = RGB(255, 0, 0)
+                        redCount = redCount - 1
+                    Else
+                        If targetYellowCount > 0 Then
+                            currentColumn.Cells(i, 1).Interior.Color = RGB(255, 255, 0)
+                            targetYellowCount = targetYellowCount - 1
+                        Else
+                            currentColumn.Cells(i, 1).Interior.ColorIndex = xlNone
+                        End If
+                    End If
+                Else
+                    If targetYellowCount > 0 Then
+                        currentColumn.Cells(i, 1).Interior.Color = RGB(255, 255, 0)
+                        targetYellowCount = targetYellowCount - 1
+                    Else
+                        currentColumn.Cells(i, 1).Interior.ColorIndex = xlNone
+                    End If
                 End If
             End If
         Next i
     Next col
-    
-    ' Распределение желтых ячеек
-    Dim remainingYellowCount As Long
-    remainingYellowCount = yellowCount
-    
-    If gIndex > 0 Then
-        Dim gStep As Long
-        gStep = WorksheetFunction.RoundUp(remainingYellowCount / gIndex, 0)
-        
-        For i = 1 To gIndex
-            Dim yellowEndIndex As Long
-            yellowEndIndex = WorksheetFunction.Min(i * gStep, remainingYellowCount)
-            
-            For j = (i - 1) * gStep + 1 To yellowEndIndex
-                yIndex = yIndex + 1
-                ReDim Preserve yellowCells(1 To yIndex) As Range
-                Set yellowCells(yIndex) = greenCells(i)
-            Next j
-            
-            remainingYellowCount = remainingYellowCount - (yellowEndIndex - (i - 1) * gStep)
-        Next i
-    End If
-    
-    If rIndex > 0 Then
-        Dim rStep As Long
-        rStep = WorksheetFunction.RoundUp(remainingYellowCount / rIndex, 0)
-        
-        For i = 1 To rIndex
-            Dim yellowEndIndex As Long
-            yellowEndIndex = WorksheetFunction.Min(i * rStep, remainingYellowCount)
-            
-            For j = (i - 1) * rStep + 1 To yellowEndIndex
-                yIndex = yIndex + 1
-                ReDim Preserve yellowCells(1 To yIndex) As Range
-                Set yellowCells(yIndex) = redCells(i)
-            Next j
-            
-            remainingYellowCount = remainingYellowCount - (yellowEndIndex - (i - 1) * rStep)
-        Next i
-    End If
-    
-    ' Применение цветов к ячейкам
-    For Each cell In greenCells
-        cell.Interior.Color = RGB(146, 208, 80)
-    Next cell
-    
-    For Each cell In redCells
-        cell.Interior.Color = RGB(255, 0, 0)
-    Next cell
-    
-    For Each cell In yellowCells
-        cell.Interior.Color = RGB(255, 255, 0)
-    Next cell
 End Sub
 
-
-' Остальной код остается без изменений
 
