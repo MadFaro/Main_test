@@ -70,10 +70,27 @@ Sub color_value_rating_division()
         percentile70Exp = GetPercentile(expValues, 0.7)
         percentile70Nov = GetPercentile(novValues, 0.7)
         
-        percentilesExp(col, 1) = percentile30Exp
-        percentilesExp(col, 2) = percentile70Exp
-        percentilesNov(col, 1) = percentile30Nov
-        percentilesNov(col, 2) = percentile70Nov
+        Dim totalExpCount As Long
+        Dim totalNovCount As Long
+        
+        For c = 1 To columnCount
+            totalExpCount = totalExpCount + expCountPerColumn(c)
+            totalNovCount = totalNovCount + novCountPerColumn(c)
+        Next c
+        
+        Dim targetCount As Long
+        targetCount = Application.WorksheetFunction.Min(totalExpCount, totalNovCount)
+        
+        Dim expRatio As Double
+        Dim novRatio As Double
+        
+        expRatio = targetCount / totalExpCount
+        novRatio = targetCount / totalNovCount
+        
+        percentilesExp(col, 1) = (percentile30Exp - percentile30Nov) * expRatio + percentile30Nov
+        percentilesExp(col, 2) = (percentile70Exp - percentile70Nov) * expRatio + percentile70Nov
+        percentilesNov(col, 1) = (percentile30Nov - percentile30Exp) * novRatio + percentile30Exp
+        percentilesNov(col, 2) = (percentile70Nov - percentile70Exp) * novRatio + percentile70Exp
     Next col
     
     For col = 1 To columnCount
@@ -103,3 +120,4 @@ Sub color_value_rating_division()
 End Sub
 
 ' Остальной код остается без изменений
+
