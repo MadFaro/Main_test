@@ -1,12 +1,20 @@
-Traceback (most recent call last):
-  File "2.py", line 5, in <module>
-    with wave.open('240002039936997.wav', 'rb') as wav_file:
-  File "C:\Python38\lib\wave.py", line 510, in open
-    return Wave_read(f)
-  File "C:\Python38\lib\wave.py", line 164, in __init__
-    self.initfp(f)
-  File "C:\Python38\lib\wave.py", line 144, in initfp
-    self._read_fmt_chunk(chunk)
-  File "C:\Python38\lib\wave.py", line 269, in _read_fmt_chunk
-    raise Error('unknown format: %r' % (wFormatTag,))
-wave.Error: unknown format: 41216
+import wave
+import numpy as np
+
+# Открываем WAV-файл для чтения
+with wave.open('your_file.wav', 'rb') as wav_file:
+    # Используем стандартные предположения, если заголовки недоступны
+    num_channels = 2  # Стерео
+    sample_width = 2  # 16 бит
+    frame_rate = 44100  # 44.1 кГц
+    num_frames = wav_file.getnframes()
+
+    # Чтение аудио данных
+    audio_data = np.frombuffer(wav_file.readframes(num_frames), dtype=np.int16)
+
+# Переформатируем данные в массив с двумя каналами
+audio_data = np.reshape(audio_data, (num_frames, num_channels))
+
+# В этом месте вы можете работать с переменной audio_data,
+# которая содержит числовые данные аудио с предполагаемыми параметрами
+
