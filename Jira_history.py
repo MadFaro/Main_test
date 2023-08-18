@@ -1,20 +1,8 @@
-import wave
-import numpy as np
-
-# Открываем WAV-файл для чтения
-with wave.open('your_file.wav', 'rb') as wav_file:
-    # Используем стандартные предположения, если заголовки недоступны
-    num_channels = 2  # Стерео
-    sample_width = 2  # 16 бит
-    frame_rate = 44100  # 44.1 кГц
-    num_frames = wav_file.getnframes()
-
-    # Чтение аудио данных
-    audio_data = np.frombuffer(wav_file.readframes(num_frames), dtype=np.int16)
-
-# Переформатируем данные в массив с двумя каналами
-audio_data = np.reshape(audio_data, (num_frames, num_channels))
-
-# В этом месте вы можете работать с переменной audio_data,
-# которая содержит числовые данные аудио с предполагаемыми параметрами
-
+WARNING (VoskAPI:CheckMemoryUsage():determinize-lattice-pruned.cc:316) Did not reach requested beam in determinize-lattice: size exceeds maximum 50000000 bytes; (repo,arcs,elems) = (52002944,80864,63576), after rebuilding, repo size was 49319712, effective beam was 5.96073 vs. requested beam 6
+LOG (VoskAPI:RebuildRepository():determinize-lattice-pruned.cc:283) Rebuilding repository.
+WARNING (VoskAPI:CheckMemoryUsage():determinize-lattice-pruned.cc:316) Did not reach requested beam in determinize-lattice: size exceeds maximum 50000000 bytes; (repo,arcs,elems) = (50405440,74464,57648), after rebuilding, repo size was 47855520, effective beam was 5.66235 vs. requested beam 6
+LOG (VoskAPI:RebuildRepository():determinize-lattice-pruned.cc:283) Rebuilding repository.
+WARNING (VoskAPI:CheckMemoryUsage():determinize-lattice-pruned.cc:316) Did not reach requested beam in determinize-lattice: size exceeds maximum 50000000 bytes; (repo,arcs,elems) = (50113472,71488,55272), after rebuilding, repo size was 47694752, effective beam was 5.4613 vs. requested beam 6
+LOG (VoskAPI:RebuildRepository():determinize-lattice-pruned.cc:283) Rebuilding repository.
+LOG (VoskAPI:RebuildRepository():determinize-lattice-pruned.cc:283) Rebuilding repository.
+WARNING (VoskAPI:CheckMemoryUsage():determinize-lattice-pruned.cc:316) Did not reach requested beam in determinize-lattice: size exceeds maximum 50000000 bytes; (repo,arcs,elems) = (50015168,143552,116016), after rebuilding, repo size was 41095040, effective beam was 5.59155 vs. requested beam 6
