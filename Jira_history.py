@@ -4,10 +4,16 @@ from transformers import Trainer, TrainingArguments
 from torch.utils.data import Dataset
 import pandas as pd
 
-# Загрузка предварительно обученной модели и токенизатора
-model_name = 'bert-base-uncased'
-model = BertForSequenceClassification.from_pretrained(model_name)
-tokenizer = BertTokenizer.from_pretrained(model_name)
+# Загрузка предварительно обученной модели из файла h5 с помощью TensorFlow
+h5_model_path = "путь_к_файлу_модели.h5"
+loaded_model = tf.keras.models.load_model(h5_model_path)
+
+# Используйте эту модель как базовую для модели BertForSequenceClassification
+model = BertForSequenceClassification.from_pretrained("bert-base-uncased", state_dict=loaded_model.state_dict())
+
+# Загрузка токенизатора из файла JSON
+tokenizer_path = "путь_к_файлу_токенизатора.json"
+tokenizer = BertTokenizer.from_pretrained(tokenizer_path, do_lower_case=True)  # Установите do_lower_case в зависимости от токенизатора
 
 # Загрузка данных из DataFrame
 data = pd.read_csv("your_data.csv")  # Замените на свой файл данных
@@ -54,7 +60,6 @@ trainer = Trainer(
 
 trainer.train()
 
-# Сохранение дообученной модели и токенизатора
+# Сохранение дообученной модели
 output_model_dir = "./custom_bert_model"
 model.save_pretrained(output_model_dir)
-tokenizer.save_pretrained(output_model_dir)
