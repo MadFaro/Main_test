@@ -1,6 +1,7 @@
 import torch
 from transformers import BertTokenizer, BertForSequenceClassification
 from transformers import Trainer, TrainingArguments
+from torch.utils.data import Dataset
 import pandas as pd
 
 # Загрузка предварительно обученной модели и токенизатора
@@ -18,6 +19,20 @@ train_labels = data["flag_column"].tolist()
 # Токенизация и кодирование данных
 train_encodings = tokenizer(train_texts, padding=True, truncation=True, return_tensors='pt')
 train_labels = torch.tensor(train_labels)
+
+# Создание класса набора данных
+class MyDataset(Dataset):
+    def __init__(self, encodings, labels):
+        self.encodings = encodings
+        self.labels = labels
+    
+    def __len__(self):
+        return len(self.labels)
+    
+    def __getitem__(self, idx):
+        item = {key: val[idx] for key, val in self.encodings.items()}
+        item['labels'] = self.labels[idx]
+        return item
 
 # Настройка тренировки
 training_args = TrainingArguments(
