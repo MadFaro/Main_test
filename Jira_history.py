@@ -1,26 +1,28 @@
-import nemo
-import nemo.collections.asr as nemo_asr
-import os
+Collecting hydra
+  Downloading Hydra-2.5.tar.gz (82 kB)
+     ---------------------------------------- 82.4/82.4 kB 1.2 MB/s eta 0:00:00
+  Preparing metadata (setup.py) ... done
+Building wheels for collected packages: hydra
+  Building wheel for hydra (setup.py) ... error
+  error: subprocess-exited-with-error
 
-# Путь к аудиофайлу
-audio_file = 'путь_к_аудиофайлу.wav'
+  × python setup.py bdist_wheel did not run successfully.
+  │ exit code: 1
+  ╰─> [9 lines of output]
+      running bdist_wheel
+      running build
+      running build_py
+      creating build
+      creating build\lib.win-amd64-cpython-38
+      copying src\hydra.py -> build\lib.win-amd64-cpython-38
+      running build_ext
+      building '_hydra' extension
+      error: Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
+      [end of output]
 
-# Путь к сохраненной модели
-model_checkpoint = 'путь_к_сохраненной_модели.nemo'
-
-# Инициализация NeMo ASR модели с использованием сохраненной модели
-asr_model = nemo_asr.models.EncDecCTCModel.restore_from(model_checkpoint)
-
-# Загрузка аудиофайла
-if os.path.exists(audio_file):
-    audio, _ = librosa.load(audio_file, sr=16000)
-else:
-    print("Аудиофайл не найден.")
-    exit(1)
-
-# Преобразование аудио в текст
-transcriptions = asr_model.transcribe([audio])
-
-# Вывод результата
-print("Распознанный текст:", transcriptions[0])
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+  ERROR: Failed building wheel for hydra
+  Running setup.py clean for hydra
+Failed to build hydra
+ERROR: Could not build wheels for hydra, which is required to install pyproject.toml-based projects
 
