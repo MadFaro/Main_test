@@ -1,23 +1,15 @@
-Traceback (most recent call last):
-  File "Nemo.py", line 2, in <module>
-    import nemo.collections.asr as nemo_asr
-  File "C:\Python38\lib\site-packages\nemo\collections\asr\__init__.py", line 15, in <module>
-    from nemo.collections.asr import data, losses, models, modules
-  File "C:\Python38\lib\site-packages\nemo\collections\asr\losses\__init__.py", line 15, in <module>
-    from nemo.collections.asr.losses.angularloss import AngularSoftmaxLoss
-  File "C:\Python38\lib\site-packages\nemo\collections\asr\losses\angularloss.py", line 18, in <module>
-    from nemo.core.classes import Loss, Typing, typecheck
-  File "C:\Python38\lib\site-packages\nemo\core\__init__.py", line 16, in <module>
-    from nemo.core.classes import *
-  File "C:\Python38\lib\site-packages\nemo\core\classes\__init__.py", line 20, in <module>
-    from nemo.core.classes.common import (
-  File "C:\Python38\lib\site-packages\nemo\core\classes\common.py", line 36, in <module>
-    from nemo.core.connectors.save_restore_connector import SaveRestoreConnector
-  File "C:\Python38\lib\site-packages\nemo\core\connectors\save_restore_connector.py", line 30, in <module>
-    from nemo.utils import logging, model_utils
-  File "C:\Python38\lib\site-packages\nemo\utils\model_utils.py", line 27, in <module>
-    from nemo.utils.data_utils import resolve_cache_dir  # imported for compatibility: model_utils.resolve_cache_dir()
-  File "C:\Python38\lib\site-packages\nemo\utils\data_utils.py", line 21, in <module>
-    from nemo import __version__ as NEMO_VERSION
-ImportError: cannot import name '__version__' from 'nemo' (C:\Python38\lib\site-packages\nemo\__init__.py)
-
+  File "Nemo.py", line 22, in <module>
+    transcriptions = asr_model.transcribe([audio])
+  File "C:\Python38\lib\site-packages\torch\utils\_contextlib.py", line 115, in decorate_context
+    return func(*args, **kwargs)
+  File "C:\Python38\lib\site-packages\nemo\collections\asr\models\ctc_models.py", line 183, in transcribe
+    fp.write(json.dumps(entry) + '\n')
+  File "C:\Python38\lib\json\__init__.py", line 231, in dumps
+    return _default_encoder.encode(obj)
+  File "C:\Python38\lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Python38\lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Python38\lib\json\encoder.py", line 179, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type ndarray is not JSON serializable
