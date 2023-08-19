@@ -1,31 +1,23 @@
-import glob, vosk, os, nltk, pymorphy2, time
+import glob
+import os
 import soundfile as sf
+from pydub import AudioSegment
+from scipy import signal
+import vosk
+import pymorphy2
+import nltk
 import numpy as np
 import pandas as pd
+import time
 
-
-
-
-# Получаем весь список файлов их папки
+# Получаем весь список файлов из папки
 folder_path = r'C:\Users\TologonovAB\Desktop\text\audio\audio'
 file_pattern = '*.wav'
 file_list = glob.glob(os.path.join(folder_path, file_pattern))
 
-# Загружаем модель и обозначем фразы для поиска
+# Загрузка модели vosk
 model = vosk.Model('vosk-model-ru-0.22/')
-phrases_l = ["выиграть автомобиль", 
-             "подарок автомобиль", 
-             "приз автомобиль",
-             "от банка автомобиль"
-             "автомобиль подарок",
-             "автомобиль в подарок",
-             "автомобиль главный приз",
-             "выбрать автомобиль",
-             "автомобиль от банка",
-             "акция автомобиль",
-             "акция машина",
-             ]
-phrases_r = [""]
+phrases_l = ["выиграть автомобиль", "подарок автомобиль", "приз автомобиль", "от банка автомобиль", "автомобиль подарок", "автомобиль в подарок", "автомобиль главный приз", "выбрать автомобиль", "автомобиль от банка", "акция автомобиль", "акция машина"]
 
 # Функция для поиска фраз
 def check_phrases(text, phrases):
@@ -42,64 +34,58 @@ def check_phrases(text, phrases):
 
 # Запускаем основной цикл
 for file in file_list:
-    results = [] # Пустой словарь для записи
-    start_time = time.time() # обозначаем начало выполнения цикла
-    audio_data, sample_rate = sf.read(file) # Читаем файл
-    left_channel = audio_data[:, 0] # Берем левый канал - то что говорит оператор
-    right_channel = audio_data[:, 1] # Берем правый канал - то что говорит клиент
+    results = [] # Пустой список для результатов
+    start_time = time.time() # Начало замера времени
 
-# Выравниваем громкость для левого канала
-    max_value_l = np.max(np.abs(left_channel))
-    if max_value_l > 0:
-        normalize_audio_l = left_channel / max_value_l
-    else:
-        normalize_audio_l = left_channel
+    # Чтение аудиофайла
+    audio_data, sample_rate = sf.read(file)
+    
+    # Разбиение на два канала
+    left_channel = audio_data[:, 0]
+    right_channel = audio_data[:, 1]
 
-# Выравниваем громкость для правого канала
-    max_value_r = np.max(np.abs(right_channel))
-    if max_value_r > 0:
-        normalize_audio_r = right_channel / max_value_r
-    else:
-        normalize_audio_r = right_channel
+    # Фильтрация высоких и низких частот для левого канала
+    cutoff_low = 300
+    cutoff_high = 3000
+    b, a = signal.butter(4, [cutoff_low, cutoff_high], btype="band", fs=sample_rate)
+    filtered_audio_l = signal.lfilter(b, a, left_channel)
 
-# Сохраняем каналы
-    sf.write(f'audio/left/{os.path.basename(file)}', normalize_audio_l, sample_rate) # Сохраняем левый канал
-    sf.write(f'audio/right/{os.path.basename(file)}', normalize_audio_r, sample_rate) # Сохраняем правый канал
+    # Фильтрация высоких и низких частот для правого канала
+    filtered_audio_r = signal.lfilter(b, a, right_channel)
 
-# Инициализация модели
-    recognizer = vosk.KaldiRecognizer(model, sample_rate)
+    # Скорректировать скорость воспроизведения
+    speed_change = 0.8
+    audio_segment_l = AudioSegment(data=filtered_audio_l.tobytes(), frame_rate=sample_rate, sample_width=filtered_audio_l.dtype.itemsize, channels=1)
+    adjusted_audio_l = audio_segment_l.speedup(playback_speed=speed_change)
 
-# Прогоняем левый канал через модельку и ищем фразы
-    with open(f'audio/left/{os.path.basename(file)}', 'rb') as file_l:
-        data_l = file_l.read()
-    recognizer.AcceptWaveform(data_l)
-    text_l = recognizer.FinalResult()
+    audio_segment_r = AudioSegment(data=filtered_audio_r.tobytes(), frame_rate=sample_rate, sample_width=filtered_audio_r.dtype.itemsize, channels=1)
+    adjusted_audio_r = audio_segment_r.speedup(playback_speed=speed_change)
+
+    # Инициализация модели vosk для левого канала
+    recognizer_l = vosk.KaldiRecognizer(model, sample_rate)
+    recognizer_l.AcceptWaveform(adjusted_audio_l.raw_data)
+    text_l = recognizer_l.FinalResult()
     found_phrases_l = check_phrases(text_l, phrases_l)
 
-# Прогоняем правый канал через модельку и ищем фразы
-    with open(f'audio/right/{os.path.basename(file)}', 'rb') as file_r:
-        data_r = file_r.read()
-    recognizer.AcceptWaveform(data_r)
-    text_r = recognizer.FinalResult()
-#    found_phrases_r = check_phrases(text_r, phrases_r)
+    # Инициализация модели vosk для правого канала
+    recognizer_r = vosk.KaldiRecognizer(model, sample_rate)
+    recognizer_r.AcceptWaveform(adjusted_audio_r.raw_data)
+    text_r = recognizer_r.FinalResult()
 
-# Записываем результат в словарь
     end_time = time.time()
     result_time = end_time - start_time
+
     results.append({
-        'audio_file_name': os.path.basename(file), 
-        'text_operator': text_l, 
+        'audio_file_name': os.path.basename(file),
+        'text_operator': text_l,
         'found_phrases_operator': found_phrases_l,
-        'text_client': text_r, 
-#       'found_phrases_client': found_phrases_r,
-        'time_second' : result_time   
-        })
+        'text_client': text_r,
+        'time_second': result_time
+    })
 
-# Чистим папки с аудио
-    os.remove(file)
-    os.remove(f'audio/left/{os.path.basename(file)}')
-    os.remove(f'audio/right/{os.path.basename(file)}')
-
-# Записываем данные в CSV файл
+# Запись данных в CSV-файл
     df = pd.DataFrame(results)
     df.to_csv('text.csv', mode='a', header=False, index=False, encoding='ANSI', lineterminator='\r\n', sep=';')
+    
+print("Обработка и транскрибация завершены.")
+
