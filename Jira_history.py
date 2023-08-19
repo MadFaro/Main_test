@@ -1,28 +1,23 @@
-Collecting hydra
-  Downloading Hydra-2.5.tar.gz (82 kB)
-     ---------------------------------------- 82.4/82.4 kB 1.2 MB/s eta 0:00:00
-  Preparing metadata (setup.py) ... done
-Building wheels for collected packages: hydra
-  Building wheel for hydra (setup.py) ... error
-  error: subprocess-exited-with-error
-
-  × python setup.py bdist_wheel did not run successfully.
-  │ exit code: 1
-  ╰─> [9 lines of output]
-      running bdist_wheel
-      running build
-      running build_py
-      creating build
-      creating build\lib.win-amd64-cpython-38
-      copying src\hydra.py -> build\lib.win-amd64-cpython-38
-      running build_ext
-      building '_hydra' extension
-      error: Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
-      [end of output]
-
-  note: This error originates from a subprocess, and is likely not a problem with pip.
-  ERROR: Failed building wheel for hydra
-  Running setup.py clean for hydra
-Failed to build hydra
-ERROR: Could not build wheels for hydra, which is required to install pyproject.toml-based projects
+Traceback (most recent call last):
+  File "Nemo.py", line 2, in <module>
+    import nemo.collections.asr as nemo_asr
+  File "C:\Python38\lib\site-packages\nemo\collections\asr\__init__.py", line 15, in <module>
+    from nemo.collections.asr import data, losses, models, modules
+  File "C:\Python38\lib\site-packages\nemo\collections\asr\losses\__init__.py", line 15, in <module>
+    from nemo.collections.asr.losses.angularloss import AngularSoftmaxLoss
+  File "C:\Python38\lib\site-packages\nemo\collections\asr\losses\angularloss.py", line 18, in <module>
+    from nemo.core.classes import Loss, Typing, typecheck
+  File "C:\Python38\lib\site-packages\nemo\core\__init__.py", line 16, in <module>
+    from nemo.core.classes import *
+  File "C:\Python38\lib\site-packages\nemo\core\classes\__init__.py", line 20, in <module>
+    from nemo.core.classes.common import (
+  File "C:\Python38\lib\site-packages\nemo\core\classes\common.py", line 36, in <module>
+    from nemo.core.connectors.save_restore_connector import SaveRestoreConnector
+  File "C:\Python38\lib\site-packages\nemo\core\connectors\save_restore_connector.py", line 30, in <module>
+    from nemo.utils import logging, model_utils
+  File "C:\Python38\lib\site-packages\nemo\utils\model_utils.py", line 27, in <module>
+    from nemo.utils.data_utils import resolve_cache_dir  # imported for compatibility: model_utils.resolve_cache_dir()
+  File "C:\Python38\lib\site-packages\nemo\utils\data_utils.py", line 21, in <module>
+    from nemo import __version__ as NEMO_VERSION
+ImportError: cannot import name '__version__' from 'nemo' (C:\Python38\lib\site-packages\nemo\__init__.py)
 
