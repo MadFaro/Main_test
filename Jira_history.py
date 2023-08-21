@@ -25,3 +25,24 @@ for i, r in df.iterrows():
     texts.append(text)
 
 df["text"] = texts
+
+import torch
+from transformers import pipeline
+from datasets import load_dataset
+
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
+pipe = pipeline(
+  "automatic-speech-recognition",
+  model="openai/whisper-large-v2",
+  chunk_length_s=30,
+  device=device,
+)
+
+ds = load_dataset("hf-internal-testing/librispeech_asr_dummy", "clean", split="validation")
+sample = ds[0]["audio"]
+
+prediction = pipe(sample.copy(), batch_size=8)["text"]
+
+# we can also return timestamps for the predictions
+prediction = pipe(sample.copy(), batch_size=8, return_timestamps=True)["chunks"]
