@@ -1,1 +1,1 @@
-ffmpeg -i input.wav -af "aselect='gte(duration,2)', asetpts=N/SR/TB" -f segment -segment_time 2 output%d.wav
+ffmpeg -i input.wav -filter_complex "[0:a]asegment=duration=10:pause_threshold=-50dB:break_duration=2:reset_timestamps=1[out]" -map "[out]" output%d.wav
