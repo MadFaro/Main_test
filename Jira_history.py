@@ -1,16 +1,17 @@
-import wave
-import struct
+import soundfile as sf
  
- 
-def break_the_silence():
-    source = wave.open("in.wav", mode="rb")
-    dest = wave.open("out.wav", mode="wb")
-    dest.setparams(source.getparams())
-    frames_count = source.getnframes()
-    data = struct.unpack("<" + str(frames_count) + "h",
-                         source.readframes(frames_count))
-    newdata = list(filter(lambda x: abs(x) > 5, data))
-    newframes = struct.pack("<" + str(len(newdata)) + "h", *newdata)
-    dest.writeframes(newframes)
-    source.close()
-    dest.close()
+audio_data, sample_rate = sf.read(file)
+left_channel = audio_data[:, 0]
+right_channel = audio_data[:, 1]
+
+max_value_l = np.max(np.abs(left_channel))
+if max_value_l > 0:
+ normalize_audio_l = left_channel / max_value_l
+else:
+ normalize_audio_l = left_channel
+
+max_value_r = np.max(np.abs(right_channel))
+ if max_value_r > 0:
+normalize_audio_r = right_channel / max_value_r
+else:
+ normalize_audio_r = right_channel
