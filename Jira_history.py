@@ -1,22 +1,13 @@
-import soundfile as sf
-import numpy as np
+import subprocess
 
-# Загрузка аудио данных
-audio_data, sample_rate = sf.read(file)
-left_channel = audio_data[:, 0]
-right_channel = audio_data[:, 1]
+# Входной и выходной файлы
+input_file = 'input.mp3'
+output_file = 'output.mp3'
 
-# RMS нормализация для левого канала
-rms_left = np.sqrt(np.mean(left_channel**2))
-normalized_audio_l = left_channel / rms_left
+# Команда FFmpeg для увеличения громкости в два раза
+volume_command = ['ffmpeg', '-i', input_file, '-af', 'volume=2.0', output_file]
+compand_command = ['ffmpeg', '-i', input_file, '-af', 'compand=0|0:1|1:-90/-900|-70/-70|-30/-9|0/-3:6:0:0:0', output_file]
+# Запуск команды с помощью subprocess
+subprocess.run(volume_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-# RMS нормализация для правого канала
-rms_right = np.sqrt(np.mean(right_channel**2))
-normalized_audio_r = right_channel / rms_right
-
-# Объединение нормализованных каналов обратно
-normalized_audio_data = np.column_stack((normalized_audio_l, normalized_audio_r))
-
-# Сохранение аудио данных в том же формате
-output_file = "normalized_audio.wav"
-sf.write(output_file, normalized_audio_data, sample_rate)
+print("Готово!")
