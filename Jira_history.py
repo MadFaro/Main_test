@@ -10,4 +10,5 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
-  TO_NUMBER(REGEXP_SUBSTR('Лимит по карте *1234 увеличен до 60000', '(\d+)\s*увеличен\s*до\s*(\d+)')) AS NewLimit
+
+SUBSTR('Лимит по карте *1234 увеличен до 60000', INSTR('Лимит по карте *1234 увеличен до 60000', 'до ') + LENGTH('до ')) AS TextAfterDо
