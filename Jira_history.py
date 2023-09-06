@@ -20,5 +20,8 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 driver = webdriver.Chrome()
 driver.get('https://www.google.com/')
 
-SELECT TRUNC(SYSDATE + (1/48) * ROUND((TO_NUMBER(TO_CHAR(SYSDATE, 'SSSSS')) / 60 / 30)), 1/48) AS rounded_date
-FROM dual;
+ORA-00932: несовместимые типы данных: ожидается DATE UNIT, получено NUMBER
+00932. 00000 -  "inconsistent datatypes: expected %s got %s"
+*Cause:    
+*Action:
+Error at Line: 2 Column: 92
