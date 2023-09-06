@@ -19,3 +19,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 
 driver = webdriver.Chrome()
 driver.get('https://www.google.com/')
+
+SELECT TRUNC(your_date_column, 'HH24') + NUMTODSINTERVAL(FLOOR(MOD(EXTRACT(MINUTE FROM your_date_column), 30)), 'MINUTE') AS rounded_date
+FROM your_table;
+
