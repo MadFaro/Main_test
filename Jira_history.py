@@ -20,8 +20,5 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 driver = webdriver.Chrome()
 driver.get('https://www.google.com/')
 
-ORA-30076: неверное поле выборки для источника выборки
-30076. 00000 -  "invalid extract field for extract source"
-*Cause:    The extract source does not contain the specified extract field.
-*Action:
-Error at Line: 2 Column: 76
+SELECT TRUNC(SYSDATE + (1/48) * ROUND((TO_NUMBER(TO_CHAR(SYSDATE, 'SSSSS')) / 60 / 30)), 1/48) AS rounded_date
+FROM dual;
