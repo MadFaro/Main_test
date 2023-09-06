@@ -20,6 +20,8 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 driver = webdriver.Chrome()
 driver.get('https://www.google.com/')
 
-SELECT TRUNC(your_date_column, 'HH24') + NUMTODSINTERVAL(FLOOR(MOD(EXTRACT(MINUTE FROM your_date_column), 30)), 'MINUTE') AS rounded_date
-FROM your_table;
-
+ORA-30076: неверное поле выборки для источника выборки
+30076. 00000 -  "invalid extract field for extract source"
+*Cause:    The extract source does not contain the specified extract field.
+*Action:
+Error at Line: 2 Column: 76
