@@ -13,15 +13,42 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
 
-from seleniumwire import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-
-
-driver = webdriver.Chrome()
-driver.get('https://www.google.com/')
-
-SELECT TRUNC(SYSDATE, 'HH24') + (FLOOR((TO_NUMBER(TO_CHAR(SYSDATE, 'MI')) / 30)) * (1/48)) AS rounded_date
-
-https://support.microsoft.com/ru-ru/topic/%D0%BE%D0%B1%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B7%D0%B0-%D0%B0%D0%B2%D0%B3%D1%83%D1%81%D1%82-2023-%D0%B3-%D0%B4%D0%BB%D1%8F-microsoft-office-796da43e-4310-4eab-ba9d-2908bbfe16d5
-
-FROM dual;
+Sub РасставитьПерерывыСИспользованиемSolver()
+    Dim ws As Worksheet
+    Dim lastRow As Long, lastCol As Long
+    Dim i As Long, j As Long
+    Dim OperatorRange As Range
+    Dim SolverApp As Object
+    
+    ' Указываем имя вашего листа
+    Set ws = ThisWorkbook.Sheets("Лист1") ' Замените "Лист1" на имя вашего листа
+    
+    ' Находим последнюю заполненную строку и столбец
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+    
+    ' Определение диапазона переменных Solver (все ячейки с 1)
+    Set OperatorRange = ws.Range(ws.Cells(2, 2), ws.Cells(lastRow, lastCol))
+    
+    ' Создаем объект Solver
+    Set SolverApp = Application.Solver
+    
+    ' Настройка параметров Solver
+    SolverApp.SolverReset
+    SolverApp.SolverOk SetCell:=OperatorRange, MaxMinVal:=2, ValueOf:=0, ByChange:=OperatorRange, Engine:=1, EngineDesc:="Simplex LP"
+    SolverApp.SolverAdd CellRef:=OperatorRange, Relation:=1, FormulaText:=1 ' Ограничение на значения (должны быть 1 или 0)
+    SolverApp.SolverOptions AssumeNonNeg:=True
+    SolverApp.SolverSolve UserFinish:=True
+    
+    ' Присваиваем -1 там, где Solver решение указало на 1
+    For i = 1 To lastRow - 1
+        For j = 1 To lastCol - 1
+            If OperatorRange.Cells(i, j).Value = 1 Then
+                ws.Cells(i + 1, j + 1).Value = -1
+            End If
+        Next j
+    Next i
+    
+    ' Освобождаем ресурсы Solver
+    Set SolverApp = Nothing
+End Sub
