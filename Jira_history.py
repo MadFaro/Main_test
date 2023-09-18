@@ -13,7 +13,9 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
 
-SELECT object_name
-FROM all_objects
-WHERE object_type = 'PROCEDURE'
-  AND owner = 'ИМЯ_СХЕМЫ';
+SELECT ao.object_name AS procedure_name, as.text AS procedure_code
+FROM all_objects ao
+JOIN all_source as
+ON ao.object_name = as.name
+WHERE ao.object_type = 'PROCEDURE'
+  AND ao.owner = 'ИМЯ_СХЕМЫ';
