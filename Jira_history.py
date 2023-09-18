@@ -13,9 +13,4 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
 
-SELECT ao.object_name AS procedure_name, as.text AS procedure_code
-FROM all_objects ao
-JOIN all_source as
-ON ao.object_name = as.name
-WHERE ao.object_type = 'PROCEDURE'
-  AND ao.owner = 'ИМЯ_СХЕМЫ';
+result_df = df.groupby('Группа')['Значение'].agg(', '.join).reset_index()
