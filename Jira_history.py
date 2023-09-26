@@ -13,4 +13,27 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
 
-result_df = df.groupby('Группа')['Значение'].agg(', '.join).reset_index()
+import tkinter as tk
+from tkinter import filedialog
+
+def open_file_dialog():
+    initial_dir = "C:/Users/tolog/Desktop/schedulerapp"  # Замените на нужный путь к папке
+    file_path = filedialog.askopenfilename(initialdir=initial_dir)
+    if file_path:
+        file_label.config(text=file_path)
+    else:
+        file_label.config(text="Файл не выбран")
+
+app = tk.Tk()
+app.title("Выбор файла")
+app.geometry("400x200")  
+app.resizable(False, False)  
+
+open_button = tk.Button(app, text="Выбрать файл", command=open_file_dialog)
+open_button.pack(pady=20)
+
+file_label = tk.Label(app, text="Файл не выбран")
+file_label.pack()
+
+app.mainloop()
+
