@@ -13,30 +13,37 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
 
-Option Explicit
+set App = createobject("excel.application")
+App.visible = false
+App.Workbooks.Open("C:\Users\atologonov\Desktop\ÃÎÏ\OR\ORMail.xlsm")
+App.Run("ORMail.xlsm!Pochta")
+App.Workbooks("ORMail.xlsm").Close(false)
+App.quit
 
-Dim objExcel, objWorkbook
 
-' Создаем объект Excel
-Set objExcel = CreateObject("Excel.Application")
+Sub ORZ()
+Calculate
 
-' Открываем файл Excel
-Set objWorkbook = objExcel.Workbooks.Open("путь_к_вашему_файлу\запрос1.xlsx")
+Dim book1, book2, n1, n2 As String
 
-' Замените "Имя_подключения" на имя вашего подключения данных
-Dim connectionName
-connectionName = "Имя_подключения"
+book1 = Worksheets("Data").Range("A1")
+book2 = Worksheets("Data").Range("A2")
 
-' Обновляем конкретное подключение данных
-On Error Resume Next
-objWorkbook.Connections(connectionName).Refresh
-On Error GoTo 0
+n1 = Dir(book1)
+n2 = Dir(book2)
 
-' Сохраняем и закрываем файл Excel
-objWorkbook.Save
-objWorkbook.Close
+Workbooks.Open (book1), False, False, , , 255
+Workbooks(n1).Connections("Çàïðîñ èç Portals").Refresh
+Calculate
+Workbooks(n1).RefreshAll
+Workbooks(n1).Save
+Workbooks(n1).Close
 
-' Высвобождаем ресурсы
-Set objWorkbook = Nothing
-Set objExcel = Nothing
+Workbooks.Open (book2), False, False, , , 255
+Workbooks(n2).Connections("Çàïðîñ èç Portals").Refresh
+Calculate
+Workbooks(n2).RefreshAll
+Workbooks(n2).Save
+Workbooks(n2).Close
 
+End Sub
