@@ -67,3 +67,12 @@ driver.find_element_by_css_selector("button.btn.btn-success").click()
 time.sleep(5)
 
 driver.quit()
+
+cookies = [
+    {'name': 'cookie_name1', 'value': 'cookie_value1'},
+    {'name': 'cookie_name2', 'value': 'cookie_value2'}
+]
+
+# Добавьте куки в текущую сессию
+for cookie in cookies:
+    driver.add_cookie(cookie)
