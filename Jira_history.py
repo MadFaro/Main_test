@@ -13,37 +13,26 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
 
-import requests
-from bs4 import BeautifulSoup
-import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import time
+from bs4 import BeautifulSoup as BS
 
-# Замените URL на адрес нужной веб-страницы
-url = "https://example.com"
+def browser_chrome():
+    options = Options()
+    #options.add_argument('headless')
+    options.add_argument('window-size=1920x935')
+    driver = webdriver.Chrome(executable_path=r'C:\путь\chromedriver.exe', options=options)
+    driver.get('https://vstup.osvita.ua/y2021/r14/97/833553')
+    driver.execute_script('getItemsRequest()') # Нажимает кнопку
+    time.sleep(5)
+    body = driver.execute_script('return document.getElementsByTagName("body")[0]') 
+    html_page = body.get_attribute('innerHTML')
+    html = BS(html_page, 'html.parser')
+    trs = html.select('.rstatus6')
+    for el in trs:
+        t = el.find_all('td')
+        print(f'{t[0].text}|{t[1].text}|{t[2].text}')
 
-# Отправляем GET-запрос для получения HTML-кода страницы
-response = requests.get(url)
-html = response.text
-
-# Разбираем HTML-код с помощью BeautifulSoup и находим все таблицы
-soup = BeautifulSoup(html, "html.parser")
-tables = soup.find_all("table")
-
-# Преобразуем каждую таблицу в объект DataFrame и сохраняем их в список
-dataframes = []
-
-for table in tables:
-    df = pd.read_html(str(table))
-    dataframes.extend(df)
-
-# Теперь dataframes - это список объектов DataFrame, представляющих таблицы на веб-странице
-# Вы можете обрабатывать и анализировать эти таблицы по своему усмотрению
-
-# Пример: Вывести первую таблицу (если она есть) в консоль
-if dataframes:
-    print(dataframes[0])
-
-# Пример: Сохранить первую таблицу в CSV-файл
-if dataframes:
-    dataframes[0].to_csv("first_table.csv", index=False)
-
+browser_chrome()
 
