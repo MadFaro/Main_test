@@ -13,10 +13,37 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
 
-# Преобразуйте столбец 'Дата и время' в формат datetime
-df['Дата и время'] = pd.to_datetime(df['Дата и время'])
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
 
-# Измените формат даты в столбце на "YY-MM-DD HH:mm:ss"
-df['Дата и время'] = df['Дата и время'].dt.strftime('%y-%m-%d %H:%M:%S')
+# Замените URL на адрес нужной веб-страницы
+url = "https://example.com"
+
+# Отправляем GET-запрос для получения HTML-кода страницы
+response = requests.get(url)
+html = response.text
+
+# Разбираем HTML-код с помощью BeautifulSoup и находим все таблицы
+soup = BeautifulSoup(html, "html.parser")
+tables = soup.find_all("table")
+
+# Преобразуем каждую таблицу в объект DataFrame и сохраняем их в список
+dataframes = []
+
+for table in tables:
+    df = pd.read_html(str(table))
+    dataframes.extend(df)
+
+# Теперь dataframes - это список объектов DataFrame, представляющих таблицы на веб-странице
+# Вы можете обрабатывать и анализировать эти таблицы по своему усмотрению
+
+# Пример: Вывести первую таблицу (если она есть) в консоль
+if dataframes:
+    print(dataframes[0])
+
+# Пример: Сохранить первую таблицу в CSV-файл
+if dataframes:
+    dataframes[0].to_csv("first_table.csv", index=False)
 
 
