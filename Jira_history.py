@@ -13,37 +13,8 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
 
-set App = createobject("excel.application")
-App.visible = false
-App.Workbooks.Open("C:\Users\atologonov\Desktop\ÃÎÏ\OR\ORMail.xlsm")
-App.Run("ORMail.xlsm!Pochta")
-App.Workbooks("ORMail.xlsm").Close(false)
-App.quit
-
-
-Sub ORZ()
-Calculate
-
-Dim book1, book2, n1, n2 As String
-
-book1 = Worksheets("Data").Range("A1")
-book2 = Worksheets("Data").Range("A2")
-
-n1 = Dir(book1)
-n2 = Dir(book2)
-
-Workbooks.Open (book1), False, False, , , 255
-Workbooks(n1).Connections("Çàïðîñ èç Portals").Refresh
-Calculate
-Workbooks(n1).RefreshAll
-Workbooks(n1).Save
-Workbooks(n1).Close
-
-Workbooks.Open (book2), False, False, , , 255
-Workbooks(n2).Connections("Çàïðîñ èç Portals").Refresh
-Calculate
-Workbooks(n2).RefreshAll
-Workbooks(n2).Save
-Workbooks(n2).Close
-
-End Sub
+Совместно с коллегами из отдела аналитики была создана и обучена ASR модель. Для этого мы использовали набор инструментов Kaldi. На просторах интернета найдены и подготовлены словари и датасеты. С помощью скрипта на python был запущен процесс обучения модели. В конечном итоге мы получили рабочий процесс, состоящий из нескольких шагов:
+- Скрипт на python забирает звонки из хранилища и сегментирует их по определенным признакам
+- Затем аудио дополнительно обрабатываются, удаляются шумы, нормализуется громкость, разделяются каналы на оператора и клиента и т.д.
+- Далее модель транскрибирует подготовленную запись в текст и записывает данные в БД, где транскрибация дополняется данными, такими как тематики обращений, ФИО оператора и т.д.
+- Параллельно работают другие скрипты и модели, которые забирают эти данные из БД дополнительно делают токенизацию и лемматизацию, и решают конкретные задачи, которые формируются на стороне контроля качества
