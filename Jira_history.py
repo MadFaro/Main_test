@@ -12,5 +12,32 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
+import os
+import time
+from multiprocessing import Process
 
-Процесс обучения ASR модели был автоматизирован с использованием скриптов на языке Python. Модель обучалась на обширном наборе данных, который включал в себя как общедоступные датасеты, так и специально подготовленные словари и записи разговоров из интернета.
+# Функция для обработки файла
+def process_file(file_path):
+    # Ваш код для обработки файла здесь
+
+# Функция для мониторинга папки
+def monitor_folder(folder_path):
+    while True:
+        for file_name in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, file_name)
+            if os.path.isfile(file_path):
+                process_file(file_path)
+        time.sleep(1)  # Измените значение по желанию
+
+if __name__ == '__main':
+    folder1 = 'путь_к_папке_1'
+    folder2 = 'путь_к_папке_2'
+
+    process1 = Process(target=monitor_folder, args=(folder1,))
+    process2 = Process(target=monitor_folder, args=(folder2,))
+
+    process1.start()
+    process2.start()
+
+    process1.join()
+    process2.join()
