@@ -14,36 +14,26 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 import os
 import shutil
-import random
 
-# Путь к вашей папке с файлами
-source_folder = '/путь/к/вашей/папке'
+# Путь к папке с аудиофайлами
+source_folder = "путь_к_вашей_папке_с_аудиофайлами"
 
-# Путь к папкам, в которые нужно распределить файлы
-destination_folders = ['/путь/к/папке1', '/путь/к/папке2', '/путь/к/папке3', '/путь/к/папке4', '/путь/к/папке5', '/путь/к/папке6', '/путь/к/папке7', '/путь/к/папке8', '/путь/к/папке9', '/путь/к/папке10']
+# Создаем 10 папок (если они еще не существуют)
+for i in range(1, 11):
+    folder_name = f"папка_{i}"
+    os.makedirs(folder_name, exist_ok=True)
 
-# Получить список файлов в исходной папке
-file_list = os.listdir(source_folder)
+# Получаем список аудиофайлов в исходной папке
+audio_files = os.listdir(source_folder)
 
-# Перемешать список файлов в случайном порядке
-random.shuffle(file_list)
+# Распределяем файлы по 10 папкам равномерно
+current_folder_index = 1
+for audio_file in audio_files:
+    folder_name = f"папка_{current_folder_index}"
+    source_path = os.path.join(source_folder, audio_file)
+    destination_path = os.path.join(folder_name, audio_file)
+    shutil.move(source_path, destination_path)
 
-# Рассчитать, сколько файлов должно быть в каждой папке
-files_per_folder = len(file_list) // len(destination_folders)
-remainder = len(file_list) % len(destination_folders)
-
-# Создать целевые папки, если они еще не существуют
-for folder in destination_folders:
-    os.makedirs(folder, exist_ok=True)
-
-# Распределить файлы по папкам и переместить их
-for i, folder in enumerate(destination_folders):
-    start = i * files_per_folder
-    end = (i + 1) * files_per_folder
-    if i < remainder:
-        end += 1
-    for file in file_list[start:end]:
-        source_path = os.path.join(source_folder, file)
-        destination_path = os.path.join(folder, file)
-        shutil.move(source_path, destination_path)
+    # Переходим к следующей папке (циклично)
+    current_folder_index = (current_folder_index % 10) + 1
 
