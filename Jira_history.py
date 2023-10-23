@@ -12,37 +12,11 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
-import os
-import shutil
-
-# Путь к папке с аудиофайлами
-source_folder = "путь_к_вашей_папке_с_аудиофайлами"
-
-# Список конкретных папок, в которые вы хотите распределить файлы
-destination_folders = [
-    "путь_к_папке_1",
-    "путь_к_папке_2",
-    "путь_к_папке_3",
-    "путь_к_папке_4",
-    "путь_к_папке_5",
-    "путь_к_папке_6",
-    "путь_к_папке_7",
-    "путь_к_папке_8",
-    "путь_к_папке_9",
-    "путь_к_папке_10",
-]
-
-# Получаем список аудиофайлов в исходной папке
-audio_files = os.listdir(source_folder)
-
-# Распределяем файлы равномерно по заданным папкам
-folder_index = 0
-for audio_file in audio_files:
-    destination_path = os.path.join(destination_folders[folder_index], audio_file)
-    source_path = os.path.join(source_folder, audio_file)
-    shutil.move(source_path, destination_path)
-
-    # Переходим к следующей папке (циклично)
-    folder_index = (folder_index + 1) % 10
-
+import wmi
+w = wmi.WMI(namespace="root\OpenHardwareMonitor")
+temperature_infos = w.Sensor()
+for sensor in temperature_infos:
+    if sensor.SensorType==u'Temperature':
+        print(sensor.Name)
+        print(sensor.Value)
 
