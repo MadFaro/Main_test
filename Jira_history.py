@@ -18,22 +18,31 @@ import shutil
 # Путь к папке с аудиофайлами
 source_folder = "путь_к_вашей_папке_с_аудиофайлами"
 
-# Создаем 10 папок (если они еще не существуют)
-for i in range(1, 11):
-    folder_name = f"папка_{i}"
-    os.makedirs(folder_name, exist_ok=True)
+# Список конкретных папок, в которые вы хотите распределить файлы
+destination_folders = [
+    "путь_к_папке_1",
+    "путь_к_папке_2",
+    "путь_к_папке_3",
+    "путь_к_папке_4",
+    "путь_к_папке_5",
+    "путь_к_папке_6",
+    "путь_к_папке_7",
+    "путь_к_папке_8",
+    "путь_к_папке_9",
+    "путь_к_папке_10",
+]
 
 # Получаем список аудиофайлов в исходной папке
 audio_files = os.listdir(source_folder)
 
-# Распределяем файлы по 10 папкам равномерно
-current_folder_index = 1
+# Распределяем файлы равномерно по заданным папкам
+folder_index = 0
 for audio_file in audio_files:
-    folder_name = f"папка_{current_folder_index}"
+    destination_path = os.path.join(destination_folders[folder_index], audio_file)
     source_path = os.path.join(source_folder, audio_file)
-    destination_path = os.path.join(folder_name, audio_file)
     shutil.move(source_path, destination_path)
 
     # Переходим к следующей папке (циклично)
-    current_folder_index = (current_folder_index % 10) + 1
+    folder_index = (folder_index + 1) % 10
+
 
