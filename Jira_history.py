@@ -12,11 +12,5 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
-import wmi
-w = wmi.WMI(namespace="root\OpenHardwareMonitor")
-temperature_infos = w.Sensor()
-for sensor in temperature_infos:
-    if sensor.SensorType==u'Temperature':
-        print(sensor.Name)
-        print(sensor.Value)
-
+with pd.ExcelWriter(path2 + str(Yesterday) + '.xlsx', engine='openpyxl', mode='a') as writer: 
+     writer2.to_excel(writer, sheet_name = 'Свод', engine='xlsxwriter')
