@@ -33,23 +33,26 @@ tfidf_matrix = tfidf_vectorizer.fit_transform(corpus)
 tfidf_scores = tfidf_matrix[0].toarray()[0]
 
 # Сопоставление важности слов с ключевыми словами
+# Сопоставление важности слов с ключевыми словами, включая количество слов
 term_importance = {}
 for term in terms:
     term.normalized  # Нормализованное ключевое слово
-    term_importance[term.normalized] = tfidf_scores[tfidf_vectorizer.vocabulary_.get(term.normalized, -1)]
+    term_importance[term.normalized] = {
+        'importance': tfidf_scores[tfidf_vectorizer.vocabulary_.get(term.normalized, -1)],
+        'count': term.count  # Добавление количества слов
+    }
 
 # Сортировка ключевых слов по их важности
-sorted_terms = sorted(term_importance.items(), key=lambda x: x[1], reverse=True)
+sorted_terms = sorted(term_importance.items(), key=lambda x: x[1]['importance'], reverse=True)
 
 # Выбор 20% самых важных ключевых слов
 threshold = 0.2  # Порог 20%
 selected_terms = sorted_terms[:int(len(sorted_terms) * threshold)]
 
-# Вывод отобранных ключевых слов
-for term, importance in selected_terms:
-    print(f"{term}: {importance}")
 # Вывод отобранных ключевых слов с их нормализованными формами, количеством и важностью
-for term, importance in selected_terms:
-    term_text = term.normalized
-    term_count = term.count
+for term, data in selected_terms:
+    term_text = term
+    term_count = data['count']
+    importance = data['importance']
     print(f"Слово: {term_text}, Количество: {term_count}, Важность: {importance}")
+
