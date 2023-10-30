@@ -12,5 +12,44 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
-with pd.ExcelWriter(path2 + str(Yesterday) + '.xlsx', engine='openpyxl', mode='a') as writer: 
-     writer2.to_excel(writer, sheet_name = 'Свод', engine='xlsxwriter')
+from sklearn.feature_extraction.text import TfidfVectorizer
+from rutermextract import TermExtractor
+
+# Ваш текст
+text = "Ваш текст здесь"
+
+# Извлечение ключевых слов с rutermextract
+term_extractor = TermExtractor()
+terms = term_extractor(text)
+
+# Создание корпуса для TF-IDF
+corpus = [text]
+
+# Вычисление TF-IDF
+tfidf_vectorizer = TfidfVectorizer()
+tfidf_matrix = tfidf_vectorizer.fit_transform(corpus)
+
+# Получение важности слов
+tfidf_scores = tfidf_matrix[0].toarray()[0]
+
+# Сопоставление важности слов с ключевыми словами
+term_importance = {}
+for term in terms:
+    term.normalized  # Нормализованное ключевое слово
+    term_importance[term.normalized] = tfidf_scores[tfidf_vectorizer.vocabulary_.get(term.normalized, -1)]
+
+# Сортировка ключевых слов по их важности
+sorted_terms = sorted(term_importance.items(), key=lambda x: x[1], reverse=True)
+
+# Выбор 20% самых важных ключевых слов
+threshold = 0.2  # Порог 20%
+selected_terms = sorted_terms[:int(len(sorted_terms) * threshold)]
+
+# Вывод отобранных ключевых слов
+for term, importance in selected_terms:
+    print(f"{term}: {importance}")
+# Вывод отобранных ключевых слов с их нормализованными формами, количеством и важностью
+for term, importance in selected_terms:
+    term_text = term.normalized
+    term_count = term.count
+    print(f"Слово: {term_text}, Количество: {term_count}, Важность: {importance}")
