@@ -45,9 +45,20 @@ for term in terms:
 # Сортировка ключевых слов по их важности
 sorted_terms = sorted(term_importance.items(), key=lambda x: x[1]['importance'], reverse=True)
 
-# Выбор 20% самых важных ключевых слов
-threshold = 0.2  # Порог 20%
-selected_terms = sorted_terms[:int(len(sorted_terms) * threshold)]
+# Сумма важности всех ключевых слов
+total_importance = sum(importance for term, data in sorted_terms)
+
+# Вычисление порога для выбора 20% слов
+threshold = 0.2 * total_importance
+
+# Выбор ключевых слов с учетом порога важности
+selected_terms = []
+current_importance = 0.0
+for term, data in sorted_terms:
+    current_importance += data['importance']
+    selected_terms.append((term, data))
+    if current_importance >= threshold:
+        break
 
 # Вывод отобранных ключевых слов с их нормализованными формами, количеством и важностью
 for term, data in selected_terms:
@@ -55,4 +66,5 @@ for term, data in selected_terms:
     term_count = data['count']
     importance = data['importance']
     print(f"Слово: {term_text}, Количество: {term_count}, Важность: {importance}")
+
 
