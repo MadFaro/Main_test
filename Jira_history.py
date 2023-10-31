@@ -12,59 +12,51 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from rutermextract import TermExtractor
+import os, time, datetime
+import win32com.client
 
-# Ваш текст
-text = "Ваш текст здесь"
+Yesterday1 = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%d')
+Yesterday2 = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%m')
+Yesterday3 = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%Y')
 
-# Извлечение ключевых слов с rutermextract
-term_extractor = TermExtractor()
-terms = term_extractor(text)
+months = ["День", "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
+month = (months[int(Yesterday2)])
 
-# Создание корпуса для TF-IDF
-corpus = [text]
+file = "\\\\Fs-vrn-cp002\\claim\\Отчетность сервисных групп\\Отчеты групп\\ГПСО\\Отчет по ПП\\Эффективность claim "+month+" "+Yesterday3+" по столбцу Исполнитель ОК.xlsx"
+file1 = "\\\\Fs-vrn-cp002\\claim\\Отчетность сервисных групп\\Отчеты групп\\Общие отчеты\\ТД\\"+Yesterday3+"\\"+month+" "+Yesterday3+"\\Пропущенные звонки "+month+".xlsx"
+file2= "\\\\Fs-vrn-cp002\\claim\\Отчетность сервисных групп\\Отчеты групп\\Общие отчеты\\ТД\\"+Yesterday3+"\\"+month+" "+Yesterday3+"\\ГПСО обеды перерывы "+month+".xlsx"
+file3 = "\\\\Fs-vrn-cp002\\claim\\Отчетность сервисных групп\\Отчеты групп\\Сервисы\\Отчет по SMS\\Отчет по отправленным SMS\\"+Yesterday3+"\\Отправленные "+month+".xlsx"
+file4 = "\\\\Fs-vrn-cp002\\claim\\Отчетность сервисных групп\\Отчеты групп\\Общие отчеты\\ТД\\"+Yesterday3+"\\"+month+" "+Yesterday3+"\\Опоздания "+month+".xlsx"
+file5 = "\\\\Fs-vrn-cp002\\claim\\Отчетность сервисных групп\\Отчеты групп\\Общие отчеты\\FCR\\FCR EOO\\Регистрация в ЕОО_"+month+" "+Yesterday3+" + % регистрации.xlsx"
+file6 = "\\\\Fs-vrn-cp002\\claim\\Отчетность сервисных групп\\Отчеты групп\\Общие отчеты\\FCR\\FCR EOO\\% регистрации " + Yesterday3 + ".xlsx"
+file7 = "\\\\Fs-vrn-cp002\\claim\\Отчетность сервисных групп\\Отчеты групп\\Общие отчеты\\FCR\\FCR EOO\\NPS повторы ЦОВ.xlsm"
+file8 = "\\\\Fs-vrn-cp002\\claim\\Отчетность сервисных групп\\Отчеты групп\\ГПСО\\Запросы в NPS\\ССО.xlsx"
+file9 = "\\\\Fs-vrn-cp002\\claim\\Отчетность сервисных групп\\Отчеты групп\\ГПСО\\Отчет по ACW\\СО ACW.xlsx"
 
-# Вычисление TF-IDF
-tfidf_vectorizer = TfidfVectorizer()
-tfidf_matrix = tfidf_vectorizer.fit_transform(corpus)
+HTMLBody = ("Добрый день!<BR> <style type= text/css >"
+            "A{color: #f00}"
+            "table {border-collapse: collapse; background: #333;border: 1px solid #333;text-align: center;}"
+            "table th {font-size: 15px;padding: 10px;text-align: center;color:#ffffff;border: 1px solid #333}" 
+            "table td {background: #f0f0f0;padding: 10px;text-align: left;border: 1px solid #333}"
+			"</style> <table border: 1px solid #000 class= brd > <tr> <th>Отчет</th> <th>Дата и время<BR>обновления</th></tr>"
+			"<tr> <td> <a href ="+'"'+ file + '"'+">" + os.path.basename(file) + "</A> </td> <td>" + str(datetime.datetime.strptime(time.ctime(os.path.getmtime(file)), "%c").strftime('%d.%m.%Y - %H:%M:%S')) + "</td> "
+			"<tr> <td> <a href = "+'"'+ file1 + '"'+">" + os.path.basename(file1) + "</A> </td> <td>" + str(datetime.datetime.strptime(time.ctime(os.path.getmtime(file1)), "%c").strftime('%d.%m.%Y - %H:%M:%S')) + "</td> "
+			"<tr> <td> <a href = "+'"'+ file2 + '"'+">" + os.path.basename(file2) + "</A> </td> <td>" + str(datetime.datetime.strptime(time.ctime(os.path.getmtime(file2)), "%c").strftime('%d.%m.%Y - %H:%M:%S')) + "</td> "
+			"<tr> <td> <a href = "+'"'+ file3 + '"'+">" + os.path.basename(file3) + "</A> </td> <td>" + str(datetime.datetime.strptime(time.ctime(os.path.getmtime(file3)), "%c").strftime('%d.%m.%Y - %H:%M:%S')) + "</td> "
+			"<tr> <td> <a href = "+'"'+ file4 + '"'+">" + os.path.basename(file4) + "</A> </td> <td>" + str(datetime.datetime.strptime(time.ctime(os.path.getmtime(file4)), "%c").strftime('%d.%m.%Y - %H:%M:%S')) + "</td> "
+			"<tr> <td> <a href = "+'"'+ file5 + '"'+">" + os.path.basename(file5) + "</A> </td> <td>" + str(datetime.datetime.strptime(time.ctime(os.path.getmtime(file5)), "%c").strftime('%d.%m.%Y - %H:%M:%S')) + "</td> "
+			"<tr> <td> <a href = "+'"'+ file6 + '"'+">" + os.path.basename(file6) + "</A> </td> <td>" + str(datetime.datetime.strptime(time.ctime(os.path.getmtime(file6)), "%c").strftime('%d.%m.%Y - %H:%M:%S')) + "</td> "
+			"<tr> <td> <a href = "+'"'+ file7 + '"'+">" + os.path.basename(file7) + "</A> </td> <td>" + str(datetime.datetime.strptime(time.ctime(os.path.getmtime(file7)), "%c").strftime('%d.%m.%Y - %H:%M:%S')) + "</td> "
+			"<tr> <td> <a href = "+'"'+ file8 + '"'+">" + os.path.basename(file8) + "</A> </td> <td>" + str(datetime.datetime.strptime(time.ctime(os.path.getmtime(file8)), "%c").strftime('%d.%m.%Y - %H:%M:%S')) + "</td> "
+			"<tr> <td> <a href = "+'"'+ file9 + '"'+">" + os.path.basename(file9) + "</A> </td> <td>" + str(datetime.datetime.strptime(time.ctime(os.path.getmtime(file9)), "%c").strftime('%d.%m.%Y - %H:%M:%S')) + "</td> ")
 
-# Получение важности слов
-tfidf_scores = tfidf_matrix[0].toarray()[0]
+outlook = win32com.client.Dispatch( "Outlook.Application" )
+mail = outlook.CreateItem(0)
+#mail.To = "atologonov@svyaznoy.ru"
+mail.To = "kbelyaeva@svyaznoy.ru"
+mail.Subject = 'Отчеты ГПСО '
+mail.HTMLBody = HTMLBody
 
-# Сопоставление важности слов с ключевыми словами
-# Сопоставление важности слов с ключевыми словами, включая количество слов
-term_importance = {}
-for term in terms:
-    term.normalized  # Нормализованное ключевое слово
-    term_importance[term.normalized] = {
-        'importance': tfidf_scores[tfidf_vectorizer.vocabulary_.get(term.normalized, -1)],
-        'count': term.count  # Добавление количества слов
-    }
-
-# Сортировка ключевых слов по их важности
-sorted_terms = sorted(term_importance.items(), key=lambda x: x[1]['importance'], reverse=True)
-
-# Сумма важности всех ключевых слов
-total_importance = sum(importance for term, data in sorted_terms)
-
-# Вычисление порога для выбора 20% слов
-threshold = 0.2 * total_importance
-
-# Выбор ключевых слов с учетом порога важности
-selected_terms = []
-current_importance = 0.0
-for term, data in sorted_terms:
-    current_importance += data['importance']
-    selected_terms.append((term, data))
-    if current_importance >= threshold:
-        break
-
-# Вывод отобранных ключевых слов с их нормализованными формами, количеством и важностью
-for term, data in selected_terms:
-    term_text = term
-    term_count = data['count']
-    importance = data['importance']
-    print(f"Слово: {term_text}, Количество: {term_count}, Важность: {importance}")
+mail.Send()
 
 
