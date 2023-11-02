@@ -11,6 +11,7 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
+ffmpeg -i audio.wav -f ffmetadata -i metadata.xml -map_metadata 1 -c:v copy output.wav
 
 from pydub import AudioSegment
 import xml.etree.ElementTree as ET
