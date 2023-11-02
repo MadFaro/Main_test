@@ -35,7 +35,7 @@ for root, dirs, files in os.walk(audio_folder):
                 root = tree.getroot()
 
                 # Извлекаем необходимые данные из XML
-                timestamp = root.find(".//x:tag[@x:taggedbycomponent='IFServices']/@x:timestamp", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'}).get("x:timestamp")
+                timestamp = root.find(".//x:tag[@x:taggedbycomponent='IFServices']/x:attribute[@x:key='timestamp']", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'}).text
                 calltype = root.find(".//x:tag[@x:taggedbycomponent='IFServices']/x:attribute[@x:key='calltype']", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'}).text
                 ani = root.find(".//x:session/x:ani", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'}).text
                 agentname = root.find(".//x:tag[@x:taggedbycomponent='IFServices']/x:attribute[@x:key='agentname']", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'}).text
@@ -58,4 +58,3 @@ for root, dirs, files in os.walk(audio_folder):
                 subprocess.run(cmd)
 
 print('Объединение завершено.')
-
