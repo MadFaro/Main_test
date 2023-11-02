@@ -13,48 +13,4 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 ffmpeg -i audio.wav -f ffmetadata -i metadata.xml -map_metadata 1 -c:v copy output.wav
 
-import os
-import subprocess
-import xml.etree.ElementTree as ET
-
-# Путь к папке "аудио"
-audio_folder = 'путь_к_папке_аудио'
-output_folder = 'путь_к_папке_аудио2'
-
-# Рекурсивно обойти все подпапки
-for root, dirs, files in os.walk(audio_folder):
-    for file in files:
-        if file.endswith('.wav'):
-            wav_file = os.path.join(root, file)
-            xml_file = os.path.join(root, file.replace('.wav', '.xml'))
-
-            # Проверка наличия XML-файла с таким же именем
-            if os.path.isfile(xml_file):
-                # Парсинг XML-файла
-                tree = ET.parse(xml_file)
-                root = tree.getroot()
-
-                # Извлекаем необходимые данные из XML
-                timestamp = root.find(".//x:tag[@x:taggedbycomponent='IFServices']/x:attribute[@x:key='timestamp']", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'}).text
-                calltype = root.find(".//x:tag[@x:taggedbycomponent='IFServices']/x:attribute[@x:key='calltype']", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'}).text
-                ani = root.find(".//x:session/x:ani", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'}).text
-                agentname = root.find(".//x:tag[@x:taggedbycomponent='IFServices']/x:attribute[@x:key='agentname']", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'}).text
-                agentid = root.find(".//x:tag[@x:taggedbycomponent='IFServices']/x:attribute[@x:key='agentid']", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'}).text
-
-                # Формируем новое имя файла
-                new_filename = f"{timestamp}|{calltype}|{ani}|{agentname}|{agentid}.wav"
-                output_file = os.path.join(output_folder, new_filename)
-
-                # Используем FFmpeg для объединения аудио и метаданных
-                cmd = [
-                    'ffmpeg',
-                    '-i', wav_file,
-                    '-f', 'ffmetadata',
-                    '-i', xml_file,
-                    '-map_metadata', '1',
-                    '-c:v', 'copy',
-                    output_file
-                ]
-                subprocess.run(cmd)
-
-print('Объединение завершено.')
+start_time_element = root.find(".//x:starttime", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'})
