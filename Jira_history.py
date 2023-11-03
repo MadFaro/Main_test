@@ -13,5 +13,6 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 ffmpeg -i audio.wav -f ffmetadata -i metadata.xml -map_metadata 1 -c:v copy output.wav
 from datetime import datetime
+start_time_element = root.find(".//x:starttime", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'})
 start_datetime = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S.%f%z')
 formatted_start_time = start_datetime.strftime('%d.%m.%Y %H:%M:%S')
