@@ -12,14 +12,27 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
-cmd = [
-    'ffmpeg',
-    '-i', wav_file,
-    '-f', 'ffmetadata',
-    '-i', xml_file,
-    '-map_metadata', '1',
-    '-c:v', 'copy',
-    '-c:a', 'pcm_mulaw',
-    '-ac', '2',  # Указываем количество аудиоканалов
-    output_file
-]
+import pandas as pd
+
+# Пример данных
+data = {'TimeColumn1': ['367:20:23', '10:15:30', '12:45:15'],
+        'TimeColumn2': ['245:10:00', '11:00:00', '123:30:00']}
+
+# Создайте DataFrame
+df = pd.DataFrame(data)
+
+# Функция для преобразования времени в десятичное число
+def time_to_decimal(time_str):
+    time_parts = time_str.split(':')
+    hours = int(time_parts[0])
+    minutes = int(time_parts[1])
+    seconds = int(time_parts[2])
+    decimal_time = hours + minutes / 60 + seconds / 3600
+    return decimal_time
+
+# Примените функцию к каждому столбцу с временем
+for column in df.columns:
+    df[column] = df[column].apply(time_to_decimal)
+
+# Ваши столбцы с временем теперь содержат десятичные числа
+print(df)
