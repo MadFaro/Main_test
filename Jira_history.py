@@ -14,5 +14,17 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 import pandas as pd
 
-for column in df.columns:
-    df[column] = df[column].astype(str)
+import pandas as pd
+
+# Загрузка данных из Excel
+df = pd.read_excel('your_excel_file.xlsx')
+
+# Определяем список столбцов, которые нужно преобразовать
+columns_to_convert = df.columns[1:]
+
+# Цикл для преобразования столбцов
+for column in columns_to_convert:
+    df[column] = df[column].apply(pd.to_timedelta)
+
+# Ваши данные будут сохранены в pandas DataFrame с временем в формате "[дни] HH:MM:SS"
+print(df)
