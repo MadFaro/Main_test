@@ -14,9 +14,5 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 import pandas as pd
 
-def datetime_to_decimal(dt):
-    hours = dt.hour
-    minutes = dt.minute
-    seconds = dt.second
-    decimal_time = hours + minutes / 60 + seconds / 3600
-    return decimal_time
+for column in df.columns:
+    df[column] = df[column].astype(str)
