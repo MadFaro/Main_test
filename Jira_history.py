@@ -11,8 +11,25 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
-ffmpeg -i audio.wav -f ffmetadata -i metadata.xml -map_metadata 1 -c:v copy output.wav
-from datetime import datetime
-start_time_element = root.find(".//x:starttime", namespaces={'x': 'http://www.verint.com/xmlns/recording20080320'})
-start_datetime = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S.%f%z')
-formatted_start_time = start_datetime.strftime('%d.%m.%Y %H:%M:%S')
+import pandas as pd
+
+# Создайте DataFrame для каждого CSV-файла
+df1 = pd.read_csv('file1.csv')
+df2 = pd.read_csv('file2.csv')
+df3 = pd.read_csv('file3.csv')
+df4 = pd.read_csv('file4.csv')
+df5 = pd.read_csv('file5.csv')
+df6 = pd.read_csv('file6.csv')
+df7 = pd.read_csv('file7.csv')
+df8 = pd.read_csv('file8.csv')
+df9 = pd.read_csv('file9.csv')
+df10 = pd.read_csv('file10.csv')
+
+# Список всех ваших DataFrame
+dfs = [df1, df2, df3, df4, df5, df6, df7, df8, df9, df10]
+
+# Объедините их в один DataFrame
+combined_df = pd.concat(dfs, ignore_index=True)
+
+# Сохраните объединенные данные в новый CSV-файл
+combined_df.to_csv('combined_data.csv', index=False)
