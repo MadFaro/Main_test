@@ -12,19 +12,10 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
-import pandas as pd
+import openpyxl
 
-import pandas as pd
+# Откройте файл Excel с помощью openpyxl
+wb = openpyxl.load_workbook('your_excel_file.xlsx')
 
-# Загрузка данных из Excel
-df = pd.read_excel('your_excel_file.xlsx')
-
-# Определяем список столбцов, которые нужно преобразовать
-columns_to_convert = df.columns[1:]
-
-# Цикл для преобразования столбцов
-for column in columns_to_convert:
-    df[column] = df[column].apply(pd.to_timedelta)
-
-# Ваши данные будут сохранены в pandas DataFrame с временем в формате "[дни] HH:MM:SS"
-print(df)
+# Сохраните файл обратно
+wb.save('recovered_excel_file.xlsx')
