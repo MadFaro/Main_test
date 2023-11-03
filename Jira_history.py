@@ -14,13 +14,21 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 import openpyxl
 
-# Откройте файл Excel с помощью openpyxl
-wb = openpyxl.load_workbook('your_excel_file.xlsx')
+# Откройте исходную книгу
+source_wb = openpyxl.load_workbook('your_source_file.xlsx')
 
-# Выполняем необходимые операции
-# ...
+# Создайте новую книгу
+new_wb = openpyxl.Workbook()
 
-# Сохраняем файл в новом формате (например, CSV)
-new_file_path = 'recovered_excel_file.csv'
-wb.save(new_file_path)
+# Выберите листы для копирования
+sheet_names_to_copy = ['Sheet1', 'Sheet2']  # Замените на имена листов, которые вы хотите скопировать
 
+# Копируйте листы в новую книгу
+for sheet_name in sheet_names_to_copy:
+    source_sheet = source_wb[sheet_name]
+    new_sheet = new_wb.create_sheet(sheet_name)
+    for row in source_sheet.iter_rows(values_only=True):
+        new_sheet.append(row)
+
+# Сохраните новую книгу
+new_wb.save('new_combined_workbook.xlsx')
