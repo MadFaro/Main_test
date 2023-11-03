@@ -14,8 +14,21 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 import openpyxl
 
+import openpyxl
+
 # Откройте файл Excel с помощью openpyxl
 wb = openpyxl.load_workbook('your_excel_file.xlsx')
 
+# Переберите листы в файле
+for sheet in wb.sheetnames:
+    ws = wb[sheet]
+
+    # Переберите ячейки в листе
+    for row in ws.iter_rows():
+        for cell in row:
+            if cell.hyperlink is not None:
+                cell.hyperlink.target = None
+                print(f"Удалена гиперссылка в ячейке {cell.coordinate}")
+
 # Сохраните файл обратно
-wb.save('recovered_excel_file.xlsx')
+wb.save('excel_file_without_hyperlinks.xlsx')
