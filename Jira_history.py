@@ -20,5 +20,6 @@ cmd = [
     '-map_metadata', '1',
     '-c:v', 'copy',
     '-c:a', 'pcm_mulaw',
+    '-ac', '2',  # Указываем количество аудиоканалов
     output_file
 ]
