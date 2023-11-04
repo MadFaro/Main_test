@@ -24,3 +24,21 @@ N_FRAMES = exact_div(N_SAMPLES, HOP_LENGTH)  # 3000 frames in a mel spectrogram 
 N_SAMPLES_PER_TOKEN = HOP_LENGTH * 2  # the initial convolutions has stride 2
 FRAMES_PER_SECOND = exact_div(SAMPLE_RATE, HOP_LENGTH)  # 10ms per audio frame
 TOKENS_PER_SECOND = exact_div(SAMPLE_RATE, N_SAMPLES_PER_TOKEN)  # 20ms per audio token
+
+# Установка новой частоты дискретизации
+SAMPLE_RATE = 8000
+# Пересчитать N_FFT (размер окна для STFT)
+N_FFT = 320  # Примерное соотношение к 25 мс окну при новой частоте дискретизации
+# Пересчитать N_MELS (количество мел-фильтров)
+N_MELS = 40  # Можно уменьшить до 40 или 30 в зависимости от ваших потребностей
+# Пересчитать HOP_LENGTH (шаг при вычислении мел-спектрограммы)
+HOP_LENGTH = 80  # Примерное соотношение к 10 мс шагу при новой частоте дискретизации
+
+CHUNK_LENGTH = 30
+N_SAMPLES = CHUNK_LENGTH * SAMPLE_RATE  # 240000 samples in a 30-second chunk
+N_FRAMES = exact_div(N_SAMPLES, HOP_LENGTH)  # 3000 frames in a mel spectrogram input
+
+N_SAMPLES_PER_TOKEN = HOP_LENGTH * 2  # the initial convolutions has stride 2
+FRAMES_PER_SECOND = exact_div(SAMPLE_RATE, HOP_LENGTH)  # 100ms per audio frame
+TOKENS_PER_SECOND = exact_div(SAMPLE_RATE, N_SAMPLES_PER_TOKEN)  # 50ms per audio token
+
