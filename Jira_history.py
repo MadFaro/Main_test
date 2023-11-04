@@ -12,23 +12,28 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
-import openpyxl
+pip install pyspellchecker
 
-# Откройте исходную книгу
-source_wb = openpyxl.load_workbook('your_source_file.xlsx')
+from spellchecker import SpellChecker
 
-# Создайте новую книгу
-new_wb = openpyxl.Workbook()
+# Создайте экземпляр класса SpellChecker
+spell = SpellChecker()
 
-# Выберите листы для копирования
-sheet_names_to_copy = ['Sheet1', 'Sheet2']  # Замените на имена листов, которые вы хотите скопировать
+# Ваш текст для проверки
+text = "Пример текста с орфографическими ошибками. Я здесь чекаю спелл чекер."
 
-# Копируйте листы в новую книгу
-for sheet_name in sheet_names_to_copy:
-    source_sheet = source_wb[sheet_name]
-    new_sheet = new_wb.create_sheet(sheet_name)
-    for row in source_sheet.iter_rows(values_only=True):
-        new_sheet.append(row)
+# Разделите текст на слова
+words = text.split()
 
-# Сохраните новую книгу
-new_wb.save('new_combined_workbook.xlsx')
+# Найдите и исправьте опечатки
+corrected_text = []
+for word in words:
+    corrected_word = spell.correction(word)
+    corrected_text.append(corrected_word)
+
+# Преобразуйте исправленные слова обратно в текст
+corrected_text = " ".join(corrected_text)
+
+# Выведите исправленный текст
+print(corrected_text)
+
