@@ -12,28 +12,15 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
-pip install pyspellchecker
+# hard-coded audio hyperparameters
+SAMPLE_RATE = 16000
+N_FFT = 400
+N_MELS = 80
+HOP_LENGTH = 160
+CHUNK_LENGTH = 30
+N_SAMPLES = CHUNK_LENGTH * SAMPLE_RATE  # 480000 samples in a 30-second chunk
+N_FRAMES = exact_div(N_SAMPLES, HOP_LENGTH)  # 3000 frames in a mel spectrogram input
 
-from spellchecker import SpellChecker
-
-# Создайте экземпляр класса SpellChecker
-spell = SpellChecker()
-
-# Ваш текст для проверки
-text = "Пример текста с орфографическими ошибками. Я здесь чекаю спелл чекер."
-
-# Разделите текст на слова
-words = text.split()
-
-# Найдите и исправьте опечатки
-corrected_text = []
-for word in words:
-    corrected_word = spell.correction(word)
-    corrected_text.append(corrected_word)
-
-# Преобразуйте исправленные слова обратно в текст
-corrected_text = " ".join(corrected_text)
-
-# Выведите исправленный текст
-print(corrected_text)
-
+N_SAMPLES_PER_TOKEN = HOP_LENGTH * 2  # the initial convolutions has stride 2
+FRAMES_PER_SECOND = exact_div(SAMPLE_RATE, HOP_LENGTH)  # 10ms per audio frame
+TOKENS_PER_SECOND = exact_div(SAMPLE_RATE, N_SAMPLES_PER_TOKEN)  # 20ms per audio token
