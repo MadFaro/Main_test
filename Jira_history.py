@@ -12,33 +12,26 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
-# hard-coded audio hyperparameters
-SAMPLE_RATE = 16000
-N_FFT = 400
-N_MELS = 80
-HOP_LENGTH = 160
-CHUNK_LENGTH = 30
-N_SAMPLES = CHUNK_LENGTH * SAMPLE_RATE  # 480000 samples in a 30-second chunk
-N_FRAMES = exact_div(N_SAMPLES, HOP_LENGTH)  # 3000 frames in a mel spectrogram input
+merged_output = []
+i, j = 0, 0
 
-N_SAMPLES_PER_TOKEN = HOP_LENGTH * 2  # the initial convolutions has stride 2
-FRAMES_PER_SECOND = exact_div(SAMPLE_RATE, HOP_LENGTH)  # 10ms per audio frame
-TOKENS_PER_SECOND = exact_div(SAMPLE_RATE, N_SAMPLES_PER_TOKEN)  # 20ms per audio token
+while i < len(output1) and j < len(output2):
+    word1 = output1[i]
+    word2 = output2[j]
 
-# Установка новой частоты дискретизации
-SAMPLE_RATE = 8000
-# Пересчитать N_FFT (размер окна для STFT)
-N_FFT = 320  # Примерное соотношение к 25 мс окну при новой частоте дискретизации
-# Пересчитать N_MELS (количество мел-фильтров)
-N_MELS = 40  # Можно уменьшить до 40 или 30 в зависимости от ваших потребностей
-# Пересчитать HOP_LENGTH (шаг при вычислении мел-спектрограммы)
-HOP_LENGTH = 80  # Примерное соотношение к 10 мс шагу при новой частоте дискретизации
+    if word1["start"] < word2["start"]:
+        merged_output.append(word1)
+        i += 1
+    else:
+        merged_output.append(word2)
+        j += 1
 
-CHUNK_LENGTH = 30
-N_SAMPLES = CHUNK_LENGTH * SAMPLE_RATE  # 240000 samples in a 30-second chunk
-N_FRAMES = exact_div(N_SAMPLES, HOP_LENGTH)  # 3000 frames in a mel spectrogram input
+# Add any remaining words from both outputs
+merged_output.extend(output1[i:])
+merged_output.extend(output2[j:])
 
-N_SAMPLES_PER_TOKEN = HOP_LENGTH * 2  # the initial convolutions has stride 2
-FRAMES_PER_SECOND = exact_div(SAMPLE_RATE, HOP_LENGTH)  # 100ms per audio frame
-TOKENS_PER_SECOND = exact_div(SAMPLE_RATE, N_SAMPLES_PER_TOKEN)  # 50ms per audio token
+# Create a sentence from the merged output
+sentence = " ".join(word["word"] for word in merged_output)
+
+print(sentence)
 
