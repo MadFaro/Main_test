@@ -11,13 +11,39 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 audacity -nq -t "input.wav" --effect=Amplify:factor=2.0
 
+import json
+import os
+
+# Инициализация пустого списка для результатов
 results = []
-results.append({
-        'audio_file_name': os.path.basename(file), 
-        'text_operator': left_channel_output_data["text"], 
-        'text_client': right_channel_output_data["text"], 
+
+for file in your_files:  # Замените на вашу итерацию по файлам
+    left_channel_output_data = ...
+    right_channel_output_data = ...
+    dialog = ...
+    result_time = ...
+
+    # Добавление результатов в список
+    results.append({
+        'audio_file_name': os.path.basename(file),
+        'text_operator': left_channel_output_data["text"],
+        'text_client': right_channel_output_data["text"],
         'text_join': dialog,
-        'time_second' : result_time   
-        })
-df = pd.DataFrame(results)
-df.to_csv('text.csv', mode='a', header=False, index=False, encoding='ANSI', lineterminator='\r\n', sep=';')
+        'time_second': result_time
+    })
+
+    # Открываем JSON файл для дозаписи
+    with open('text.json', 'a', encoding='utf-8') as json_file:
+        json.dump(results, json_file, ensure_ascii=False)
+        json_file.write('\n')  # Разделитель для каждой итерации
+            
+import json
+import pandas as pd
+
+# Открываем файл JSON и загружаем данные
+with open('text.json', 'r', encoding='utf-8') as json_file:
+    data = [json.loads(line) for line in json_file]
+
+# data теперь представляет собой список словарей
+# Преобразуем его в датафрейм
+df = pd.DataFrame(data)
