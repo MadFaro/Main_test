@@ -12,11 +12,6 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 =ЕСЛИОШИБКА((((@Agents($AH$2;$AI$2;I18;I68)/30)*22,5)/0,85)/I166;2)
 
-import json
-# Разбираем строки в JSON
-left_channel_output_data = json.loads(left_channel_output_str)
-right_channel_output_data = json.loads(right_channel_output_str)
-
 # Извлекаем результаты из левого и правого каналов
 left_result = left_channel_output_data["result"]
 right_result = right_channel_output_data["result"]
@@ -31,28 +26,30 @@ while i < len(left_result) and j < len(right_result):
     right_word = right_result[j]
 
     # Проверяем, совпадают ли слова по времени
-    if left_word["start"] == right_word["start"] and left_word["end"] == right_word["end"]:
-        merged_result.append(f"Левый: {left_word['word']} Правый: {right_word['word']}")
+    if left_word["start"] == right_word["end"]:
+        merged_result.append(left_word["word"])
+        merged_result.append(right_word["word"])
         i += 1
         j += 1
-    elif left_word["start"] < right_word["start"]:
-        merged_result.append(f"Левый: {left_word['word']}")
+    elif left_word["start"] < right_word["end"]:
+        merged_result.append(left_word["word"])
         i += 1
     else:
-        merged_result.append(f"Правый: {right_word['word']}")
+        merged_result.append(right_word["word"])
         j += 1
 
 # Добавляем оставшиеся слова из левого и правого каналов
 while i < len(left_result):
-    merged_result.append(f"Левый: {left_result[i]['word']}")
+    merged_result.append(left_result[i]["word"])
     i += 1
 
 while j < len(right_result):
-    merged_result.append(f"Правый: {right_result[j]['word']}")
+    merged_result.append(right_result[j]["word"])
     j += 1
 
-# Создаем диалог на основе объединенных результатов
-dialog = "\n".join(merged_result)
+# Создаем предложение из объединенных результатов
+sentence = " ".join(merged_result)
 
-# Выводим текст диалога
+# Выводим предложение
+print(sentence)
 print(dialog)
