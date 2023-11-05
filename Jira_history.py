@@ -10,3 +10,14 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 audacity -nq -t "input.wav" --effect=Amplify:factor=2.0
+
+results = []
+results.append({
+        'audio_file_name': os.path.basename(file), 
+        'text_operator': left_channel_output_data["text"], 
+        'text_client': right_channel_output_data["text"], 
+        'text_join': dialog,
+        'time_second' : result_time   
+        })
+df = pd.DataFrame(results)
+df.to_csv('text.csv', mode='a', header=False, index=False, encoding='ANSI', lineterminator='\r\n', sep=';')
