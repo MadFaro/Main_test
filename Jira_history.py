@@ -40,7 +40,9 @@ def search_phrases_and_derivatives(text, phrases):
 
     return results
 
-text_to_search = "Не перебивайте меня. Не перебивайте его. Перебивайте меня, если что-то не так."
-phrases_to_search = ["не перебивайте", "что-то не так"]
+text_to_search = "тестовое предложение для поиска слов"
+phrases_to_search = ["тестовая", "слов"]
 
 search_result = search_phrases_and_derivatives(text_to_search, phrases_to_search)
+
+print(search_result)
