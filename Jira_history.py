@@ -9,5 +9,3 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
-round(100*(number(concat(0,/webim/stats[@dep='roznichnyi_biznes_obshchii']/sl))+0.00001) div (number(concat(0,/webim/stats[@dep='roznichnyi_biznes_obshchii']/all))+0.00001))
-
