@@ -9,41 +9,29 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
-audacity -nq -t "input.wav" --effect=Amplify:factor=2.0
+from razdel import tokenize
+import pymorphy2
 
-import json
-import os
+def normalize_text(text):
+    morph = pymorphy2.MorphAnalyzer()
+    tokens = [morph.parse(token.text.lower())[0].normal_form for token in tokenize(text)]
+    return ' '.join(tokens)
 
-# Инициализация пустого списка для результатов
-results = []
+def search_phrases_and_derivatives(text, phrases):
+    normalized_text = normalize_text(text)
+    results = []
 
-for file in your_files:  # Замените на вашу итерацию по файлам
-    left_channel_output_data = ...
-    right_channel_output_data = ...
-    dialog = ...
-    result_time = ...
+    for phrase in phrases:
+        normalized_phrase = normalize_text(phrase)
+        if normalized_phrase in normalized_text:
+            results.append(phrase)
 
-    # Добавление результатов в список
-    results.append({
-        'audio_file_name': os.path.basename(file),
-        'text_operator': left_channel_output_data["text"],
-        'text_client': right_channel_output_data["text"],
-        'text_join': dialog,
-        'time_second': result_time
-    })
+    return results
 
-    # Открываем JSON файл для дозаписи
-    with open('text.json', 'a', encoding='utf-8') as json_file:
-        json.dump(results, json_file, ensure_ascii=False)
-        json_file.write('\n')  # Разделитель для каждой итерации
-            
-import json
-import pandas as pd
+text_to_search = "не перебивай меня. перебивай его. Перебивайте меня, если что-то не так."
+phrases_to_search = ["не перебивайте", "что-то не так"]
 
-# Открываем файл JSON и загружаем данные
-with open('text.json', 'r', encoding='utf-8') as json_file:
-    data = [json.loads(line) for line in json_file]
+search_result = search_phrases_and_derivatives(text_to_search, phrases_to_search)
 
-# data теперь представляет собой список словарей
-# Преобразуем его в датафрейм
-df = pd.DataFrame(data)
+print("Найденные совпадения:", search_result)
+
