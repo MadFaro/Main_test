@@ -9,59 +9,70 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
-import os, time
+import os
+import time
 import soundfile as sf
 import pandas as pd
-import threading
+from multiprocessing import Process, Manager
 from faster_whisper import WhisperModel
 
-model = WhisperModel(model_size_or_path=r"C:\Users\TologonovAB\Desktop\model_wisper\whisper-large-v2", device="cpu", compute_type="float32", cpu_threads=8, num_workers=3)
-
-def monitor_folder(folder_path, text_file):
-    while True:
-        for file_name in os.listdir(folder_path):
-            file_path = os.path.join(folder_path, file_name)
-            if os.path.isfile(file_path):
-                process_file(file_path, folder_path, text_file)
-        time.sleep(1)
-
-def process_file(file, folder, text_file):
+def transcribe_worker(model, file, folder, text_file, results_list):
     print(f'Обработка {folder}')
     file_record = os.path.basename(file).split("$")
-    results = []
     start_time = time.time()
-    segments, _ = model.transcribe(file, language="ru", task="transcribe", vad_filter = False)
+    segments, _ = model.transcribe(file, language="ru", task="transcribe", vad_filter=False)
     segments = list(segments)
     df_text = pd.DataFrame.from_dict(segments)
     text = ' '.join(df_text['text'])
     end_time = time.time()
     result_time = end_time - start_time
-    results.append({
-            'id': file_record[0],
-            'callid': file_record[1],
-            'calltype': file_record[2],
-            'networkid': file_record[3],
-            'agentname': file_record[4],
-            'agentid': file_record[5],
-            'text': text,
-            'time' : result_time   
-                })
+    results_list.append({
+        'id': file_record[0],
+        'callid': file_record[1],
+        'calltype': file_record[2],
+        'networkid': file_record[3],
+        'agentname': file_record[4],
+        'agentid': file_record[5],
+        'text': text,
+        'time': result_time
+    })
     os.remove(file)
-    df = pd.DataFrame(results)
+    df = pd.DataFrame(results_list)
     df.to_csv(text_file, mode='a', header=False, index=False, encoding='ANSI', lineterminator='\r\n', sep=';')
 
-folder1 = r'C:\Users\TologonovAB\Desktop\ASR_W\1'
-file1 = r'C:\Users\TologonovAB\Desktop\ASR_W\text1.csv'
-folder2 = r'C:\Users\TologonovAB\Desktop\ASR_W\2'
-file2 = r'C:\Users\TologonovAB\Desktop\ASR_W\text2.csv'
-folder3 = r'C:\Users\TologonovAB\Desktop\ASR_W\3'
-file3 = r'C:\Users\TologonovAB\Desktop\ASR_W\text3.csv'
+def monitor_folder(folder_path, text_file, results_list):
+    while True:
+        for file_name in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, file_name)
+            if os.path.isfile(file_path):
+                transcribe_worker(model, file_path, folder_path, text_file, results_list)
+        time.sleep(1)
 
+if __name__ == "__main__":
+    manager = Manager()
+    results_list1 = manager.list()
+    results_list2 = manager.list()
+    results_list3 = manager.list()
 
-process1 = threading.Thread(target=monitor_folder, args=(folder1, file1,))
-process2 = threading.Thread(target=monitor_folder, args=(folder2, file2,))
-process3 = threading.Thread(target=monitor_folder, args=(folder3, file3,))
+    model = WhisperModel(model_size_or_path=r"C:\Users\TologonovAB\Desktop\model_wisper\whisper-large-v2",
+                         device="cpu", compute_type="float32", cpu_threads=8, num_workers=3)
 
-process1.start()
-process2.start()
-process3.start()
+    folder1 = r'C:\Users\TologonovAB\Desktop\ASR_W\1'
+    file1 = r'C:\Users\TologonovAB\Desktop\ASR_W\text1.csv'
+    folder2 = r'C:\Users\TologonovAB\Desktop\ASR_W\2'
+    file2 = r'C:\Users\TologonovAB\Desktop\ASR_W\text2.csv'
+    folder3 = r'C:\Users\TologonovAB\Desktop\ASR_W\3'
+    file3 = r'C:\Users\TologonovAB\Desktop\ASR_W\text3.csv'
+
+    process1 = Process(target=monitor_folder, args=(folder1, file1, results_list1))
+    process2 = Process(target=monitor_folder, args=(folder2, file2, results_list2))
+    process3 = Process(target=monitor_folder, args=(folder3, file3, results_list3))
+
+    process1.start()
+    process2.start()
+    process3.start()
+
+    process1.join()
+    process2.join()
+    process3.join()
+
