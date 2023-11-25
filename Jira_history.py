@@ -9,40 +9,59 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
-from razdel import tokenize
-import pymorphy2
+import os, time
+import soundfile as sf
+import pandas as pd
+import threading
+from faster_whisper import WhisperModel
 
-def normalize_text(text):
-    morph = pymorphy2.MorphAnalyzer()
-    tokens = [morph.parse(token.text.lower())[0].normal_form for token in tokenize(text)]
-    return ' '.join(tokens)
+model = WhisperModel(model_size_or_path=r"C:\Users\TologonovAB\Desktop\model_wisper\whisper-large-v2", device="cpu", compute_type="float32", cpu_threads=8, num_workers=3)
 
-def search_phrases_and_derivatives(text, phrases):
-    morph = pymorphy2.MorphAnalyzer()
-    normalized_text = normalize_text(text)
+def monitor_folder(folder_path, text_file):
+    while True:
+        for file_name in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, file_name)
+            if os.path.isfile(file_path):
+                process_file(file_path, folder_path, text_file)
+        time.sleep(1)
+
+def process_file(file, folder, text_file):
+    print(f'Обработка {folder}')
+    file_record = os.path.basename(file).split("$")
     results = []
+    start_time = time.time()
+    segments, _ = model.transcribe(file, language="ru", task="transcribe", vad_filter = False)
+    segments = list(segments)
+    df_text = pd.DataFrame.from_dict(segments)
+    text = ' '.join(df_text['text'])
+    end_time = time.time()
+    result_time = end_time - start_time
+    results.append({
+            'id': file_record[0],
+            'callid': file_record[1],
+            'calltype': file_record[2],
+            'networkid': file_record[3],
+            'agentname': file_record[4],
+            'agentid': file_record[5],
+            'text': text,
+            'time' : result_time   
+                })
+    os.remove(file)
+    df = pd.DataFrame(results)
+    df.to_csv(text_file, mode='a', header=False, index=False, encoding='ANSI', lineterminator='\r\n', sep=';')
 
-    for phrase in phrases:
-        normalized_phrase = normalize_text(phrase)
-        index = normalized_text.find(normalized_phrase)
-        
-        if index != -1:
-            start = max(0, index - 200)
-            end = min(len(normalized_text), index + len(normalized_phrase) + 200)
-            context_before = text[start:index]
-            context_after = text[index + len(normalized_phrase):end]
-            
-            results.append({
-                "phrase": phrase,
-                "context_before": context_before,
-                "context_after": context_after
-            })
+folder1 = r'C:\Users\TologonovAB\Desktop\ASR_W\1'
+file1 = r'C:\Users\TologonovAB\Desktop\ASR_W\text1.csv'
+folder2 = r'C:\Users\TologonovAB\Desktop\ASR_W\2'
+file2 = r'C:\Users\TologonovAB\Desktop\ASR_W\text2.csv'
+folder3 = r'C:\Users\TologonovAB\Desktop\ASR_W\3'
+file3 = r'C:\Users\TologonovAB\Desktop\ASR_W\text3.csv'
 
-    return results
 
-text_to_search = "тестовое предложение для поиска слов"
-phrases_to_search = ["тестовая", "слов"]
+process1 = threading.Thread(target=monitor_folder, args=(folder1, file1,))
+process2 = threading.Thread(target=monitor_folder, args=(folder2, file2,))
+process3 = threading.Thread(target=monitor_folder, args=(folder3, file3,))
 
-search_result = search_phrases_and_derivatives(text_to_search, phrases_to_search)
-
-print(search_result)
+process1.start()
+process2.start()
+process3.start()
