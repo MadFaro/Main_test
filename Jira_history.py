@@ -11,21 +11,36 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 
 
-  File "C:\Program Files\Python38\lib\multiprocessing\process.py", line 313, in _bootstrap
-    self.run()
-  File "C:\Program Files\Python38\lib\multiprocessing\process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "C:\Users\TologonovAB\Desktop\ASR_W\main.py", line 40, in monitor_folder
-    transcribe_worker(file_path, folder_path, text_file, results_list)
-  File "C:\Users\TologonovAB\Desktop\ASR_W\main.py", line 21, in transcribe_worker
-    results_list.append({
-  File "<string>", line 2, in append
-  File "C:\Program Files\Python38\lib\multiprocessing\managers.py", line 831, in _callmethod
-    self._connect()
-  File "C:\Program Files\Python38\lib\multiprocessing\managers.py", line 818, in _connect
-    conn = self._Client(self._token.address, authkey=self._authkey)
-  File "C:\Program Files\Python38\lib\multiprocessing\connection.py", line 500, in Client
-    c = PipeClient(address)
-  File "C:\Program Files\Python38\lib\multiprocessing\connection.py", line 701, in PipeClient
-    _winapi.WaitNamedPipe(address, 1000)
-FileNotFoundError: [WinError 2] Не удается найти указанный файл
+  File "toxic.py", line 12, in <module>
+    toxic_sum = pipe([row['text_client']])
+  File "C:\Program Files\Python38\lib\site-packages\transformers\pipelines\text_classification.py", line 156, in __call__
+    result = super().__call__(*args, **kwargs)
+  File "C:\Program Files\Python38\lib\site-packages\transformers\pipelines\base.py", line 1121, in __call__
+    outputs = list(final_iterator)
+  File "C:\Program Files\Python38\lib\site-packages\transformers\pipelines\pt_utils.py", line 124, in __next__
+    item = next(self.iterator)
+  File "C:\Program Files\Python38\lib\site-packages\transformers\pipelines\pt_utils.py", line 125, in __next__
+    processed = self.infer(item, **self.params)
+  File "C:\Program Files\Python38\lib\site-packages\transformers\pipelines\base.py", line 1046, in forward
+    model_outputs = self._forward(model_inputs, **forward_params)
+  File "C:\Program Files\Python38\lib\site-packages\transformers\pipelines\text_classification.py", line 187, in _forward
+    return self.model(**model_inputs)
+  File "C:\Program Files\Python38\lib\site-packages\torch\nn\modules\module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Program Files\Python38\lib\site-packages\torch\nn\modules\module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Program Files\Python38\lib\site-packages\transformers\models\bert\modeling_bert.py", line 1564, in forward
+    outputs = self.bert(
+  File "C:\Program Files\Python38\lib\site-packages\torch\nn\modules\module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Program Files\Python38\lib\site-packages\torch\nn\modules\module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Program Files\Python38\lib\site-packages\transformers\models\bert\modeling_bert.py", line 1015, in forward
+    embedding_output = self.embeddings(
+  File "C:\Program Files\Python38\lib\site-packages\torch\nn\modules\module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Program Files\Python38\lib\site-packages\torch\nn\modules\module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Program Files\Python38\lib\site-packages\transformers\models\bert\modeling_bert.py", line 238, in forward
+    embeddings += position_embeddings
+RuntimeError: The size of tensor a (1681) must match the size of tensor b (512) at non-singleton dimension 1
