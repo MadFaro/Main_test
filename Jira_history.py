@@ -10,11 +10,12 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 
+
 import os
 import time
 import soundfile as sf
 import pandas as pd
-from multiprocessing import spawn, Manager
+from multiprocessing import get_context, Process, Manager
 from faster_whisper import WhisperModel
 
 def transcribe_worker(file, folder, text_file, results_list):
@@ -53,7 +54,8 @@ def monitor_folder(folder_path, text_file, results_list):
         time.sleep(1)
 
 if __name__ == "__main__":
-    manager = Manager()
+    context = get_context("spawn")
+    manager = context.Manager()
     results_list1 = manager.list()
     results_list2 = manager.list()
     results_list3 = manager.list()
@@ -65,6 +67,7 @@ if __name__ == "__main__":
     folder3 = r'C:\Users\TologonovAB\Desktop\ASR_W\3'
     file3 = r'C:\Users\TologonovAB\Desktop\ASR_W\text3.csv'
 
-    spawn.Process(target=monitor_folder, args=(folder1, file1, results_list1)).start()
-    spawn.Process(target=monitor_folder, args=(folder2, file2, results_list2)).start()
-    spawn.Process(target=monitor_folder, args=(folder3, file3, results_list3)).start()
+    Process(target=monitor_folder, args=(folder1, file1, results_list1)).start()
+    Process(target=monitor_folder, args=(folder2, file2, results_list2)).start()
+    Process(target=monitor_folder, args=(folder3, file3, results_list3)).start()
+
