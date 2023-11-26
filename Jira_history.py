@@ -11,36 +11,90 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 
 
-  File "toxic.py", line 12, in <module>
-    toxic_sum = pipe([row['text_client']])
-  File "C:\Program Files\Python38\lib\site-packages\transformers\pipelines\text_classification.py", line 156, in __call__
-    result = super().__call__(*args, **kwargs)
-  File "C:\Program Files\Python38\lib\site-packages\transformers\pipelines\base.py", line 1121, in __call__
-    outputs = list(final_iterator)
-  File "C:\Program Files\Python38\lib\site-packages\transformers\pipelines\pt_utils.py", line 124, in __next__
-    item = next(self.iterator)
-  File "C:\Program Files\Python38\lib\site-packages\transformers\pipelines\pt_utils.py", line 125, in __next__
-    processed = self.infer(item, **self.params)
-  File "C:\Program Files\Python38\lib\site-packages\transformers\pipelines\base.py", line 1046, in forward
-    model_outputs = self._forward(model_inputs, **forward_params)
-  File "C:\Program Files\Python38\lib\site-packages\transformers\pipelines\text_classification.py", line 187, in _forward
-    return self.model(**model_inputs)
-  File "C:\Program Files\Python38\lib\site-packages\torch\nn\modules\module.py", line 1518, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "C:\Program Files\Python38\lib\site-packages\torch\nn\modules\module.py", line 1527, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "C:\Program Files\Python38\lib\site-packages\transformers\models\bert\modeling_bert.py", line 1564, in forward
-    outputs = self.bert(
-  File "C:\Program Files\Python38\lib\site-packages\torch\nn\modules\module.py", line 1518, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "C:\Program Files\Python38\lib\site-packages\torch\nn\modules\module.py", line 1527, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "C:\Program Files\Python38\lib\site-packages\transformers\models\bert\modeling_bert.py", line 1015, in forward
-    embedding_output = self.embeddings(
-  File "C:\Program Files\Python38\lib\site-packages\torch\nn\modules\module.py", line 1518, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "C:\Program Files\Python38\lib\site-packages\torch\nn\modules\module.py", line 1527, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "C:\Program Files\Python38\lib\site-packages\transformers\models\bert\modeling_bert.py", line 238, in forward
-    embeddings += position_embeddings
-RuntimeError: The size of tensor a (1681) must match the size of tensor b (512) at non-singleton dimension 1
+import pandas as pd
+import cx_Oracle
+import holidays
+from sqlalchemy import create_engine
+from sklearn.metrics import mean_absolute_error
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Conv1D, MaxPooling1D, Dropout
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras.optimizers import Adam
+
+
+holidays_ru = holidays.Russia(years=2023)
+# Конект к БД
+connect = create_engine("oracle://", creator=connect_str)
+
+sql = """
+        select day as datetime, sum(CALLSOFFERED) as calls from (
+        Select trunc(INTERVAL, 'HH24') as day, sum(CALLSOFFERED) as CALLSOFFERED
+        from ANALYTICS.TOLOG_TEMP_ML1
+        where INTERVAL < date'2023-06-01' and FULLNAME in 
+        ('CCM_PG_1.SG_DDO_ActiveCredit',
+        'CCM_PG_1.SG_DDO_DebetCard',
+        'CCM_PG_1.SG_Operator')
+        group by trunc(INTERVAL, 'HH24')
+        union
+        Select trunc(V0, 'HH24') as day, sum(v5) as CALLSOFFERED
+        from ANALYTICS.TOLOG_TEMP_ML2
+        where V0 < date'2023-06-01'
+        group by trunc(V0, 'HH24')) a
+        group by day
+        order by day
+        """
+
+# Данные для обучения
+df = pd.read_sql(sql, connect)
+df['datetime'] = pd.to_datetime(df['datetime'], format='%d.%m.%Y')
+df.sort_values(by='datetime', inplace=True)
+df['day_of_week'] = df['datetime'].dt.dayofweek.astype(int)
+df['start_week'] = df['datetime'].dt.dayofweek.isin([0]).astype(int)
+df['hour'] = df['datetime'].dt.hour.astype(int)
+df['start'] = df['datetime'].dt.day.isin([1, 2, 3]).astype(int)
+df['end'] = df['datetime'].dt.is_month_end.astype(int)
+df['day'] = df['datetime'].dt.day.astype(int)
+df['month'] = df['datetime'].dt.month.astype(int)
+df['holidays'] = df['datetime'].dt.date.isin(holidays_ru).astype(int)
+df_normalized = df.copy()
+df_normalized.drop('datetime', axis=1, inplace=True)
+df_normalized[['calls', 'month', 'day_of_week', 'start_week', 'day', 'start' , 'end',
+               'holidays', 'hour']] = df[['calls', 'month', 'day_of_week', 'start_week', 'day', 'start' , 'end',
+               'holidays', 'hour']] / df[['calls', 'month', 'day_of_week', 'start_week', 'day', 'start' , 'end',
+               'holidays', 'hour']].max()
+
+# Контроль переобучения по эпохам
+early = EarlyStopping(monitor='loss', min_delta=0.0001, patience=5, verbose=2, mode='auto')
+check = ModelCheckpoint('model.h5', monitor='loss', verbose=2, save_best_only=False, mode='auto')
+callbacks = [early, check]
+
+# Создание модели
+model = Sequential()
+model.add(LSTM(66, activation='tanh', input_shape=(8, 1), return_sequences = True))
+model.add(LSTM(66, activation='relu'))
+model.add(Dense(1))
+model.compile(optimizer=Adam(learning_rate=0.006), loss='mse', metrics=['mae'])
+
+# Обучение
+X_train = df_normalized[['month', 'day_of_week', 'start_week', 'day', 'start', 'end', 'holidays', 'hour']].values.reshape((df_normalized.shape[0], 8, 1))
+y_train = df_normalized['calls'].values.reshape((df_normalized.shape[0], 1))
+model.fit(X_train, y_train, epochs=300, batch_size=720, verbose=1, callbacks=callbacks)
+
+# Таблица для прогноза
+next_days = pd.date_range(start=(df['datetime'].max()+pd.Timedelta(hours=1)), periods=61*24, freq='1H')
+X_pred = pd.DataFrame({'datetime': next_days})
+X_pred['hour'] = X_pred['datetime'].dt.hour.astype(int)
+X_pred['day_of_week'] = X_pred['datetime'].dt.dayofweek.astype(int)
+X_pred['start_week'] = X_pred['datetime'].dt.dayofweek.isin([0]).astype(int)
+X_pred['day'] = X_pred['datetime'].dt.day.astype(int)
+X_pred['start'] = X_pred['datetime'].dt.day.isin([1, 2, 3]).astype(int)
+X_pred['end'] = X_pred['datetime'].dt.is_month_end.astype(int)
+X_pred['month'] = X_pred['datetime'].dt.month.astype(int)
+X_pred['holidays'] = X_pred['datetime'].dt.date.isin(holidays_ru).astype(int)
+X_pred_formatted = (X_pred[['month', 'day_of_week', 'start_week', 'day', 'start', 'end', 'holidays', 'hour']] / df[['month', 'day_of_week', 'start_week', 'day', 'start', 'end', 'holidays', 'hour']].max()).values.reshape((X_pred.shape[0], 8, 1))
+
+# Прогноз
+predictions_normalized = model.predict(X_pred_formatted)
+predictions = predictions_normalized * df['calls'].max()
+X_pred['predictions'] = predictions * 1.07
+X_pred.to_excel('test.xlsx')
