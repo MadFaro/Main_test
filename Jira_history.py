@@ -11,80 +11,42 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 
 
-from Stemmer import Stemmer
-def cleaner(txt):
-  txt = txt.lower() # приведение букв в нижний регистр 
-  stemmer = Stemmer('russian')
-  txt = ' '.join( stemmer.stemWords( txt.split() ) ) 
-  txt = re.sub( r'\b\d+\b', ' digit ', txt ) # заменяем цифры 
-  return  txt 
-
+from faster_whisper import WhisperModel
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score, classification_report
-from joblib import dump, load
-import re
-import string
+import time
+import glob, os
 
-# Функция предобработки текста
-def preprocess_text(text):
-    # Приведение к нижнему регистру
-    text = text.lower()
-    
-    # Удаление знаков пунктуации
-    text = ''.join([char for char in text if char not in string.punctuation])
-    
-    # Удаление переносов строк
-    text = re.sub('\n', ' ', text)
-    
-    # Другие операции по необходимости, например, удаление стоп-слов
-    
-    return text
 
-# Загрузка данных из Excel-файла
-excel_file_path = 'путь_к_вашему_файлу.xlsx'
-df = pd.read_excel(excel_file_path)
+folder_path = r'C:\Users\TologonovAB\Desktop\model_wisper\move'
+file_pattern = '*.wav'
+file_list = glob.glob(os.path.join(folder_path, file_pattern))
 
-# Применение предобработки к тексту
-df['текст_обращения'] = df['текст_обращения'].apply(preprocess_text)
+model = WhisperModel(model_size_or_path=r"C:\Users\TologonovAB\Desktop\model_wisper\whisper-int8-2", device='cpu', cpu_threads=4)
 
-# Разделение данных на обучающий и тестовый наборы
-X_train, X_test, y_train, y_test = train_test_split(df['текст_обращения'], df['тематика'], test_size=0.2, random_state=42)
-
-# Использование метода векторизации текста
-vectorizer = CountVectorizer()
-X_train_vectorized = vectorizer.fit_transform(X_train)
-X_test_vectorized = vectorizer.transform(X_test)
-
-# Обучение модели
-model = MultinomialNB()
-model.fit(X_train_vectorized, y_train)
-
-# Сохранение модели
-model_filename = 'trained_model.joblib'
-dump(model, model_filename)
-
-# Оценка модели
-y_pred = model.predict(X_test_vectorized)
-
-accuracy = accuracy_score(y_test, y_pred)
-print(f'Accuracy: {accuracy}')
-
-print('\nClassification Report:')
-print(classification_report(y_test, y_pred))
-
-# Классификация нового текста
-new_text = ['Новый текст обращения']
-# Применение предобработки к новому тексту
-new_text = [preprocess_text(text) for text in new_text]
-new_text_vectorized = vectorizer.transform(new_text)
-
-predicted_topic = model.predict(new_text_vectorized)
-print(f'Предполагаемая тематика: {predicted_topic[0]}')
-
-# Загрузка модели для последующего использования
-loaded_model = load(model_filename)
-
+for file in file_list:
+    file_record = os.path.basename(file).split("$")
+    results = []
+    start_time = time.time()
+    segments, _ = model.transcribe(file, language="ru", task="transcribe", vad_filter = False)
+    segments = list(segments)
+    df_text = pd.DataFrame.from_dict(segments)
+    if df_text.empty:
+        text = ''
+    else:
+        text = ' '.join(df_text['text'])
+    end_time = time.time()
+    result_time = end_time - start_time
+    results.append({
+            'id': file_record[0],
+            'callid': file_record[1],
+            'calltype': file_record[2],
+            'networkid': file_record[3],
+            'agentname': file_record[4],
+            'agentid': file_record[5],
+            'text': text,
+            'time' : result_time   
+                })
+    os.remove(file)
+    df = pd.DataFrame(results)
+    df.to_csv('text1.csv', mode='a', header=False, index=False, encoding='ANSI', lineterminator='\r\n', sep=';')
 
