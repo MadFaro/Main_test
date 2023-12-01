@@ -11,76 +11,28 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 
 
-import multiprocessing
-from faster_whisper import WhisperModel
-import pandas as pd
-import time
-import glob
-import os
-
-def process_file(file, model):
-    file_record = os.path.basename(file).split("$")
-    results = []
-
-    start_time = time.time()
-    segments, _ = model.transcribe(file, language="ru", task="transcribe", vad_filter=False)
-    segments = list(segments)
-    df_text = pd.DataFrame.from_dict(segments)
-
-    if df_text.empty:
-        text = ''
-    else:
-        text = ' '.join(df_text['text'])
-
-    end_time = time.time()
-    result_time = end_time - start_time
-
-    results.append({
-        'id': file_record[0],
-        'callid': file_record[1],
-        'calltype': file_record[2],
-        'networkid': file_record[3],
-        'agentname': file_record[4],
-        'agentid': file_record[5],
-        'text': text,
-        'time': result_time
-    })
-
-    os.remove(file)
-
-    return results
-
-def process_files(folder_path, model, result_file):
-    file_pattern = '*.wav'
-    file_list = glob.glob(os.path.join(folder_path, file_pattern))
-
-    results = []
-    for file in file_list:
-        results.extend(process_file(file, model))
-
-    df = pd.DataFrame(results)
-    df.to_csv(result_file, mode='a', header=False, index=False, encoding='ANSI', lineterminator='\r\n', sep=';')
-
-def main():
-    folder1_path = r'C:\Users\TologonovAB\Desktop\model_wisper\move1'
-    folder2_path = r'C:\Users\TologonovAB\Desktop\model_wisper\move2'
-
-    model = WhisperModel(model_size_or_path=r"C:\Users\TologonovAB\Desktop\model_wisper\whisper-int8-2", device='cpu', cpu_threads=4)
-
-    result_file1 = 'text1.csv'
-    result_file2 = 'text2.csv'
-
-    # Используем multiprocessing для параллельной обработки двух папок
-    process1 = multiprocessing.Process(target=process_files, args=(folder1_path, model, result_file1))
-    process2 = multiprocessing.Process(target=process_files, args=(folder2_path, model, result_file2))
-
-    process1.start()
-    process2.start()
-
-    process1.join()
-    process2.join()
-
-if __name__ == "__main__":
+Traceback (most recent call last):
+  File "main.py", line 71, in <module>
     main()
+  File "main.py", line 64, in main
+    process1.start()
+  File "C:\Program Files\Python38\lib\multiprocessing\process.py", line 121, in start
+    self._popen = self._Popen(self)
+  File "C:\Program Files\Python38\lib\multiprocessing\context.py", line 224, in _Popen
+    return _default_context.get_context().Process._Popen(process_obj)
+  File "C:\Program Files\Python38\lib\multiprocessing\context.py", line 326, in _Popen
+    return Popen(process_obj)
+  File "C:\Program Files\Python38\lib\multiprocessing\popen_spawn_win32.py", line 93, in __init__
+    reduction.dump(process_obj, to_child)
+  File "C:\Program Files\Python38\lib\multiprocessing\reduction.py", line 60, in dump
+    ForkingPickler(file, protocol).dump(obj)
+TypeError: cannot pickle 'ctranslate2._ext.Whisper' object
 
+C:\Users\TologonovAB\Desktop\model_wisper>Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "C:\Program Files\Python38\lib\multiprocessing\spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "C:\Program Files\Python38\lib\multiprocessing\spawn.py", line 126, in _main
+    self = reduction.pickle.load(from_parent)
+EOFError: Ran out of input
 
