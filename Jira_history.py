@@ -9,57 +9,82 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
+
+
+from Stemmer import Stemmer
+def cleaner(txt):
+  txt = txt.lower() # приведение букв в нижний регистр 
+  stemmer = Stemmer('russian')
+  txt = ' '.join( stemmer.stemWords( txt.split() ) ) 
+  txt = re.sub( r'\b\d+\b', ' digit ', txt ) # заменяем цифры 
+  return  txt 
+
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score, classification_report
-from sklearn.pipeline import Pipeline
-from joblib import dump
+from joblib import dump, load
+import re
+import string
+
+# Функция предобработки текста
+def preprocess_text(text):
+    # Приведение к нижнему регистру
+    text = text.lower()
+    
+    # Удаление знаков пунктуации
+    text = ''.join([char for char in text if char not in string.punctuation])
+    
+    # Удаление переносов строк
+    text = re.sub('\n', ' ', text)
+    
+    # Другие операции по необходимости, например, удаление стоп-слов
+    
+    return text
 
 # Загрузка данных из Excel-файла
 excel_file_path = 'путь_к_вашему_файлу.xlsx'
 df = pd.read_excel(excel_file_path)
 
+# Применение предобработки к тексту
+df['текст_обращения'] = df['текст_обращения'].apply(preprocess_text)
+
 # Разделение данных на обучающий и тестовый наборы
 X_train, X_test, y_train, y_test = train_test_split(df['текст_обращения'], df['тематика'], test_size=0.2, random_state=42)
 
-# Создание конвейера (pipeline) с векторизатором и классификатором
-pipeline = Pipeline([
-    ('vectorizer', CountVectorizer()),
-    ('classifier', MultinomialNB())
-])
+# Использование метода векторизации текста
+vectorizer = CountVectorizer()
+X_train_vectorized = vectorizer.fit_transform(X_train)
+X_test_vectorized = vectorizer.transform(X_test)
 
-# Определение сетки параметров для подбора
-param_grid = {
-    'vectorizer__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],  # Попробуйте разные диапазоны n-gram
-    'vectorizer__max_df': [0.5, 0.6, 0.7, 0.8, 0.9],       # Максимальная документная частота
-    'classifier__alpha': [0.01, 0.1, 0.5, 1.0, 2.0],          # Параметр сглаживания в Naive Bayes
-}
+# Обучение модели
+model = MultinomialNB()
+model.fit(X_train_vectorized, y_train)
 
-# Инициирование Grid Search с кросс-валидацией
-grid_search = GridSearchCV(pipeline, param_grid, cv=5, n_jobs=-1)
+# Сохранение модели
+model_filename = 'trained_model.joblib'
+dump(model, model_filename)
 
-# Обучение модели с подбором параметров
-grid_search.fit(X_train, y_train)
-
-# Вывод наилучших параметров
-print("Наилучшие параметры:", grid_search.best_params_)
-
-# Получение наилучшей модели
-best_model = grid_search.best_estimator_
-
-# Сохранение модели с лучшими параметрами
-model_filename = 'best_model.joblib'
-dump(best_model, model_filename)
-
-# Оценка модели с наилучшими параметрами
-y_pred = best_model.predict(X_test)
+# Оценка модели
+y_pred = model.predict(X_test_vectorized)
 
 accuracy = accuracy_score(y_test, y_pred)
-print(f'Accuracy с наилучшими параметрами: {accuracy}')
+print(f'Accuracy: {accuracy}')
 
-# Другие метрики оценки
 print('\nClassification Report:')
 print(classification_report(y_test, y_pred))
+
+# Классификация нового текста
+new_text = ['Новый текст обращения']
+# Применение предобработки к новому тексту
+new_text = [preprocess_text(text) for text in new_text]
+new_text_vectorized = vectorizer.transform(new_text)
+
+predicted_topic = model.predict(new_text_vectorized)
+print(f'Предполагаемая тематика: {predicted_topic[0]}')
+
+# Загрузка модели для последующего использования
+loaded_model = load(model_filename)
+
 
