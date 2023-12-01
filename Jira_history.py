@@ -9,26 +9,45 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
-import torchaudio
-import torch
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, classification_report
+from joblib import dump, load
 
-# Загрузка предварительно обученной модели и токенизатора
-model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h")
-tokenizer = Wav2Vec2Tokenizer.from_pretrained("facebook/wav2vec2-base-960h")
+# Загрузка данных из Excel-файла
+excel_file_path = 'путь_к_вашему_файлу.xlsx'
+df = pd.read_excel(excel_file_path)
 
-# Загрузка аудиофайла
-audio_input, _ = torchaudio.load("your_audio_file.wav", normalize=True)
+# Разделение данных на обучающий и тестовый наборы
+X_train, X_test, y_train, y_test = train_test_split(df['текст_обращения'], df['тематика'], test_size=0.2, random_state=42)
 
-# Преобразование аудио в токены
-input_values = tokenizer(audio_input.squeeze().numpy(), return_tensors="pt").input_values
+# Использование метода векторизации текста
+vectorizer = CountVectorizer()
+X_train_vectorized = vectorizer.fit_transform(X_train)
+X_test_vectorized = vectorizer.transform(X_test)
 
-# Распознавание аудио
-with torch.no_grad():
-    logits = model(input_values).logits
+# Обучение модели
+model = MultinomialNB()
+model.fit(X_train_vectorized, y_train)
 
-# Получение текста из выходных данных
-predicted_ids = torch.argmax(logits, dim=-1)
-transcription = tokenizer.batch_decode(predicted_ids)[0]
+# Сохранение модели
+model_filename = 'trained_model.joblib'
+dump(model, model_filename)
 
-print("Transcription:", transcription)
+# Оценка модели
+y_pred = model.predict(X_test_vectorized)
+
+accuracy = accuracy_score(y_test, y_pred)
+print(f'Accuracy: {accuracy}')
+
+print('\nClassification Report:')
+print(classification_report(y_test, y_pred))
+
+# Классификация нового текста
+new_text = ['Новый текст обращения']
+new_text_vectorized = vectorizer.transform(new_text)
+
+predicted_topic = model.predict(new_text_vectorized)
+print(f'Предполагаемая тематика: {predicted_topic[0]}')
