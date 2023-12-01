@@ -11,28 +11,20 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 
 
-Traceback (most recent call last):
-  File "main.py", line 71, in <module>
-    main()
-  File "main.py", line 64, in main
-    process1.start()
-  File "C:\Program Files\Python38\lib\multiprocessing\process.py", line 121, in start
-    self._popen = self._Popen(self)
-  File "C:\Program Files\Python38\lib\multiprocessing\context.py", line 224, in _Popen
-    return _default_context.get_context().Process._Popen(process_obj)
-  File "C:\Program Files\Python38\lib\multiprocessing\context.py", line 326, in _Popen
-    return Popen(process_obj)
-  File "C:\Program Files\Python38\lib\multiprocessing\popen_spawn_win32.py", line 93, in __init__
-    reduction.dump(process_obj, to_child)
-  File "C:\Program Files\Python38\lib\multiprocessing\reduction.py", line 60, in dump
-    ForkingPickler(file, protocol).dump(obj)
-TypeError: cannot pickle 'ctranslate2._ext.Whisper' object
+from concurrent.futures import ProcessPoolExecutor
 
-C:\Users\TologonovAB\Desktop\model_wisper>Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-  File "C:\Program Files\Python38\lib\multiprocessing\spawn.py", line 116, in spawn_main
-    exitcode = _main(fd, parent_sentinel)
-  File "C:\Program Files\Python38\lib\multiprocessing\spawn.py", line 126, in _main
-    self = reduction.pickle.load(from_parent)
-EOFError: Ran out of input
+def main():
+    folder1_path = r'C:\Users\TologonovAB\Desktop\model_wisper\move1'
+    folder2_path = r'C:\Users\TologonovAB\Desktop\model_wisper\move2'
+    model_path = r"C:\Users\TologonovAB\Desktop\model_wisper\whisper-int8-2"
+
+    result_file1 = 'text1.csv'
+    result_file2 = 'text2.csv'
+
+    with ProcessPoolExecutor() as executor:
+        executor.submit(process_files, folder1_path, model_path, result_file1)
+        executor.submit(process_files, folder2_path, model_path, result_file2)
+
+if __name__ == "__main__":
+    main()
 
