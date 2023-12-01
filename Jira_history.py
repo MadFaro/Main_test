@@ -11,42 +11,76 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
 
 
+import multiprocessing
 from faster_whisper import WhisperModel
 import pandas as pd
 import time
-import glob, os
+import glob
+import os
 
-
-folder_path = r'C:\Users\TologonovAB\Desktop\model_wisper\move'
-file_pattern = '*.wav'
-file_list = glob.glob(os.path.join(folder_path, file_pattern))
-
-model = WhisperModel(model_size_or_path=r"C:\Users\TologonovAB\Desktop\model_wisper\whisper-int8-2", device='cpu', cpu_threads=4)
-
-for file in file_list:
+def process_file(file, model):
     file_record = os.path.basename(file).split("$")
     results = []
+
     start_time = time.time()
-    segments, _ = model.transcribe(file, language="ru", task="transcribe", vad_filter = False)
+    segments, _ = model.transcribe(file, language="ru", task="transcribe", vad_filter=False)
     segments = list(segments)
     df_text = pd.DataFrame.from_dict(segments)
+
     if df_text.empty:
         text = ''
     else:
         text = ' '.join(df_text['text'])
+
     end_time = time.time()
     result_time = end_time - start_time
+
     results.append({
-            'id': file_record[0],
-            'callid': file_record[1],
-            'calltype': file_record[2],
-            'networkid': file_record[3],
-            'agentname': file_record[4],
-            'agentid': file_record[5],
-            'text': text,
-            'time' : result_time   
-                })
+        'id': file_record[0],
+        'callid': file_record[1],
+        'calltype': file_record[2],
+        'networkid': file_record[3],
+        'agentname': file_record[4],
+        'agentid': file_record[5],
+        'text': text,
+        'time': result_time
+    })
+
     os.remove(file)
+
+    return results
+
+def process_files(folder_path, model, result_file):
+    file_pattern = '*.wav'
+    file_list = glob.glob(os.path.join(folder_path, file_pattern))
+
+    results = []
+    for file in file_list:
+        results.extend(process_file(file, model))
+
     df = pd.DataFrame(results)
-    df.to_csv('text1.csv', mode='a', header=False, index=False, encoding='ANSI', lineterminator='\r\n', sep=';')
+    df.to_csv(result_file, mode='a', header=False, index=False, encoding='ANSI', lineterminator='\r\n', sep=';')
+
+def main():
+    folder1_path = r'C:\Users\TologonovAB\Desktop\model_wisper\move1'
+    folder2_path = r'C:\Users\TologonovAB\Desktop\model_wisper\move2'
+
+    model = WhisperModel(model_size_or_path=r"C:\Users\TologonovAB\Desktop\model_wisper\whisper-int8-2", device='cpu', cpu_threads=4)
+
+    result_file1 = 'text1.csv'
+    result_file2 = 'text2.csv'
+
+    # Используем multiprocessing для параллельной обработки двух папок
+    process1 = multiprocessing.Process(target=process_files, args=(folder1_path, model, result_file1))
+    process2 = multiprocessing.Process(target=process_files, args=(folder2_path, model, result_file2))
+
+    process1.start()
+    process2.start()
+
+    process1.join()
+    process2.join()
+
+if __name__ == "__main__":
+    main()
+
 
