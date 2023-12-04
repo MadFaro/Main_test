@@ -8,3 +8,5 @@ ffmpeg -i output.wav -af "highpass=f=300, lowpass=f=3000" output1.wav
 ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
+
+=ОКРУГЛВВЕРХ(ЕСЛИ(C$1>$A2;(C$1*($B2*$A2+$B2*(1-$A2))-$B2*$A2)/(1-C$1);(-1)*(($B2*$A2)-C$1*($B2*$A2+$B2*(1-$A2)))/C$1);0)
