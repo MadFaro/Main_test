@@ -9,4 +9,44 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
-=ОКРУГЛВВЕРХ(ЕСЛИ(C$1>$A2;(C$1*($B2*$A2+$B2*(1-$A2))-$B2*$A2)/(1-C$1);(-1)*(($B2*$A2)-C$1*($B2*$A2+$B2*(1-$A2)))/C$1);0)
+import pandas as pd
+
+# Создайте DataFrame с вашими данными
+data = {'created': ['2023-11-01 00:05:34'],
+        'closed': ['2023-11-01 00:10:20'],
+        'operatorname': ['Янгирова Карина'],
+        'chatid': [78564]}
+
+df = pd.DataFrame(data)
+
+# Преобразуйте столбцы 'created' и 'closed' в формат datetime
+df['created'] = pd.to_datetime(df['created'])
+df['closed'] = pd.to_datetime(df['closed'])
+
+# Сортировка данных по времени создания чата
+df = df.sort_values(by='created')
+
+# Создание столбца для отслеживания активных чатов
+df['active_chats'] = 0
+
+# Список для отслеживания числа активных чатов в каждый момент времени
+active_chats_list = []
+
+# Цикл по данным для отслеживания активных чатов
+for index, row in df.iterrows():
+    # Увеличение счетчика при начале чата
+    df.loc[index:, 'active_chats'] += 1
+    # Уменьшение счетчика при завершении чата
+    end_time = row['closed']
+    df.loc[df['created'] > end_time, 'active_chats'] -= 1
+    # Запись числа активных чатов в список
+    active_chats_list.append(df['active_chats'].max())
+
+# Добавление списка в DataFrame
+df['active_chats_max'] = active_chats_list
+
+# Вывод среднего значения активных чатов
+average_active_chats = df['active_chats_max'].mean()
+
+print(f'Среднее количество чатов в работе у операторов: {average_active_chats}')
+
