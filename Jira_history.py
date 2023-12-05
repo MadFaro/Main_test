@@ -28,16 +28,30 @@ df = df.sort_values(by='created')
 # Создание столбца для отслеживания активных чатов
 df['active_chats'] = 0
 
+# Словарь для отслеживания активных чатов для каждого оператора
+active_chats_dict = {}
+
 # Список для отслеживания числа активных чатов в каждый момент времени
 active_chats_list = []
 
 # Цикл по данным для отслеживания активных чатов
 for index, row in df.iterrows():
+    operator = row['operatorname']
+    # Если оператор уже есть в словаре, используйте его, в противном случае создайте запись для оператора
+    if operator in active_chats_dict:
+        df.loc[index:, 'active_chats'] += active_chats_dict[operator]
+    else:
+        active_chats_dict[operator] = 0
+    
     # Увеличение счетчика при начале чата
     df.loc[index:, 'active_chats'] += 1
+    
     # Уменьшение счетчика при завершении чата
     end_time = row['closed']
     df.loc[df['created'] > end_time, 'active_chats'] -= 1
+    # Запись числа активных чатов для оператора в словарь
+    active_chats_dict[operator] = df.loc[index, 'active_chats']
+    
     # Запись числа активных чатов в список
     active_chats_list.append(df['active_chats'].max())
 
@@ -47,5 +61,6 @@ df['active_chats_max'] = active_chats_list
 # Вывод среднего значения активных чатов
 average_active_chats = df['active_chats_max'].mean()
 
-print(f'Среднее количество чатов в работе: {average_active_chats}')
+print(f'Среднее количество чатов в работе у операторов: {average_active_chats}')
+
 
