@@ -10,4 +10,22 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 import pandas as pd
 
-TO_CHAR(your_date_column, 'HH24:MI:SS') = '00:00:00'
+import spacy
+import re
+nlp_ru = spacy.load("ru_core_news_sm")
+
+def depersonalize_russian(text):
+    doc = nlp_ru(text)
+    depersonalized_text = text
+    for ent in doc.ents:
+        depersonalized_text = depersonalized_text.replace(ent.text, ent.label_)
+    return depersonalized_text
+  
+def depersonalize_regex_russian(text):
+    # Заменить все номера телефонов на "PHONE_NUMBER"
+    text = re.sub(r'\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b', 'PHONE_NUMBER', text)
+    # Заменить все адреса электронной почты на "EMAIL_ADDRESS"
+    text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', 'EMAIL_ADDRESS', text)
+    # Другие примеры деперсонализации с помощью регулярных выражений
+    # ...
+    return text
