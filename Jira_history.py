@@ -9,9 +9,4 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
-    nlp_ru = spacy.load("ru_core_news_sm")
-  File "C:\Python38\lib\site-packages\spacy\__init__.py", line 47, in load
-    return util.load_model(name, disable=disable, exclude=exclude, config=config)
-  File "C:\Python38\lib\site-packages\spacy\util.py", line 329, in load_model
-    raise IOError(Errors.E050.format(name=name))
-OSError: [E050] Can't find model 'ru_core_news_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
+python -m spacy download ru_core_news_sm
