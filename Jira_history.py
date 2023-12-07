@@ -8,3 +8,5 @@ ffmpeg -i output.wav -af "highpass=f=300, lowpass=f=3000" output1.wav
 ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
+
+\b(?:\+7|8)?[-\s]?\(?\d{1,5}\)?[-.\s]?\d{3}[-.\s]?\d{2}[-.\s]?\d{2}\b
