@@ -9,7 +9,4 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
-predictions_normalized = model.predict(X_pred_formatted)
-predictions = predictions_normalized * df['calls'].max()
-X_pred['predictions'] = abs(predictions)
-X_pred.to_excel('test.xlsx')
+X_pred['predictions'] = abs(predictions) * X_pred['day'].apply(lambda x: 1.10 if x == 1 else 1)
