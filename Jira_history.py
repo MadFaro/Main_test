@@ -8,3 +8,23 @@ ffmpeg -i output.wav -af "highpass=f=300, lowpass=f=3000" output1.wav
 ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
+import pandas as pd
+
+# Создаем пример DataFrame
+data = {'col1': [1, 2, 3],
+        'col2': [4, 5, 6],
+        'col3': ['7.1', '8.2', '9.3']}
+
+df = pd.DataFrame(data)
+
+# Выводим DataFrame до изменения формата
+print("DataFrame до изменения формата:")
+print(df)
+
+# Меняем формат столбцов col1 и col2 на float
+columns_to_convert = ['col1', 'col2']
+df[columns_to_convert] = df[columns_to_convert].astype(float)
+
+# Выводим DataFrame после изменения формата
+print("\nDataFrame после изменения формата:")
+print(df)
