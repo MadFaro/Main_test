@@ -8,6 +8,3 @@ ffmpeg -i output.wav -af "highpass=f=300, lowpass=f=3000" output1.wav
 ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
-
-=ЕСЛИ(B3="Агент"; ЕСЛИ(E3>120%; F3*50%; ЕСЛИ(E3>=80%; F3*30%; 0)); ЕСЛИ(B3="Руководитель"; ЕСЛИ(E3<100%; 0; 20000); 0))
-
