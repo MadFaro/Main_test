@@ -9,4 +9,5 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
-=_xlfn.IFS(B3="Агент";ЕСЛИ(E3>120%;F3*50%);B3="Агент";"ЕСЛИ(E3=>80%;F3*30%;0)";B3="Агент";ЕСЛИ(E3<80%;0);B3="Руководитель";ЕСЛИ(E3<100%;0;20000))
+=ЕСЛИ(B3="Агент"; ЕСЛИ(E3>120%; F3*50%; ЕСЛИ(E3>=80%; F3*30%; 0)); ЕСЛИ(B3="Руководитель"; ЕСЛИ(E3<100%; 0; 20000); 0))
+
