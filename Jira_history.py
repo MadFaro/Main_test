@@ -9,11 +9,4 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
-'week' AS type,
-       CASE WHEN TO_CHAR(DTM, 'd') = '7' 
-            THEN TRUNC(DTM, 'WW') - 1 + (CASE WHEN TO_CHAR(TRUNC(DTM, 'WW') - 1, 'YYYY') = TO_CHAR(DTM, 'YYYY') 
-                                                THEN 7 
-                                                ELSE 0 
-                                           END)
-            ELSE TRUNC(DTM, 'WW') + 1
-       END AS dtm
+NEXT_DAY(TRUNC(DTM, 'MM') - 1, 'SUNDAY') + 1 AS dtm
