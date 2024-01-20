@@ -8,18 +8,3 @@ ffmpeg -i output.wav -af "highpass=f=300, lowpass=f=3000" output1.wav
 ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
-
-import pandas as pd
-
-# Создайте DataFrame для примера
-data = {'ваш_столбец': ['Это текст с более чем 4000 символов...' * 1000, 'Короткий текст']}
-df = pd.DataFrame(data)
-
-# Максимальная длина, которую вы хотите ограничить
-макс_длина = 4000
-
-# Примените обрезку к столбцу
-df['ваш_столбец'] = df['ваш_столбец'].apply(lambda x: x[:макс_длина] if len(x) > макс_длина else x)
-
-# Выведите результат
-print(df)
