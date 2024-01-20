@@ -9,4 +9,9 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav
 
-TRUNC(DTM, 'WW') + 1 - TO_NUMBER(TO_CHAR(TRUNC(DTM, 'WW'), 'D'))
+# Функция для обрезки текста
+def обрезать_текст(текст):
+    return текст[:макс_длина]
+
+# Примените функцию к столбцу
+df['ваш_столбец'] = df['ваш_столбец'].apply(обрезать_текст)
