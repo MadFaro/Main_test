@@ -9,4 +9,5 @@ ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav  
 
-case when ORA_HASH(concat(to_char(client_did),'PILOT_CC'), 99)<=49 then 1 else 0 end as group_client
+SELECT ora_hash(concat(to_char(123457632),'PILOT_CC'), 99) AS hash_value
+FROM dual;
