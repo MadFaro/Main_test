@@ -8,14 +8,3 @@ ffmpeg -i output.wav -af "highpass=f=300, lowpass=f=3000" output1.wav
 ffmpeg -i output1.wav -af "volume=1.5" output2.wav
 ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav  
-
-source_wb = openpyxl.load_workbook('webim.xlsx')
-new_wb = openpyxl.Workbook()
-sheet_names_to_copy = ['По часам (онлайн)', 'По часам (офлайн)']
-
-for sheet_name in sheet_names_to_copy:
-    source_sheet = source_wb[sheet_name]
-    new_sheet = new_wb.create_sheet(sheet_name)
-    for index, row in enumerate(source_sheet.iter_rows(values_only=True), start=1):
-        if index > 2:  # Пропускаем первые две строки
-            new_sheet.append(row)
