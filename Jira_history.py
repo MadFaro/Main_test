@@ -12,8 +12,10 @@ ffmpeg -i output3.wav -af "crystalizer" output4.wav
 source_wb = openpyxl.load_workbook('webim.xlsx')
 new_wb = openpyxl.Workbook()
 sheet_names_to_copy = ['По часам (онлайн)', 'По часам (офлайн)']
+
 for sheet_name in sheet_names_to_copy:
     source_sheet = source_wb[sheet_name]
     new_sheet = new_wb.create_sheet(sheet_name)
-    for row in source_sheet.iter_rows(values_only=True):
-        new_sheet.append(row)
+    for index, row in enumerate(source_sheet.iter_rows(values_only=True), start=1):
+        if index > 2:  # Пропускаем первые две строки
+            new_sheet.append(row)
