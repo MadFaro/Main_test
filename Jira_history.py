@@ -21,35 +21,32 @@ IS
 BEGIN
     INSERT INTO ANALYTICS.TMP_STATS_SERVICE_LEVEL (threadid, department_id, got_into_common_queue_time, start_chatting_time)
     SELECT 
-        threadid,
-        departmentid,
-        MIN(CASE WHEN state = 'queue' THEN dtm END) OVER (PARTITION BY threadid, departmentid) AS got_into_common_queue_time,
-        MIN(CASE WHEN state = 'chatting' THEN dtm END) OVER (PARTITION BY threadid, departmentid) AS start_chatting_time
-    FROM (
-        SELECT 
-            cth.threadid, 
-            cth.departmentid, 
-            cth.state, 
-            cth.dtm,
-            ROW_NUMBER() OVER (PARTITION BY cth.threadid ORDER BY cth.number_) AS rn
-        FROM 
-            ODS.ODS_WIS_CHATTHREADHISTORY@cdw.prod cth
-        JOIN 
-            ODS.ODS_WIS_CHATTHREAD@cdw.prod ct ON ct.threadid = cth.threadid
-        WHERE 
-            ct.OFFLINE_ = 0
-            AND cth.dtm BETWEEN TRUNC(SYSDATE-1) AND TRUNC(SYSDATE)
-    ) 
-    WHERE rn = 1
-    AND state IN ('queue', 'chatting')
-    AND (
-        state = 'chatting' 
-        OR NOT EXISTS (
-            SELECT 1 
-            FROM ODS.ODS_WIS_CHATTHREADHISTORY@cdw.prod cth2 
-            WHERE cth2.threadid = cth.threadid 
-            AND cth2.state IN ('chatting_with_robot', 'closed_by_operator')
-            AND cth2.dtm > cth.dtm
-        )
-    );
+        cth.threadid,
+        cth.departmentid,
+        CASE WHEN cth.state = 'queue' THEN cth.dtm END AS got_into_common_queue_time,
+        CASE 
+            WHEN cth.state = 'chatting' THEN
+                (SELECT MIN(created) 
+                 FROM ODS.ODS_WIS_CHATMESSAGE@cdw.prod 
+                 WHERE threadid = cth.threadid 
+                   AND kind IN (2, 10, 13) 
+                   AND created > cth.dtm)
+        END AS start_chatting_time
+    FROM 
+        ODS.ODS_WIS_CHATTHREADHISTORY@cdw.prod cth
+    JOIN 
+        ODS.ODS_WIS_CHATTHREAD@cdw.prod ct ON ct.threadid = cth.threadid
+    WHERE 
+        ct.OFFLINE_ = 0
+        AND cth.dtm BETWEEN TRUNC(SYSDATE-1) AND TRUNC(SYSDATE)
+        AND (
+            cth.state = 'queue'
+            OR (cth.state = 'chatting' AND EXISTS (
+                SELECT 1 
+                FROM ODS.ODS_WIS_CHATMESSAGE@cdw.prod 
+                WHERE threadid = cth.threadid 
+                  AND kind IN (2, 10, 13) 
+                  AND created > cth.dtm
+            ))
+        );
 END;
