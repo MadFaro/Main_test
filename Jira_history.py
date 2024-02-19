@@ -10,81 +10,11 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav  
 
 
-CREATE OR REPLACE PROCEDURE p_service_level (
-    p_dtmfrom IN TIMESTAMP,
-    p_dtmto IN TIMESTAMP,
-    p_departmentid IN INT,
-    p_locale IN CHAR(2)
-)
-IS
-    v_cur_threadid INT;
-    v_prev_threadid INT;
-    v_cur_department_id INT;
-    v_cur_state VARCHAR2(128);
-    v_cur_time TIMESTAMP;
-    v_start_time TIMESTAMP := NULL;
-    v_end_time TIMESTAMP := NULL;
-    l_done INT := 0;
-    CURSOR cur IS
-        SELECT cth.threadid, cth.departmentid, cth.state, dtm FROM chatthreadhistory cth
-        JOIN chatthread ct ON ct.threadid = cth.threadid
-        WHERE ct.offline = 0
-        AND dtm BETWEEN p_dtmfrom AND p_dtmto
-        ORDER BY cth.threadid, cth.number;
-BEGIN
-    FOR cur_rec IN cur LOOP
-        v_cur_threadid := cur_rec.threadid;
-        v_cur_department_id := cur_rec.departmentid;
-        v_cur_state := cur_rec.state;
-        v_cur_time := cur_rec.dtm;
+CREATE TABLE your_table_name (
+    column1 NUMBER,
+    column2 NUMBER,
+    column3 DATE,
+    column4 TIMESTAMP
+);
 
-        -- Reset for each new thread
-        IF v_prev_threadid <> v_cur_threadid THEN
-            v_start_time := NULL;
-            v_end_time := NULL;
-        END IF;
-
-        -- Consider queue time after bot if chat initially went to a bot
-        -- Do not consider dialogue if it was not in the chatting state and was closed by the operator
-        IF v_cur_state IN ('chatting_with_robot', 'closed_by_operator') THEN
-            v_start_time := NULL;
-            v_end_time := NULL;
-        END IF;
-
-        IF v_cur_state = 'queue' AND v_start_time IS NULL THEN
-            v_start_time := v_cur_time;
-        END IF;
-
-        IF v_cur_state = 'chatting' AND v_start_time IS NOT NULL THEN
-            SELECT MIN(created) INTO v_end_time
-            FROM chatmessage
-            WHERE threadid = v_cur_threadid
-              AND kind IN (2, 10, 13)
-              AND created > v_cur_time;
-
-            -- Handling if no records found
-            EXCEPTION
-                WHEN NO_DATA_FOUND THEN
-                    v_end_time := NULL;
-        END IF;
-
-        IF v_start_time IS NOT NULL AND v_end_time IS NOT NULL THEN
-            INSERT INTO tmp_stats_service_level (
-                threadid,
-                department_id,
-                got_into_common_queue_time,
-                start_chatting_time
-            ) VALUES (
-                v_cur_threadid,
-                v_cur_department_id,
-                v_start_time,
-                v_end_time
-            );
-            v_start_time := NULL;
-            v_end_time := NULL;
-        END IF;
-
-        v_prev_threadid := v_cur_threadid;
-    END LOOP;
-END;
 
