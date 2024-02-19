@@ -10,35 +10,36 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav  
 
 
-create or replace PROCEDURE                                                   tolog_temp_chst_sl
+CREATE OR REPLACE PROCEDURE tolog_temp_chst_sl
 (
     p_dtmfrom IN TIMESTAMP,
     p_dtmto IN TIMESTAMP,
-    p_departmentid IN INT,
+    p_departmentid IN NUMBER,
     p_locale IN VARCHAR2
 )
 IS
-    v_cur_threadid INT;
-    v_prev_threadid INT;
-    v_cur_department_id INT;
-    v_cur_state VARCHAR2(128);
-    v_cur_time TIMESTAMP;
+    v_cur_threadid ODS.ODS_WIS_CHATTHREADHISTORY@cdw.prod.threadid%TYPE;
+    v_prev_threadid ODS.ODS_WIS_CHATTHREADHISTORY@cdw.prod.threadid%TYPE := NULL;
+    v_cur_department_id ODS.ODS_WIS_CHATTHREADHISTORY@cdw.prod.departmentid%TYPE;
+    v_cur_state ODS.ODS_WIS_CHATTHREADHISTORY@cdw.prod.state%TYPE;
+    v_cur_time ODS.ODS_WIS_CHATTHREADHISTORY@cdw.prod.dtm%TYPE;
     v_start_time TIMESTAMP := NULL;
     v_end_time TIMESTAMP := NULL;
-    l_done INT := 0;
-    CURSOR cur IS
-        SELECT cth.threadid, cth.departmentid, cth.state, dtm FROM ODS.ODS_WIS_chatthreadhistory@cdw.prod cth
-        JOIN ODS.ODS_WIS_chatthread@cdw.prod ct ON ct.threadid = cth.threadid
-        WHERE ct.offline = 0
-        AND dtm BETWEEN trunc(sysdate-1) AND trunc(sysdate)
-        ORDER BY cth.threadid, cth.number_;
 BEGIN
-    FOR cur_rec IN cur LOOP
+    FOR cur_rec IN (
+        SELECT cth.threadid, cth.departmentid, cth.state, cth.dtm
+        FROM ODS.ODS_WIS_CHATTHREADHISTORY@cdw.prod cth
+        JOIN ODS.ODS_WIS_CHATTHREAD@cdw.prod ct ON ct.threadid = cth.threadid
+        WHERE ct.offline = 0
+        AND cth.dtm BETWEEN TRUNC(SYSDATE-1) AND TRUNC(SYSDATE)
+        ORDER BY cth.threadid, cth.number_
+    ) LOOP
         v_cur_threadid := cur_rec.threadid;
         v_cur_department_id := cur_rec.departmentid;
         v_cur_state := cur_rec.state;
         v_cur_time := cur_rec.dtm;
-        IF v_prev_threadid <> v_cur_threadid THEN
+
+        IF v_prev_threadid IS NULL OR v_prev_threadid <> v_cur_threadid THEN
             v_start_time := NULL;
             v_end_time := NULL;
         END IF;
@@ -79,3 +80,4 @@ BEGIN
         v_prev_threadid := v_cur_threadid;
     END LOOP;
 END;
+/
