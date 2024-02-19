@@ -10,75 +10,65 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav  
 
 
-CREATE PROCEDURE `p_service_level` (IN p_dtmfrom datetime, IN p_dtmto datetime, IN p_departmentid int(11), IN p_locale char(2))
-BEGIN
-    DECLARE v_cur_threadid INT;
-    DECLARE v_prev_threadid INT;
-    DECLARE v_cur_department_id INT;
-    DECLARE v_cur_state VARCHAR(128);
-    DECLARE v_cur_time DATETIME;
-    DECLARE v_start_time DATETIME DEFAULT 0;
-    DECLARE v_end_time DATETIME DEFAULT 0;
-    DECLARE l_done INT DEFAULT 0;
-    DECLARE cur CURSOR FOR
+CREATE OR REPLACE PROCEDURE p_service_level (
+    p_dtmfrom IN TIMESTAMP,
+    p_dtmto IN TIMESTAMP,
+    p_departmentid IN INT,
+    p_locale IN CHAR(2)
+)
+IS
+    v_cur_threadid INT;
+    v_prev_threadid INT;
+    v_cur_department_id INT;
+    v_cur_state VARCHAR2(128);
+    v_cur_time TIMESTAMP;
+    v_start_time TIMESTAMP := NULL;
+    v_end_time TIMESTAMP := NULL;
+    l_done INT := 0;
+    CURSOR cur IS
         SELECT cth.threadid, cth.departmentid, cth.state, dtm FROM chatthreadhistory cth
         JOIN chatthread ct ON ct.threadid = cth.threadid
         WHERE ct.offline = 0
         AND dtm BETWEEN p_dtmfrom AND p_dtmto
         ORDER BY cth.threadid, cth.number;
+BEGIN
+    FOR cur_rec IN cur LOOP
+        v_cur_threadid := cur_rec.threadid;
+        v_cur_department_id := cur_rec.departmentid;
+        v_cur_state := cur_rec.state;
+        v_cur_time := cur_rec.dtm;
 
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET l_done = 1;
-
-    CREATE TABLE IF NOT EXISTS tmp_stats_service_level
-    (
-        id INT AUTO_INCREMENT,
-        threadid  INT NOT NULL,
-        department_id INT,
-        got_into_common_queue_time DATETIME NOT NULL,
-        start_chatting_time DATETIME NOT NULL,
-        PRIMARY KEY(id)
-    ) ENGINE = MEMORY;
-
-    TRUNCATE tmp_stats_service_level;
-
-    OPEN cur;
-    lbl:
-    LOOP
-        FETCH cur INTO v_cur_threadid, v_cur_department_id, v_cur_state, v_cur_time;
-        IF l_done = 1 THEN
-            LEAVE lbl;
-        END IF;
-
-        # Сбрасываем для каждого нового треда
+        -- Reset for each new thread
         IF v_prev_threadid <> v_cur_threadid THEN
-            SET v_start_time = 0;
-            SET v_end_time = 0;
+            v_start_time := NULL;
+            v_end_time := NULL;
         END IF;
 
-        # Если сначала чат попал на бота, то учитываем время попадания в очередь после бота.
-        # Не учитываем диалог, если он не был в состоянии chatting и был закрыт оператором.
+        -- Consider queue time after bot if chat initially went to a bot
+        -- Do not consider dialogue if it was not in the chatting state and was closed by the operator
         IF v_cur_state IN ('chatting_with_robot', 'closed_by_operator') THEN
-            SET v_start_time = 0;
-            SET v_end_time = 0;
+            v_start_time := NULL;
+            v_end_time := NULL;
         END IF;
 
-        IF v_cur_state IN ('queue') AND v_start_time = 0 THEN
-            SET v_start_time = v_cur_time;
+        IF v_cur_state = 'queue' AND v_start_time IS NULL THEN
+            v_start_time := v_cur_time;
         END IF;
 
-        IF v_cur_state IN ('chatting') AND v_start_time <> 0 THEN
-            SET v_end_time = (
-                SELECT created
-                FROM chatmessage
-                WHERE threadid = v_cur_threadid
-                  AND kind in (2, 10, 13)
-                  AND created > v_cur_time
-                ORDER BY created
-                LIMIT 1
-            );
+        IF v_cur_state = 'chatting' AND v_start_time IS NOT NULL THEN
+            SELECT MIN(created) INTO v_end_time
+            FROM chatmessage
+            WHERE threadid = v_cur_threadid
+              AND kind IN (2, 10, 13)
+              AND created > v_cur_time;
+
+            -- Handling if no records found
+            EXCEPTION
+                WHEN NO_DATA_FOUND THEN
+                    v_end_time := NULL;
         END IF;
 
-        IF v_start_time <> 0 AND v_end_time <> 0 THEN
+        IF v_start_time IS NOT NULL AND v_end_time IS NOT NULL THEN
             INSERT INTO tmp_stats_service_level (
                 threadid,
                 department_id,
@@ -90,10 +80,11 @@ BEGIN
                 v_start_time,
                 v_end_time
             );
-            SET v_start_time = 0;
-            SET v_end_time = 0;
+            v_start_time := NULL;
+            v_end_time := NULL;
         END IF;
-        SET v_prev_threadid = v_cur_threadid;
+
+        v_prev_threadid := v_cur_threadid;
     END LOOP;
-    CLOSE cur;
-END
+END;
+
