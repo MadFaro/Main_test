@@ -10,6 +10,7 @@ ffmpeg -i output2.wav -af "equalizer=f=1000:width_type=h:w=200:g=5" output3.wav
 ffmpeg -i output3.wav -af "crystalizer" output4.wav  
 
 
+
 CREATE OR REPLACE PROCEDURE tolog_temp_chst_sl
 (
     p_dtmfrom IN TIMESTAMP,
@@ -26,11 +27,17 @@ BEGIN
         CASE WHEN cth.state = 'queue' THEN cth.dtm END AS got_into_common_queue_time,
         CASE 
             WHEN cth.state = 'chatting' THEN
-                (SELECT MIN(created) 
-                 FROM ODS.ODS_WIS_CHATMESSAGE@cdw.prod 
-                 WHERE threadid = cth.threadid 
-                   AND kind IN (2, 10, 13) 
-                   AND created > cth.dtm)
+                MIN(
+                    CASE 
+                        WHEN cth.state = 'chatting' THEN 
+                            (SELECT MIN(created) 
+                             FROM ODS.ODS_WIS_CHATMESSAGE@cdw.prod 
+                             WHERE threadid = cth.threadid 
+                               AND kind IN (2, 10, 13) 
+                               AND created > cth.dtm)
+                        ELSE NULL
+                    END
+                ) OVER (PARTITION BY cth.threadid)
         END AS start_chatting_time
     FROM 
         ODS.ODS_WIS_CHATTHREADHISTORY@cdw.prod cth
@@ -41,12 +48,7 @@ BEGIN
         AND cth.dtm BETWEEN TRUNC(SYSDATE-1) AND TRUNC(SYSDATE)
         AND (
             cth.state = 'queue'
-            OR (cth.state = 'chatting' AND EXISTS (
-                SELECT 1 
-                FROM ODS.ODS_WIS_CHATMESSAGE@cdw.prod 
-                WHERE threadid = cth.threadid 
-                  AND kind IN (2, 10, 13) 
-                  AND created > cth.dtm
-            ))
+            OR cth.state = 'chatting'
         );
 END;
+
