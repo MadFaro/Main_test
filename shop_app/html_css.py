@@ -137,10 +137,9 @@
                                 transition: all 0.5s ease;}
 
                               .webio-tabs:hover{
-                              background: white;
-                                width: 57vh;
+                                width: 56vh;
                                 height: 77vh;
-                                border-radius: 11px;                           
+                                border-radius: 15px;                    
                               
                               }
                               #input-container{

@@ -97,7 +97,7 @@ async def noadmin(sdep, tab, fio, id):
         None,
     put_column(
         rows_grid).style('display:inline; width: 100%;height: 100%;')],
-                    size='9% 5% 81%').style('position: absolute;width: 100%;height: 100%;') 
+                    size='9% 5% 85%').style('position: absolute;width: 100%;height: 100%;') 
 
 # Функция для создания карточки товара
 async def render_product_card(product, sdep, tab):
@@ -227,11 +227,11 @@ async def admin(sdep, tab, fio, id):
     put_column([
         None,
         put_row([
-        put_button("add balance", onclick=lambda: chek_balance_users('admin', tab, fio, id), color='info').style('position:absolute;top:1%;right:5%;'),
+        put_button("user balance", onclick=lambda: chek_balance_users(df_user, 'admin', tab, fio, id), color='info').style('position:absolute;top:1%;right:5%;'),
         put_button("add product", onclick=lambda: add_product(df_product, sdep, tab, fio, id), color='info').style('position:absolute;top:1%;right:13%;'),
         put_button("   add user   ", onclick=lambda: add_user(df_user, sdep, tab, fio, id), color='info').style('position:absolute;top:1%;right:21%;'),
         put_button("   the store   ", onclick=lambda: noadmin(sdep, tab, fio, id), color='info').style('position:absolute;top:1%;right:29%;'),
-        put_button(f"     order {count}    ", onclick=lambda: chek_order('admin', tab, fio, id), color='info').style('position:absolute;top:1%;right:37%;'),
+        put_button(f"     order {count}    ", onclick=lambda: chek_order('admin', tab, fio, id), color='info').style("position:absolute;top:1%;right:37%;"), 
         ]),
         None,
     put_datatable(
@@ -304,7 +304,7 @@ async def chek_order(sdep, tab, fio, id):
                         size='9% 5% 81%').style('position: absolute;width: 100%;height: 100%;')
 
 # Основная функция администратора (работа с балансом)
-async def chek_balance_users(sdep, tab, fio, id):
+async def chek_balance_users(df_user, sdep, tab, fio, id):
     try:
         clear()
     except:
@@ -323,7 +323,7 @@ async def chek_balance_users(sdep, tab, fio, id):
     put_column([
         None,
         put_row([
-        put_button("add balance", onclick=lambda: chek_balance_users(sdep, tab, fio, id), color='info').style('position:absolute;top:1%;right:5%;'),
+        put_button("add balance", onclick=lambda: add_balans(df_user, sdep, tab, fio, id), color='info').style('position:absolute;top:1%;right:5%;'),
         put_button("     back      ", onclick=lambda: admin('admin', tab, fio, id), color='info').style('position:absolute;top:1%;right:13%;'),
             ]),
             None,
@@ -345,7 +345,7 @@ async def order_card_admin(row_id, df_order, df_product, sdep, tab, fio, id):
         price = df_product.loc[df_product['id'] == id_product, 'price'].values[0]
         with open(img, 'rb') as img_file:
             img_content = img_file.read()
-        return popup(f"Заказ {id_product}",[
+        return popup(f"Заказ {df_order[row_id]['id']}",[
                 put_text(f"Товар:{name}"),
                 put_image(img_content, width='100%', height="90%"),
                 put_text(f"Заказчик:{df_order[row_id]['login_customer']}"),
@@ -362,7 +362,7 @@ async def order_card_admin(row_id, df_order, df_product, sdep, tab, fio, id):
         price = df_product.loc[df_product['id'] == id_product, 'price'].values[0]
         with open(img, 'rb') as img_file:
             img_content = img_file.read()
-        return popup(f"Заказ {id_product}",[
+        return popup(f"Заказ {df_order[row_id]['id']}",[
                 put_text(f"Товар:{name}"),
                 put_image(img_content, width='100%', height="90%"),
                 put_text(f"Заказчик:{df_order[row_id]['login_customer']}"),
@@ -371,24 +371,33 @@ async def order_card_admin(row_id, df_order, df_product, sdep, tab, fio, id):
 
 # Функция для удаления данных из таблица продуктов
 async def delete_product_and_row(row_id, df, sdep, tab, fio, id):
-        row_bd = df[row_id]['id']
-        BotDS.delete_product(row_bd)
-        popup('Товар удален')
-        await admin('admin', tab, fio, id)
+        if len(df) == 1:
+            toast("Нельзя полностью удалить все записи")
+        else:
+            row_bd = df[row_id]['id']
+            BotDS.delete_product(row_bd)
+            popup('Товар удален')
+            await admin('admin', tab, fio, id)
 
 # Функция для удаления данных из таблицы пользователь
 async def delete_user_and_row(row_id, df, sdep, tab, fio, id):
-        row_bd = df[row_id]['index']
-        BotDS.delete_user(row_bd)
-        popup('Пользователь удален')
-        await admin('admin', tab, fio, id)
+        if len(df) == 1:
+            toast("Нельзя полностью удалить все записи")
+        else:
+            row_bd = df[row_id]['index']
+            BotDS.delete_user(row_bd)
+            popup('Пользователь удален')
+            await admin('admin', tab, fio, id)
 
 # Функция для удаления данных из таблицы пользователь
 async def delete_order(row_id, df, sdep, tab, fio, id):
-        row_bd = df[row_id]['id']
-        BotDS.delete_order(row_bd)
-        popup('Заказ удален')
-        await chek_order('admin', tab, fio, id)
+        if len(df) == 1:
+            toast("Нельзя полностью удалить все записи")
+        else:
+            row_bd = df[row_id]['id']
+            BotDS.delete_order(row_bd)
+            popup('Заказ удален')
+            await chek_order('admin', tab, fio, id)
 
 # Функция для удаления данных из таблицы пользователь
 async def update_order(row_id, df, sdep, tab, fio, id):
@@ -454,18 +463,14 @@ async def add_balans(df_user, sdep, tab, fio, id):
     try:
         clear()
         login_options = df_user['login'].tolist()
-        login_options.insert(0, 'ДДО')
-        login_options.insert(0, 'ДТ')
-        login_options.insert(0, 'Всем')
         info = await input_group("Отредактируй\Заполни поля ниже",[
                     select(name='login', label='Выберите кому начисляем', options=login_options),
-                    input(name = 'description', type=TEXT, label='Причина начисления', value=""),
                     input(name = 'price', type=NUMBER, label='Сколько начислить', value=0)
                     ])
         
-
-        popup('Баланс начислен',[f"{str(info['login'])} {str(info['description'])} {str(info['price'])}"])
-        await admin('admin', tab, fio, id)
+        BotDS.add_operation(operation_type='addition', product_id=0, login_customer=info['login'], value_operation=info['price'], status_operation='executed')
+        popup('Баланс начислен',[f"{str(info['login'])} {str(info['price'])}"])
+        await chek_balance_users(df_user, sdep, tab, fio, id)
     except:
         toast('Error - что то пошло не по плану:(', duration=0, position='center', color='error', onclick=lambda :run_js('window.location.reload()'))
 
