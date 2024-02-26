@@ -115,11 +115,17 @@ async def render_product_card(product, sdep, tab):
 async def order(id, name, img, price, description, sdep, tab):
     with open(img, 'rb') as img_file:
         img_content = img_file.read()
-    return popup(f"{name} - {price} руб.",[
-            put_image(img_content, width='100%', height="90%"),
-            put_text(f"Описание:\n{description}"),
-            put_button("Подтвердить заказ", onclick=lambda: order_add(id, description, sdep, tab, price), color='warning', outline=True).style('z-index:2147483647')
-        ])   
+    size_options = ['S', 'M', 'L', 'XL', 'XXL']
+    color_options = ['Черный', 'Белый', 'Красный']
+    return popup(f"{name} - {price} руб.",
+                 [
+                     put_image(img_content, width='100%', height="30%"),
+                     put_text(f"Описание:\n{description}"),
+                     put_row([
+                     put_select(name='size', label='Выберите размер:', options=size_options),None,
+                     put_select(name='color', label='Выберите цвет:', options=color_options),], size = '49% 2% 29%'),
+                    put_button("Подтвердить заказ", onclick=lambda: order_add(id, description, sdep, tab, price), color='warning', outline=True).style('z-index:2147483647')
+                 ], size='normal')
 
 # Аналогично только для админа
 async def order_admin(row_id, df, sdep):
@@ -142,9 +148,11 @@ async def order_add(id, description, sdep, tab, price):
             close_popup()
             toast('Недостаточно средств')
         else:
+            selected_size = await pin['size']
+            selected_color = await pin['color']
             BotDS.add_operation(operation_type='subtract', product_id=id, login_customer=tab, value_operation=-price, status_operation='accept')
             close_popup()
-            toast('Заказ принят')
+            toast(f'Заказ принят\nРазмер:{str(selected_size)}\nЦвет:{str(selected_color)}')
 
 # Аналогично для админа
 async def order_add_admin(row_id, df, sdep):
