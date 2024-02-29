@@ -79,7 +79,9 @@
                          product_id,
                          login,
                          price,
-                         img
+                         img,
+                         size,
+                         color
                     FROM basket
                     where login = 'Замена'
 

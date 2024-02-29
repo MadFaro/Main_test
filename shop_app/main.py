@@ -176,7 +176,7 @@ async def basket_render(tab):
         total_price = 0
         basket_data = []  # Создаем список для хранения данных о каждом товаре в корзине
         
-        for product_id, group_df in df.groupby('product_id'):
+        for (product_id, size, color), group_df in df.groupby(['product_id', 'size', 'color']):
             count = len(group_df) 
             img_url = open(group_df.iloc[0]['img'], 'rb').read()
             subtotal_price = group_df['price'].sum()
@@ -186,16 +186,20 @@ async def basket_render(tab):
                 'product_id': str(product_id),
                 'count': str(count),
                 'subtotal_price': str(subtotal_price),
-                'img': str(group_df.iloc[0]['img'])
+                'img': str(group_df.iloc[0]['img']),
+                'size': str(size),
+                'color': str(color)
             }
             basket_data.append(item_data)  # Добавляем данные о текущем товаре в список
         
             item_image = put_image(img_url, width='75px', height='75px')
-            item_text = put_text(f'{count}').style('text-align: center;')
-            item_price = put_text(f'{subtotal_price}').style('text-align: center;')
+            item_text = put_text(f'{count}').style('text-align: center;width: 50px; height: 20px;')
+            item_size = put_text(f'{size}').style('text-align: center;width: 50px; height: 20px;')
+            item_color = put_text(f'{color}').style('text-align: center;width: 100px; height: 20px;')
+            item_price = put_text(f'{subtotal_price}').style('text-align: center;width: 100px; height: 20px;')
             item_button = put_button("x", onclick=lambda: basket_delete_one(tab, product_id, group_df.iloc[0]['login']), color='danger', outline=True)
 
-            items.append(put_row([None, item_text, None, item_image, None, item_price, None, item_button, None], size='5% 10% 2% 40% 2% 15% 2% 10% 5%').style('display: flex;justify-content: space-between;align-items: center;'))
+            items.append(put_row([None, item_text, None, item_image, None, item_size, None, item_color, None, item_price, None, item_button, None], size='1% 10% 1% 35% 1% 10% 1% 10% 1% 10% 1% 10% 1%').style('display: flex;justify-content: space-between;align-items: center;'))
         
         json_data = json.dumps(basket_data)  # Сериализуем список данных о корзине в формат JSON
         
@@ -221,8 +225,14 @@ async def basket_delete_all(tab, product_id, login):
 
 # Функция добавлнения в корзину
 async def basket_add(id, img, tab, price, sdep, fio):
-    BotDS.add_basket(product_id=id, login_customer=tab, value_operation=price, img=img)
-    close_popup()
+    count = BotDS.get_basket_count(tab)
+    if int(count) < 5:
+        selectid_size = await pin['size']
+        selectid_color = await pin['color']
+        BotDS.add_basket(product_id=id, login_customer=tab, value_operation=price, img=img, size=selectid_size, color=selectid_color)
+        toast('Товар добавлен в корзину')
+    else:
+        toast('Максимум товаров в корзине 5')
 
 # функция принятия заказа
 async def basket_accept(json_data, tab, total_price):
@@ -312,10 +322,12 @@ async def order_open(sdep, tab, product_id, fio, id):
         total_price += subtotal_price
             
         item_image = put_image(img_url, width='75px', height='75px')
-        item_text = put_text(f'{count}').style('text-align: center;')
-        item_price = put_text(f'{subtotal_price}').style('text-align: center;')
+        item_text = put_text(f'{count}').style('text-align: center;50px; height: 20px;')
+        item_size = put_text(f'{item_data["size"]}').style('text-align: center;50px; height: 20px;')
+        item_color = put_text(f'{item_data["color"]}').style('text-align: center;100px; height: 20px;')
+        item_price = put_text(f'{subtotal_price}').style('text-align: center;100px; height: 20px;')
 
-        items.append(put_row([None, item_text, None, item_image, None, item_price, None], size='5% 10% 2% 40% 2% 15% 5%').style('display: flex;justify-content: space-between;align-items: center;'))
+        items.append(put_row([None, item_text, None, item_image, None, item_size, None, item_color, None, item_price, None], size='5% 10% 2% 35% 2% 10% 2% 10% 2% 10% 5%').style('display: flex;justify-content: space-between;align-items: center;'))
         
     total_text = put_column([None,None,None,None,None,None,None,None,None,None,None,None,
     put_text(f'Оплачено: {total_price}')])
@@ -347,10 +359,13 @@ async def order_open_admin(sdep, tab, product_id, fio, id):
         total_price += subtotal_price
             
         item_image = put_image(img_url, width='75px', height='75px')
-        item_text = put_text(f'{count}').style('text-align: center;')
-        item_price = put_text(f'{subtotal_price}').style('text-align: center;')
+        item_text = put_text(f'{count}').style('text-align: center;50px; height: 20px;')
+        item_size = put_text(f'{item_data["size"]}').style('text-align: center;50px; height: 20px;')
+        item_color = put_text(f'{item_data["color"]}').style('text-align: center;100px; height: 20px;')
+        item_price = put_text(f'{subtotal_price}').style('text-align: center;100px; height: 20px;')
 
-        items.append(put_row([None, item_text, None, item_image, None, item_price, None], size='5% 10% 2% 40% 2% 15% 5%').style('display: flex;justify-content: space-between;align-items: center;'))
+
+        items.append(put_row([None, item_text, None, item_image, None, item_size, None, item_color, None, item_price, None], size='5% 10% 2% 35% 2% 10% 2% 10% 2% 10% 5%').style('display: flex;justify-content: space-between;align-items: center;'))
         
     total_text = put_column([None,None,None,None,None,None,None,None,None,None,None,None,
     put_text(f'Заказчик: {df["login_customer"].iloc[0]}'),

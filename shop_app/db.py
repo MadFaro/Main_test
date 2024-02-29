@@ -35,6 +35,13 @@ class BotDB:
         except sqlite3.Error:
             return None
         
+    def get_basket_count(self, ID):
+        try:
+            result = self.cursor.execute("SELECT count(*) FROM `basket` WHERE `login` = ?", (ID,))
+            return result.fetchone()[0]
+        except sqlite3.Error:
+            return None
+                
     def get_order_count(self, ID):
         try:
             result = self.cursor.execute("SELECT count(*) FROM `operations` WHERE `status_operation` = ?", (ID,))
@@ -122,9 +129,9 @@ class BotDB:
             self.conn.rollback()
             return False          
 
-    def add_basket(self, product_id, login_customer, value_operation, img):
+    def add_basket(self, product_id, login_customer, value_operation, img, size, color):
         try:
-            self.cursor.execute('INSERT INTO `basket` (`product_id`, `login`, `price`, `img`) VALUES (?,?,?,?)', (product_id, login_customer, value_operation, img))
+            self.cursor.execute('INSERT INTO `basket` (`product_id`, `login`, `price`, `img`, `size`, `color`) VALUES (?,?,?,?,?,?)', (product_id, login_customer, value_operation, img, size, color))
             self.conn.commit()
             return True
         except sqlite3.Error:
