@@ -54,7 +54,7 @@
                          value_operation,
                          status_operation
                     FROM operations
-                    where operation_type != 'Начисление'
+                    where operation_type not in ('Начисление', 'test')
                     order by status_operation
                     
                """

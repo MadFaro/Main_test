@@ -20,7 +20,14 @@ class BotDB:
             return result.fetchone()[0]
         except sqlite3.Error:
             return None
-
+        
+    def get_user_block(self, ID):
+        try:
+            result = self.cursor.execute("SELECT `status` FROM `users` WHERE `login` = ?", (ID,))
+            return result.fetchone()[0]
+        except sqlite3.Error:
+            return None
+        
     def get_user_mot(self, ID):
         try:
             result = self.cursor.execute("SELECT `index`, `fio`, `sdep` FROM `users` WHERE `login` = ?", (ID,))
@@ -141,12 +148,22 @@ class BotDB:
     def update_user_password(self, login, new_password):
         try:
             self.cursor.execute("UPDATE `users` SET `pass` = ? WHERE `login` = ?", (new_password, login))
+            self.cursor.execute("UPDATE `users` SET `status` = ? WHERE `login` = ?", (1, login))
             self.conn.commit()
             return True
         except sqlite3.Error:
             self.conn.rollback()
             return False
-    
+        
+    def block_user(self, login, status):
+        try:
+            self.cursor.execute("UPDATE `users` SET `status` = ? WHERE `login` = ?", (status, login))
+            self.conn.commit()
+            return True
+        except sqlite3.Error:
+            self.conn.rollback()
+            return False
+   
     def update_order_status(self, status, id):
         try:
             self.cursor.execute("UPDATE `operations` SET `status_operation` = ? WHERE `id` = ?", (status, id))
