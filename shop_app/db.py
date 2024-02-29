@@ -52,7 +52,7 @@ class BotDB:
     def add_user(self, index, password, sdep, login, fio):
         try:
             self.cursor.execute('INSERT INTO `users` (`index`, `pass`, `sdep`, `login`, `fio`) VALUES (?,?,?,?,?)', (index, password, sdep, login, fio))
-            self.cursor.execute('INSERT INTO `operations` (`operation_type`, `product_id`, `login_customer`, `value_operation`, `status_operation`) VALUES (?,?,?,?,?)', ('test', 0, login, 0, 'test'))
+            self.cursor.execute('INSERT INTO `operations` (`operation_type`, `json`, `login_customer`, `value_operation`, `status_operation`) VALUES (?,?,?,?,?)', ('test', None, login, 0, 'test'))
             self.conn.commit()
             return True
         except sqlite3.Error:
@@ -94,16 +94,43 @@ class BotDB:
         except sqlite3.Error:
             self.conn.rollback()
             return False
-    
-    def add_operation(self, operation_type, product_id, login_customer, value_operation, status_operation):
+        
+    def delete_one_product_basket(self, ID, Login):
         try:
-            self.cursor.execute('INSERT INTO `operations` (`operation_type`, `product_id`, `login_customer`, `value_operation`, `status_operation`) VALUES (?,?,?,?,?)', (operation_type, product_id, login_customer, value_operation, status_operation))
+            self.cursor.execute("delete FROM `basket` WHERE `product_id` = ? and `login` = ?", (ID, Login))
             self.conn.commit()
             return True
         except sqlite3.Error:
             self.conn.rollback()
             return False
-              
+        
+    def delete_all_product_basket(self, Login):
+        try:
+            self.cursor.execute("delete FROM `basket` WHERE `login` = ?", (Login,))
+            self.conn.commit()
+            return True
+        except sqlite3.Error:
+            self.conn.rollback()
+            return False   
+             
+    def add_operation(self, operation_type, json, login_customer, value_operation, status_operation):
+        try:
+            self.cursor.execute('INSERT INTO `operations` (`operation_type`, `json`, `login_customer`, `value_operation`, `status_operation`) VALUES (?,?,?,?,?)', (operation_type, json, login_customer, value_operation, status_operation))
+            self.conn.commit()
+            return True
+        except sqlite3.Error:
+            self.conn.rollback()
+            return False          
+
+    def add_basket(self, product_id, login_customer, value_operation, img):
+        try:
+            self.cursor.execute('INSERT INTO `basket` (`product_id`, `login`, `price`, `img`) VALUES (?,?,?,?)', (product_id, login_customer, value_operation, img))
+            self.conn.commit()
+            return True
+        except sqlite3.Error:
+            self.conn.rollback()
+            return False
+                      
     def update_user_password(self, login, new_password):
         try:
             self.cursor.execute("UPDATE `users` SET `pass` = ? WHERE `login` = ?", (new_password, login))
@@ -113,9 +140,9 @@ class BotDB:
             self.conn.rollback()
             return False
     
-    def update_order_status(self, login):
+    def update_order_status(self, status, id):
         try:
-            self.cursor.execute("UPDATE `operations` SET `status_operation` = ? WHERE `id` = ?", ('executed', login))
+            self.cursor.execute("UPDATE `operations` SET `status_operation` = ? WHERE `id` = ?", (status, id))
             self.conn.commit()
             return True
         except sqlite3.Error:

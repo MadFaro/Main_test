@@ -25,24 +25,36 @@
                     SELECT id,
                          datetime_insert,
                          operation_type,
-                         product_id,
+                         json,
                          login_customer,
                          value_operation,
                          status_operation
                     FROM operations
                     where login_customer = 'Замена' and operation_type != 'test'
                """
-
-    sql_order = """
+    
+    sql_operations_one = """
                     SELECT id,
                          datetime_insert,
                          operation_type,
-                         product_id,
+                         json,
                          login_customer,
                          value_operation,
                          status_operation
                     FROM operations
-                    where product_id>=1
+                    where id = Замена
+               """
+    
+    sql_order = """
+                    SELECT id,
+                         datetime_insert,
+                         operation_type,
+                         json,
+                         login_customer,
+                         value_operation,
+                         status_operation
+                    FROM operations
+                    where operation_type != 'Начисление'
                     order by status_operation
                     
                """
@@ -50,16 +62,25 @@
                     SELECT count(*)
                          status_operation
                     FROM operations
-                    where status_operation = 'accept'
+                    where status_operation = 'Принят'
                     """
     sql_balance = """
                     SELECT id,
                          datetime_insert,
                          operation_type,
-                         product_id,
                          login_customer,
                          value_operation,
                          status_operation
                     FROM operations
-                    where operation_type = 'addition'
+                    where operation_type = 'Начисление'
+               """
+    sql_basket = """
+                    SELECT 
+                         product_id,
+                         login,
+                         price,
+                         img
+                    FROM basket
+                    where login = 'Замена'
+
                """

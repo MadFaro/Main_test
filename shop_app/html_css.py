@@ -31,8 +31,7 @@
                               .modal-title {
                                 font-family: Svyaznoy Sans Light;
                                 font-weight: 1000;
-                                }
-                         
+                                }                       
                               }
                               .btn-outline-primary {
                                 border-color: #dc354500;}
@@ -106,9 +105,10 @@
                                 filter: hue-rotate(10deg);}
 
 			                        .webio-tabs > input[type=radio]:checked + label {
-				                        font-size:0.8vw;
+                                border-bottom: 2px solid #9d00fff7;
+				                        font-size:0.9vw;
                                 font-weight: 1000;}
-
+                                
                               .webio-tabs > input[type=radio]:checked + label:hover {
                                 cursor: default;
 				                        background:white;}
