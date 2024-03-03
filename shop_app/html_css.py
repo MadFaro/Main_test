@@ -16,6 +16,7 @@
                               .btn-link, .btn-link:hover {
                                 color: #ffffff;
                                 font: menu;
+                                font-size: max(0.5vw, 10px);
                                 padding:0rem;
                                 width: 100%;
                                 height: 100%;
@@ -94,4 +95,10 @@
                   {{& pywebio_output_parse}}
               {{/contents}}
           </tab>
+          '''
+
+          footer = '''
+          <footer class="footer">
+          Powered by
+          </forret>
           '''

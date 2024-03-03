@@ -108,17 +108,18 @@ async def noadmin(sdep, tab, fio, id):
     else:
         put_row([
             None,
-            put_text('\U0001F69B Доставим в офис по всей стране').style('margin-top: 0.5em;'),
+            put_text('\U0001F69B Доставим в любой офис по всей стране').style('margin-top: 0.8em;'),
             None,
-            put_button(" Проект ", onclick=lambda: toast('что-то будет'), color='light', link_style=True),
-            put_button("Контакты", onclick=lambda: toast('что-то будет'), color='light', link_style=True)
-        ]).style('background:black;grid-template-columns:0.01fr 0.5fr 1fr 0.05fr 0.1fr;color: white;font-size: smaller;')
+            put_button("Проект", onclick=lambda: toast('что-то будет'), color='light', link_style=True),
+            put_button("Контакты", onclick=lambda: toast('что-то будет'), color='light', link_style=True),
+            put_button("Доставка", onclick=lambda: toast('что-то будет'), color='light', link_style=True)
+        ]).style('background:black;grid-template-columns:0.01fr 0.5fr 1fr 0.1fr 0.1fr 0.1fr;color: white;font-size: max(0.5vw, 10px);')
         put_row([
-        put_button("\U0001F3E0 Главная", onclick=lambda: noadmin(sdep, tab, fio, id), color='dark', outline=True),
-        put_button("\U0001F4CA Заказы ", onclick=lambda: my_order(sdep, tab, fio, id), color='dark', outline=True),
+        put_button("\U0001F3E0\r\nГлавная", onclick=lambda: noadmin(sdep, tab, fio, id), color='dark', outline=True),
+        put_button("\U0001F4CA\r\nИстория", onclick=lambda: my_order(sdep, tab, fio, id), color='dark', outline=True),
         put_image(img_logo, width='auto', height='auto').style('place-self: center;'),
-        put_button("\U0001F4B3 Кошелек", onclick=lambda: my_balance(tab, fio), color='dark', outline=True),
-        put_button("\U0001F6D2 Корзина", onclick=lambda: basket_render(tab), color='dark', outline=True)]).style('padding:0.4em;background:rgb(255 255 255);grid-template-columns:0.1fr 0.1fr 1fr 0.1fr 0.1fr;')
+        put_button("\U0001F4B3\r\nКошелек", onclick=lambda: my_balance(tab, fio), color='dark', outline=True),
+        put_button("\U0001F6D2\r\nКорзина", onclick=lambda: basket_render(tab), color='dark', outline=True)]).style('padding:0.4em;background:rgb(255 255 255);grid-template-columns:0.01fr 0.01fr 1fr 0.01fr 0.01fr;')
         put_image(img_ban, width='auto', height='auto').style('width:100%')
     put_row([
     put_column([
@@ -134,7 +135,7 @@ async def noadmin(sdep, tab, fio, id):
         {'title': '\U0001F6CD Прочее', 'content': 
         [put_column(rows_grid)]},
         {'title': '\U0001F6CD Прочее', 'content': 
-        [put_column(rows_grid)]}
+        [put_column(rows_grid)]},
        ]).style("width:100%;height:100%;transform:translateY(-5px);border-color:white;justify-content:center;")], size='auto')]
             ,size='auto').style('position:absolute;width:100%;height:100%')
 
@@ -314,7 +315,7 @@ async def my_order(sdep, tab, fio, id):
     else:
         put_row([
         None,
-        put_button("\U0001F3E0 Главная", onclick=lambda: noadmin(sdep, tab, fio, id), color='dark', outline=True).style('font-size: 2vh')]).style('padding:0.4em;background:rgb(255 255 255);grid-template-columns:1fr 0.1fr;')
+        put_button("\U0001F3E0\r\nГлавная", onclick=lambda: noadmin(sdep, tab, fio, id), color='dark', outline=True).style('font-size: 2vh')]).style('padding:0.4em;background:rgb(255 255 255);grid-template-columns:1fr 0.1fr;')
                 
         put_row([
             None,
@@ -675,4 +676,4 @@ async def add_balans(df_user, sdep, tab, fio, id):
 
 # Вызов
 if __name__ == '__main__':
-    start_server(main, host = 'localhost', port = 8080, cdn=True, secure=True)
+    start_server(main, host = 'localhost', port = 8080, debug = True, cdn=True, secure=True)
