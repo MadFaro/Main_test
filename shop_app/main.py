@@ -17,7 +17,7 @@ import json
 BotDS = BotDB('Convert/db/shop.db')
 
 # Авторизация
-@config(theme = 'minty', css_style = css.container_output, description='shop', title='shop')
+@config(theme = 'yeti', css_style = css.container_output, description='shop', title='shop')
 async def main():
 
     invalid_password_attempts = 0
@@ -102,10 +102,9 @@ async def noadmin(sdep, tab, fio, id):
     for i in range(0, len(product_cards), 5):
         row_items = product_cards[i:i+5]
         rows.append(row_items)
-
-    rows_grid = put_grid(rows).style('justify-content:center;gap:15px;')
+    rows_grid = put_grid(rows, cell_width='auto', cell_height='auto').style('justify-content:center;gap:1vh;grid-template-columns: repeat(auto-fill, minmax(200px, calc(100% / 6)));')
     if sdep == 'admin':
-        put_button("    Admin panel", onclick=lambda: admin(sdep, tab, fio, id), color='info').style('position:fixed;left:0%;top:37%;z-index:2147483647')
+        put_button("  Admin Panel   ", onclick=lambda: admin(sdep, tab, fio, id), color='info').style('position:absolute;left:0%;top:0.5%;z-index:2147483647')
     else:
         put_row([
             None,
@@ -116,20 +115,25 @@ async def noadmin(sdep, tab, fio, id):
         ]).style('background:black;grid-template-columns:0.01fr 0.5fr 1fr 0.05fr 0.1fr;color: white;font-size: smaller;')
         put_row([
         put_button("\U0001F3E0 Главная", onclick=lambda: noadmin(sdep, tab, fio, id), color='dark', outline=True),
-        None,
-        put_image(img_logo),
+        put_button("\U0001F4CA Заказы ", onclick=lambda: my_order(sdep, tab, fio, id), color='dark', outline=True),
+        put_image(img_logo, width='auto', height='auto').style('place-self: center;'),
         put_button("\U0001F4B3 Кошелек", onclick=lambda: my_balance(tab, fio), color='dark', outline=True),
-        put_button("\U0001F6D2 Корзина", onclick=lambda: basket_render(tab), color='dark', outline=True),
-        put_button("\U0001F4CA Заказы ", onclick=lambda: my_order(sdep, tab, fio, id), color='dark', outline=True)]).style('padding:0.4em;background:rgb(255 255 255);grid-template-columns:0.1fr 1fr 1fr 0.1fr 0.1fr;')
+        put_button("\U0001F6D2 Корзина", onclick=lambda: basket_render(tab), color='dark', outline=True)]).style('padding:0.4em;background:rgb(255 255 255);grid-template-columns:0.1fr 0.1fr 1fr 0.1fr 0.1fr;')
         put_image(img_ban, width='auto', height='auto').style('width:100%')
     put_row([
     put_column([
         put_tabs([
-        {'title':'Одежда', 'content':
+        {'title':'\U0001F458 Одежда', 'content':
         [put_column(rows_grid)]},
-        {'title': 'Техника', 'content': 
+        {'title': '\U0001F5A5 Техника', 'content': 
         [put_column(rows_grid)]},
-        {'title': 'Что-то еще', 'content': 
+        {'title': '\U0001F6CD Прочее', 'content': 
+        [put_column(rows_grid)]},
+        {'title': '\U0001F6CD Прочее', 'content': 
+        [put_column(rows_grid)]},
+        {'title': '\U0001F6CD Прочее', 'content': 
+        [put_column(rows_grid)]},
+        {'title': '\U0001F6CD Прочее', 'content': 
         [put_column(rows_grid)]}
        ]).style("width:100%;height:100%;transform:translateY(-5px);border-color:white;justify-content:center;")], size='auto')]
             ,size='auto').style('position:absolute;width:100%;height:100%')
@@ -137,11 +141,10 @@ async def noadmin(sdep, tab, fio, id):
 # Функция для создания карточки товара
 async def render_product_card(product, sdep, tab, fio):
     img_content = open(product['img'], 'rb').read()
-    return put_tabs([{'title': f"{str(product['name'])}", 'content':[
+    return put_tabs([{'title': f"{str(product['name'])} - {product['price']}", 'content':[
         put_column([
-        put_image(img_content, width='100%', height="100%"),
-        put_text(f"{product['price']} руб").style('height:100%;width:100%;text-align: center;')
-        ]).style('grid-template-rows:1fr 0.1fr'),
+        put_image(img_content, width='100%', height="100%")
+        ]).style('grid-template-rows:1fr'),
         put_button("", onclick=lambda: order(str(product['id']), str(product['name']),product['img'], product['price'], product['description'], sdep, tab, fio), 
                    color='dark', outline=True).style('position:absolute;top:0%;right:0%;filter:opacity(0.5);font-size:1vw;height: 100%;width: 100%;')
     ]}]).style('grid-column: span 1; grid-row: span 1;display: block;')
@@ -426,7 +429,7 @@ async def admin(sdep, tab, fio, id):
         toast(f"Пароль для пользователя {user_login} сброшен на 123456")
 
     # Отображаем таблицу
-    put_button("    Admin Panel                             ", onclick=lambda: admin(sdep, tab, fio, id), color='info').style('position:absolute;left:0%;top:0.5%;z-index:2147483647')
+    put_button("  Admin Panel   ", onclick=lambda: admin(sdep, tab, fio, id), color='info').style('position:absolute;left:0%;top:0.5%;z-index:2147483647')
     put_row([
             #Сайд бар
             put_widget(css.tpl, {'contents':[
@@ -436,12 +439,13 @@ async def admin(sdep, tab, fio, id):
     put_column([
         None,
         put_row([
-        put_button("user balance", onclick=lambda: chek_balance_users(df_user, 'admin', tab, fio, id), color='info').style('position:absolute;top:1%;right:5%;'),
-        put_button("add product", onclick=lambda: add_product(df_product, sdep, tab, fio, id), color='info').style('position:absolute;top:1%;right:13%;'),
-        put_button("   add user   ", onclick=lambda: add_user(df_user, sdep, tab, fio, id), color='info').style('position:absolute;top:1%;right:21%;'),
-        put_button("   the store   ", onclick=lambda: noadmin(sdep, tab, fio, id), color='info').style('position:absolute;top:1%;right:29%;'),
-        put_button(f"     order {count}    ", onclick=lambda: chek_order('admin', tab, fio, id), color='info').style("position:absolute;top:1%;right:37%;"), 
-        ]),
+        None,
+        put_button(f"     order {count}    ", onclick=lambda: chek_order('admin', tab, fio, id), color='primary', outline=True).style('width:100%;height:100%;padding:0.5em;'), 
+        put_button("   the store   ", onclick=lambda: noadmin(sdep, tab, fio, id), color='primary', outline=True).style('width:100%;height:100%;padding:0.5em;'),
+        put_button("add product", onclick=lambda: add_product(df_product, sdep, tab, fio, id), color='primary', outline=True).style('width:100%;height:100%;padding:0.5em;'),
+        put_button("   add user   ", onclick=lambda: add_user(df_user, sdep, tab, fio, id), color='primary', outline=True).style('width:100%;height:100%;padding:0.5em;'),
+        put_button("user balance", onclick=lambda: chek_balance_users(df_user, 'admin', tab, fio, id), color='primary', outline=True).style('width:100%;height:100%;padding:0.5em;'),
+        ]).style("display:grid;grid-template-columns:1fr"),
         None,
     put_datatable(
         df_product.to_dict(orient='records'),
@@ -465,7 +469,7 @@ async def admin(sdep, tab, fio, id):
         height='35vh'
     ).style('display:table'),
     ])
-    ], size='2% 3% 3% 40% 5% 40%')],
+    ], size='2% 5% 3% 40% 5% 40%')],
                     size='9% 5% 81%').style('position: absolute;width: 100%;height: 100%;')
 
 # Основная функция администратора (работа с заказами)
@@ -492,7 +496,7 @@ async def chek_order(sdep, tab, fio, id):
         await admin(sdep, tab, fio, id)
     else:
         # Отображаем таблицу
-        put_button("    Admin Panel                             ", onclick=lambda: admin(sdep, tab, fio, id), color='info').style('position:absolute;left:0%;top:0.5%;z-index:2147483647')
+        put_button("  Admin Panel   ", onclick=lambda: admin(sdep, tab, fio, id), color='info').style('position:absolute;left:0%;top:0.5%;z-index:2147483647')
         put_row([
                 #Сайд бар
                 put_widget(css.tpl, {'contents':[
@@ -502,9 +506,10 @@ async def chek_order(sdep, tab, fio, id):
         put_column([
             None,
             put_row([
-            put_button("   the store   ", onclick=lambda: noadmin(sdep, tab, fio, id), color='info').style('position:absolute;top:1%;right:5%;'),
-            put_button("     back      ", onclick=lambda: admin(sdep, tab, fio, id), color='info').style('position:absolute;top:1%;right:13%;'),
-            ]),
+            None,
+            put_button("   the store   ", onclick=lambda: noadmin(sdep, tab, fio, id), color='primary', outline=True).style('width:100%;height:100%;padding:0.5em;'),
+            put_button("     back      ", onclick=lambda: admin(sdep, tab, fio, id), color='primary', outline=True).style('width:100%;height:100%;padding:0.5em;'),
+            ]).style("display:grid;grid-template-columns:1fr"),
             None,
         put_datatable(
             df_order_site.to_dict(orient='records'),
@@ -513,7 +518,7 @@ async def chek_order(sdep, tab, fio, id):
             height='80vh',
             onselect=delete_wrapper_order,
         ).style('display:table'),
-        ], size='2% 3% 3% 85%')],
+        ], size='2% 5% 3% 85%')],
                         size='9% 5% 81%').style('position: absolute;width: 100%;height: 100%;')
 
 # Основная функция администратора (работа с балансом)
@@ -526,7 +531,7 @@ async def chek_balance_users(df_user, sdep, tab, fio, id):
     df_balance = pd.read_sql(sql.sql_balance, connect("Convert/db/shop.db"))
 
         # Отображаем таблицу
-    put_button("    Admin Panel                             ", onclick=lambda: admin(sdep, tab, fio, id), color='info').style('position:absolute;left:0%;top:0.5%;z-index:2147483647')
+    put_button("  Admin Panel   ", onclick=lambda: admin(sdep, tab, fio, id), color='info').style('position:absolute;left:0%;top:0.5%;z-index:2147483647')
     put_row([
                 #Сайд бар
             put_widget(css.tpl, {'contents':[
@@ -536,9 +541,10 @@ async def chek_balance_users(df_user, sdep, tab, fio, id):
     put_column([
         None,
         put_row([
-        put_button("add balance", onclick=lambda: add_balans(df_user, sdep, tab, fio, id), color='info').style('position:absolute;top:1%;right:5%;'),
-        put_button("     back      ", onclick=lambda: admin('admin', tab, fio, id), color='info').style('position:absolute;top:1%;right:13%;'),
-            ]),
+        None,
+        put_button("add balance", onclick=lambda: add_balans(df_user, sdep, tab, fio, id), color='primary', outline=True).style('width:100%;height:100%;padding:0.5em;'),
+        put_button("     back      ", onclick=lambda: admin('admin', tab, fio, id), color='primary', outline=True).style('width:100%;height:100%;padding:0.5em;'),
+            ]).style("display:grid;grid-template-columns:1fr"),
             None,
     put_datatable(
         df_balance.to_dict(orient='records'),
@@ -546,7 +552,7 @@ async def chek_balance_users(df_user, sdep, tab, fio, id):
         instance_id='balance',
         height='80vh'
         ).style('display:table'),
-        ], size='2% 3% 3% 85%')],
+        ], size='2% 5% 3% 85%')],
                         size='9% 5% 81%').style('position: absolute;width: 100%;height: 100%;')  
 
 
@@ -669,4 +675,4 @@ async def add_balans(df_user, sdep, tab, fio, id):
 
 # Вызов
 if __name__ == '__main__':
-    start_server(main, host = 'localhost', port = 8080, debug = True, cdn=True, secure=True)
+    start_server(main, host = 'localhost', port = 8080, cdn=True, secure=True)
