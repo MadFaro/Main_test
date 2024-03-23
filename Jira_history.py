@@ -1,1 +1,10 @@
-
+outputs = model.generate(input_ids, 
+                         max_length=100, 
+                         min_length=50, 
+                         length_penalty=2.0, 
+                         num_beams=4, 
+                         early_stopping=True,
+                         do_sample=True,
+                         temperature=0.7,
+                         repetition_penalty=2.0,
+                         top_k=50)
