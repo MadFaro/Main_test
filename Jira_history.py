@@ -1,10 +1,5 @@
-outputs = model.generate(input_ids, 
-                         max_length=100, 
-                         min_length=50, 
-                         length_penalty=2.0, 
-                         num_beams=4, 
-                         early_stopping=True,
-                         do_sample=True,
-                         temperature=0.7,
-                         repetition_penalty=2.0,
-                         top_k=50)
+# Преобразуем каждый объект времени в количество секунд
+df['time_as_seconds'] = df['time_column'].apply(lambda x: x.hour * 3600 + x.minute * 60 + x.second)
+
+# Преобразуем каждый объект времени во float (количество секунд) для удобства использования
+df['time_as_float'] = df['time_as_seconds'].astype(float)
