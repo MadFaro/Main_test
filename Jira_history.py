@@ -10,23 +10,18 @@ left join cmdm2.CLIENT_AGR_ID_X_CLIENT_DID d on a.client_id = d.client_kih_id
 where TYPE = 'Вызов - входящий'
 group by trunc(DT), CLIENT_DID)
 select
-months_between(trunc(ACC_OPEN_DT, 'mm'), trunc(ACC_CLOSE_DT, 'mm')) as mm_bet,
+CASE WHEN trunc(ACC_OPEN_DT, 'mm') IS NOT NULL AND trunc(ACC_CLOSE_DT, 'mm') IS NOT NULL THEN months_between(trunc(ACC_OPEN_DT, 'mm'), trunc(ACC_CLOSE_DT, 'mm')) / 12 ELSE NULL END as mm_bet,
 a.CONTRACT_UID, a.ACC_NUM, a.CONTRACT_NUM, a.ACC_CLOSE_DT, a.ACC_OPEN_DT, a.STATUS_NM, a.CLIENT_ID, a.CLIENT_DID,
 a.REPORT_MONTH, a.PIL, a.AUTO, a.MORT, a.CONTRACT_CC, a.CONTRACT_OVER, a.CREDIT_CARD, a.DEBIT_CARD, a.DC_CL, a.TERM_DEPOSIT, 
 a.DVS, a.REPAYMENT_ANNUITET, a.CURRENT_ACCOUNT, a.REPAYMENT_CC, a.IS_NTB, a.CLIENT_SEGMENT, a.RETAIL_SEG,a.PRIOR_PRODUCT, a.MACROFILIAL, 
-sum(b.unic_cnt) as have_chat,
-sum(b.cnt) as have_sum_chat,
-sum(f.unic_cnt) as have_calls,
-sum(f.cnt) as have_sum_calls
+sum(NVL(b.unic_cnt, 0)) as have_chat,
+sum(NVL(b.cnt, 0)) as have_sum_chat,
+sum(NVL(f.unic_cnt, 0)) as have_calls,
+sum(NVL(f.cnt, 0)) as have_sum_calls
 from analytics.tolog_cr_new_product_live a
 left join tab_chat b on a.CLIENT_DID = b.CLIENT_DID and a.ACC_OPEN_DT <= b.created  and a.ACC_CLOSE_DT >= b.created  
 left join tab_calls f on a.CLIENT_DID = f.CLIENT_DID and a.ACC_OPEN_DT <= f.dt and a.ACC_CLOSE_DT >= f.dt
-group by months_between(trunc(ACC_OPEN_DT, 'mm'), trunc(ACC_CLOSE_DT, 'mm'))/12,
+group by CASE WHEN trunc(ACC_OPEN_DT, 'mm') IS NOT NULL AND trunc(ACC_CLOSE_DT, 'mm') IS NOT NULL THEN months_between(trunc(ACC_OPEN_DT, 'mm'), trunc(ACC_CLOSE_DT, 'mm')) / 12 ELSE NULL END,
 a.CONTRACT_UID, a.ACC_NUM, a.CONTRACT_NUM, a.ACC_CLOSE_DT, a.ACC_OPEN_DT, a.STATUS_NM, a.CLIENT_ID, a.CLIENT_DID,
 a.REPORT_MONTH, a.PIL, a.AUTO, a.MORT, a.CONTRACT_CC, a.CONTRACT_OVER, a.CREDIT_CARD, a.DEBIT_CARD, a.DC_CL, a.TERM_DEPOSIT, 
-a.DVS, a.REPAYMENT_ANNUITET, a.CURRENT_ACCOUNT, a.REPAYMENT_CC, a.IS_NTB, a.CLIENT_SEGMENT, a.RETAIL_SEG,a.PRIOR_PRODUCT, a.MACROFILIAL
-Error report -
-ORA-01722: неверное число
-01722. 00000 -  "invalid number"
-*Cause:    The specified number was invalid.
-*Action:   Specify a valid number.
+a.DVS, a.REPAYMENT_ANNUITET, a.CURRENT_ACCOUNT, a.REPAYMENT_CC, a.IS_NTB, a.CLIENT_SEGMENT, a.RETAIL_SEG,a.PRIOR_PRODUCT, a.MACROFILIAL;
