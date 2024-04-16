@@ -1,9 +1,8 @@
-SELECT a.OWNER as owner,
-       a.object_name AS procedure_name,
-       SUBSTR(b.text, INSTR(b.text, '@', 1) + 1, 
-              INSTR(SUBSTR(b.text, INSTR(b.text, '@', 1)), ' ') - 1) AS table_name
-FROM all_objects a
-JOIN all_source b ON a.object_name = b.name
-WHERE a.object_type = 'PROCEDURE'
-  AND (LOWER(a.object_name) LIKE '%np%' OR LOWER(a.object_name) LIKE '%rap%')
-  AND b.text LIKE '%@%';
+select /*+parallel(4)*/
+PROC_ID,PHONE_NUMBER,FORM_FIELD_NAME_VALUE,FORM_FIELD_SURNAME_VALUE,
+FORM_FIELD_MIDDLENAME_VALUE,FORM_FIELD_BD_VALUE,
+FORM_FIELD_EMAIL_VALUE,PRIORITY,
+PRODUCT,FORM_SITE_URL,
+CREATE_DATE,CONTACT_ID,
+UPDATE_DATE,STATUS
+from UNICA_BIZ_ADM.V_INCOMPLETE_CC_ORDERS_PHONES@cvm
