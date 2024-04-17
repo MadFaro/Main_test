@@ -26,7 +26,7 @@ FROM (
     SELECT
         operator_id,
         visitor_id,
-        chat_date - LAG(chat_date) OVER (PARTITION BY operator_id, visitor_id ORDER BY chat_date) * 24 * 60 AS time_interval_minutes
+        (chat_date - LAG(chat_date) OVER (PARTITION BY operator_id, visitor_id ORDER BY chat_date)) * 24 * 60 AS time_interval_minutes
     FROM
         chat_intervals
 ) intervals
