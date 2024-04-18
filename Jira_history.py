@@ -26,11 +26,7 @@ TimeSlots AS (
 
 SELECT 
     TO_CHAR(TimeSlots.hour_slot, 'YYYY-MM-DD HH24:MI') AS hour_slot,
-    COUNT(DISTINCT CASE 
-                        WHEN TimeSlots.hour_slot >= HourlyLogins.login_hour AND 
-                             (TimeSlots.hour_slot < HourlyLogins.next_login_hour OR HourlyLogins.next_login_hour IS NULL)
-                        THEN HourlyLogins.OPERATORID
-                    END) AS operators_count
+    COUNT(DISTINCT OPERATORID) AS operators_count
 FROM
     TimeSlots
 LEFT JOIN
