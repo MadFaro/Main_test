@@ -1,20 +1,20 @@
+WITH HourSequence AS (
+  SELECT TRUNC(SYSDATE, 'HH24') + (LEVEL - 1)/24 AS hour_slot
+  FROM dual
+  CONNECT BY LEVEL <= 24
+)
+
 SELECT 
-    TO_CHAR(h.hour_slot, 'YYYY-MM-DD HH24:MI') AS hour_slot,
+    TO_CHAR(HourSequence.hour_slot, 'YYYY-MM-DD HH24:MI') AS hour_slot,
     COUNT(DISTINCT operatorfullname) AS operators_count
 FROM
-    (SELECT TRUNC(dtm, 'HH24') + (LEVEL - 1)/24 AS hour_slot
-     FROM dual
-     CONNECT BY TRUNC(dtm, 'HH24') + (LEVEL - 1)/24 < TRUNC(SYSDATE) + 1) h
+    HourSequence
 LEFT JOIN
-    (SELECT operatorfullname,
-            TRUNC(dtm, 'HH24') + (LEVEL - 1)/24 AS hour_slot
-     FROM your_table_name
-     WHERE actiontype = 'login'
-     CONNECT BY PRIOR operatorfullname = operatorfullname
-                AND PRIOR TRUNC(dtm, 'HH24') + (LEVEL - 1)/24 < TRUNC(dtm, 'HH24') + 1) logins
+    your_table_name
 ON
-    h.hour_slot = logins.hour_slot
+    HourSequence.hour_slot BETWEEN your_table_name.entry_time AND NVL(your_table_name.logout_time, SYSDATE)
+    AND your_table_name.actiontype = 'login'
 GROUP BY
-    TO_CHAR(h.hour_slot, 'YYYY-MM-DD HH24:MI')
+    HourSequence.hour_slot
 ORDER BY
     hour_slot;
