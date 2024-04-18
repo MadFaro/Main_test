@@ -1,4 +1,4 @@
-WITH TimeSlots AS (
+WITH TimeRange AS (
     SELECT 
         TRUNC(MIN(DTM), 'HH24') AS min_time,
         TRUNC(MAX(DTM), 'HH24') AS max_time
@@ -15,31 +15,30 @@ HourlyLogins AS (
     WHERE 
         ACTIONTYPE = 'login'
 ),
-TimeRange AS (
+TimeSlots AS (
     SELECT 
         min_time + (LEVEL - 1)/24 AS hour_slot
     FROM 
-        TimeSlots
+        TimeRange
     CONNECT BY 
         min_time + (LEVEL - 1)/24 <= max_time
 )
 
 SELECT 
-    TO_CHAR(TimeRange.hour_slot, 'YYYY-MM-DD HH24:MI') AS hour_slot,
+    TO_CHAR(TimeSlots.hour_slot, 'YYYY-MM-DD HH24:MI') AS hour_slot,
     COUNT(DISTINCT CASE 
-                        WHEN TimeRange.hour_slot >= HourlyLogins.login_hour AND 
-                             (TimeRange.hour_slot < HourlyLogins.next_login_hour OR HourlyLogins.next_login_hour IS NULL)
+                        WHEN TimeSlots.hour_slot >= HourlyLogins.login_hour AND 
+                             (TimeSlots.hour_slot < HourlyLogins.next_login_hour OR HourlyLogins.next_login_hour IS NULL)
                         THEN HourlyLogins.OPERATORID
                     END) AS operators_count
 FROM
-    TimeRange
+    TimeSlots
 LEFT JOIN
     HourlyLogins
 ON
-    TimeRange.hour_slot >= HourlyLogins.login_hour AND 
-    (TimeRange.hour_slot < HourlyLogins.next_login_hour OR HourlyLogins.next_login_hour IS NULL)
+    TimeSlots.hour_slot >= HourlyLogins.login_hour AND 
+    (TimeSlots.hour_slot < HourlyLogins.next_login_hour OR HourlyLogins.next_login_hour IS NULL)
 GROUP BY
-    TimeRange.hour_slot
+    TimeSlots.hour_slot
 ORDER BY
     hour_slot;
-
