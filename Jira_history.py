@@ -30,7 +30,8 @@ SELECT
     TO_CHAR(TimeSlots.hour_slot, 'YYYY-MM-DD HH24:MI') AS hour_slot,
     COUNT(DISTINCT CASE 
                         WHEN TimeSlots.hour_slot >= HourlyLogins.login_hour AND 
-                             (TimeSlots.hour_slot < HourlyLogins.logout_hour OR HourlyLogins.logout_hour IS NULL)
+                             (TimeSlots.hour_slot < HourlyLogins.logout_hour OR HourlyLogins.logout_hour IS NULL) AND 
+                             (TimeSlots.hour_slot - HourlyLogins.login_hour) * 24 <= 9
                         THEN HourlyLogins.OPERATORID
                     END) AS operators_count
 FROM
