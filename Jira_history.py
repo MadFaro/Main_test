@@ -1,1 +1,1 @@
-https://visualstudio.microsoft.com/ru/visual-cpp-build-tools/
+c:\localVSlayout\vs_enterprise.exe --noWeb --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.NetWeb --includeOptional
