@@ -1,1 +1,1 @@
-WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ConnectTimeoutError(<pip._vendor.urllib3.connection.VerifiedHTTPSConnection object at 0x0000015718F92CA0>, 'Connection to msk-bc.fc.bank.ru timed out. (connect timeout=15)')': /simple/pandas/
+
