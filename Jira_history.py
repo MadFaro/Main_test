@@ -1,51 +1,34 @@
 import pandas as pd
 import pickle
-from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.keras.models import load_model
 
-# Загрузка данных из файла Excel
-data = pd.read_excel("test.xlsx", sheet_name="Свод")
+# Загрузка модели
+model = load_model("model.h5")
 
-# Разделение данных на признаки (X) и метки (y)
-X = data['MSG']
-y = data['CATEGORY']
+# Загрузка TF-IDF векторизатора
+with open('tfidf_vectorizer.pkl', 'rb') as f:
+    tfidf_vectorizer = pickle.load(f)
+
+# Загрузка label_encoder
+with open('label_encoder.pkl', 'rb') as f:
+    label_encoder = pickle.load(f)
+
+# Загрузка новых данных для предсказания
+data_new = pd.read_excel("test1.xlsx", sheet_name="Свод")
+X_new = data_new['MSG']
 
 # Преобразование текста в числовые векторы с помощью TF-IDF
-tfidf_vectorizer = TfidfVectorizer(max_features=1000)
-X_tfidf = tfidf_vectorizer.fit_transform(X)
-X_tfidf.sort_indices()
+X_new_tfidf = tfidf_vectorizer.transform(X_new)
 
-# Кодирование меток категорий
-label_encoder = LabelEncoder()
-y_encoded = label_encoder.fit_transform(y)
+# Предсказание категорий
+predictions = model.predict(X_new_tfidf)
 
-# Сохранение TF-IDF векторизатора
-with open('tfidf_vectorizer.pkl', 'wb') as f:
-    pickle.dump(tfidf_vectorizer, f)
+# Декодирование предсказанных меток категорий
+predicted_categories = label_encoder.inverse_transform(predictions.argmax(axis=1))
 
-# Сохранение label_encoder
-with open('label_encoder.pkl', 'wb') as f:
-    pickle.dump(label_encoder, f)
+# Добавление предсказанных категорий в новый DataFrame
+data_new['CATEGORY'] = predicted_categories
 
-# Создание нейронной сети
-model = Sequential([
-    Dense(512, activation='relu', input_shape=(X_tfidf.shape[1],)),
-    Dense(256, activation='relu'),
-    Dense(len(label_encoder.classes_), activation='softmax')
-])
-
-# Компиляция модели
-model.compile(loss='sparse_categorical_crossentropy',
-              optimizer=Adam(learning_rate=0.001),
-              metrics=['accuracy'])
-
-# Обучение модели на всем наборе данных
-early = EarlyStopping(monitor='loss', min_delta=0.001, patience=5, verbose=2, mode='auto')
-check = ModelCheckpoint('model.h5', monitor='loss', verbose=2, save_best_only=False, mode='auto')
-callbacks = [early, check]
-
-model.fit(X_tfidf, y_encoded, epochs=1000, batch_size=32, verbose=1, callbacks=callbacks)
+# Запись данных в новый файл CSV
+data_new.to_csv("itog.csv", index=False)
