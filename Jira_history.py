@@ -1,34 +1,10 @@
-import pandas as pd
-import pickle
-from sklearn.feature_extraction.text import TfidfVectorizer
-from tensorflow.keras.models import load_model
+  File "adam_predict.py", line 20, in <module>
+    predictions = model.predict(X_new_tfidf)
+  File "C:\Python38\lib\site-packages\keras\utils\traceback_utils.py", line 70, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "C:\Python38\lib\site-packages\tensorflow\python\framework\ops.py", line 7262, in raise_from_not_ok_status
+    raise core._status_to_exception(e) from None  # pylint: disable=protected-access
+tensorflow.python.framework.errors_impl.InvalidArgumentError: {{function_node __wrapped__SerializeManySparse_device_/job:localhost/replica:0/task:0/device:CPU:0}} indices[1] = [0,963] is out of order. Many sparse ops require sorted indices.
+    Use `tf.sparse.reorder` to create a correctly ordered copy.
 
-# Загрузка модели
-model = load_model("model.h5")
-
-# Загрузка TF-IDF векторизатора
-with open('tfidf_vectorizer.pkl', 'rb') as f:
-    tfidf_vectorizer = pickle.load(f)
-
-# Загрузка label_encoder
-with open('label_encoder.pkl', 'rb') as f:
-    label_encoder = pickle.load(f)
-
-# Загрузка новых данных для предсказания
-data_new = pd.read_excel("test1.xlsx", sheet_name="Свод")
-X_new = data_new['MSG']
-
-# Преобразование текста в числовые векторы с помощью TF-IDF
-X_new_tfidf = tfidf_vectorizer.transform(X_new)
-
-# Предсказание категорий
-predictions = model.predict(X_new_tfidf)
-
-# Декодирование предсказанных меток категорий
-predicted_categories = label_encoder.inverse_transform(predictions.argmax(axis=1))
-
-# Добавление предсказанных категорий в новый DataFrame
-data_new['CATEGORY'] = predicted_categories
-
-# Запись данных в новый файл CSV
-data_new.to_csv("itog.csv", index=False)
+ [Op:SerializeManySparse]
