@@ -1,1 +1,5 @@
-
+model = Sequential()
+model.add(LSTM(60, activation='relu', input_shape=(X_tfidf.shape[1],), return_sequences = True))
+model.add(LSTM(120, activation='softmax'))
+model.add(Dense(1))
+model.compile(optimizer=Adam(learning_rate=0.006), loss='mse', metrics=['mae'])
