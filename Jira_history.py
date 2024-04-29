@@ -1,13 +1,7 @@
-from tensorflow.keras.utils import plot_model
+from tensorflow.keras.callbacks import TensorBoard
 
-# Построение модели
-model = Sequential([
-    Dense(len(label_encoder.classes_), activation='linear', input_shape=(X_train_tfidf.shape[1],)),
-    Dense(256, activation='relu'),
-    Dense(128, activation='relu'),
-    Dense(64, activation='tanh'),
-    Dense(len(label_encoder.classes_), activation='softmax')
-])
+# Создание обратного вызова TensorBoard
+tensorboard_callback = TensorBoard(log_dir='./logs', histogram_freq=1)
 
-# Сохранение визуализации модели в файл 'model_architecture.jpg'
-plot_model(model, to_file='model_architecture.jpg', show_shapes=True)
+# Запуск обучения модели с использованием обратного вызова TensorBoard
+model.fit(X_train, y_train, epochs=10, callbacks=[tensorboard_callback])
