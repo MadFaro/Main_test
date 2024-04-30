@@ -1,6 +1,5 @@
 import pandas as pd
-import random
-from faker import Faker
+from googletrans import Translator
 
 # Загрузка данных из файла
 data = pd.read_excel("test.xlsx", sheet_name="Свод")
@@ -9,21 +8,25 @@ data = pd.read_excel("test.xlsx", sheet_name="Свод")
 texts = data['MSG']
 categories = data['CATEGORY']
 
-# Инициализация Faker для генерации случайных слов
-faker = Faker()
+# Инициализация объекта Translator для перевода
+translator = Translator()
 
-# Функция для случайной замены слов в тексте
-def augment_text_replace(text, p=0.1):
-    words = text.split()
-    augmented_words = []
-    for word in words:
-        if random.random() < p:
-            # Замена слова на случайное слово от Faker
-            augmented_word = faker.word()
-            augmented_words.append(augmented_word)
-        else:
-            augmented_words.append(word)
-    return ' '.join(augmented_words)
+# Функция для перевода текста на три языка поочередно
+def translate_text(text):
+    # Перевод текста на английский
+    translated_en = translator.translate(text, dest='en').text
+    # Перевод текста на испанский
+    translated_es = translator.translate(translated_en, dest='es').text
+    # Перевод текста обратно на русский
+    translated_ru = translator.translate(translated_es, dest='ru').text
+    return translated_ru
+
+# Функция для разбиения текста на части, если он превышает 5000 символов
+def split_text(text, max_chars=5000):
+    if len(text) <= max_chars:
+        return [text]
+    else:
+        return [text[i:i+max_chars] for i in range(0, len(text), max_chars)]
 
 # Список для хранения аугментированных текстов и соответствующих им категорий
 augmented_texts = []
@@ -35,9 +38,20 @@ for text, category in zip(texts, categories):
     augmented_texts.append(text)
     augmented_categories.append(category)
     
-    # Аугментация текста: случайная замена слов и добавление в список аугментированных данных
-    augmented_text_replace = augment_text_replace(text)
-    augmented_texts.append(augmented_text_replace)
+    # Проверка длины текста и его перевод на три языка поочередно
+    if len(text) > 5000:
+        # Разбиение текста на части и их перевод
+        translated_parts = []
+        for part in split_text(text):
+            translated_part = translate_text(part)
+            translated_parts.append(translated_part)
+        augmented_text_translate = ''.join(translated_parts)
+    else:
+        # Перевод текста на три языка поочередно
+        augmented_text_translate = translate_text(text)
+    
+    # Добавление аугментированного текста и его категории в список
+    augmented_texts.append(augmented_text_translate)
     augmented_categories.append(category)
 
 # Создание нового DataFrame с исходными и аугментированными данными
