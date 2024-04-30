@@ -1,6 +1,6 @@
 import pandas as pd
-import random
-from textaugment import Word2vec
+import nltk
+from nltk.corpus import wordnet
 
 # Загрузка данных из файла
 data = pd.read_excel("test.xlsx", sheet_name="Свод")
@@ -9,11 +9,18 @@ data = pd.read_excel("test.xlsx", sheet_name="Свод")
 texts = data['MSG']
 categories = data['CATEGORY']
 
-# Функция для аугментации текста: синонимы
+# Функция для замены слов синонимами
 def augment_text_synonym(text):
-    w2v = Word2vec(model='word2vec', action="swap")
-    augmented_text = w2v.augment(text)
-    return augmented_text
+    tokens = nltk.word_tokenize(text)
+    synonyms = []
+    for token in tokens:
+        syns = wordnet.synsets(token)
+        if syns:
+            synonym = syns[0].lemmas()[0].name()
+            synonyms.append(synonym)
+        else:
+            synonyms.append(token)
+    return ' '.join(synonyms)
 
 # Список для хранения аугментированных текстов и соответствующих им категорий
 augmented_texts = []
@@ -25,7 +32,7 @@ for text, category in zip(texts, categories):
     augmented_texts.append(text)
     augmented_categories.append(category)
     
-    # Аугментация текста: синонимы и добавление в список аугментированных данных
+    # Аугментация текста: замена слов синонимами и добавление в список аугментированных данных
     augmented_text_synonym = augment_text_synonym(text)
     augmented_texts.append(augmented_text_synonym)
     augmented_categories.append(category)
@@ -35,4 +42,3 @@ augmented_data = pd.DataFrame({'MSG': augmented_texts, 'CATEGORY': augmented_cat
 
 # Сохранение аугментированных данных в новый файл
 augmented_data.to_excel("augmented_data.xlsx", index=False)
-
