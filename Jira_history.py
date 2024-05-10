@@ -1,5 +1,8 @@
+    buffer = BytesIO()
+    df = pd.read_sql("SELECT login as login_customer, '' as value_operation FROM users where login <> 'admin'", connect("Convert/db/shop.db"))
+    df.to_excel(buffer, index=False)
 put_button(' Template ', lambda: download('example.xlsx', buffer.getvalue()), color='primary', outline=True).style('width:100%;height:100%;padding:0.5em;'),
-
+from io import BytesIO
 # Функция для добавления баланса
 async def add_balans(df_user, sdep, tab, fio, id):
     try:
