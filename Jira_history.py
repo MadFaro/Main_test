@@ -43,26 +43,16 @@ def augment_text_translate(text):
         input_ids_2 = tokenizer(src_text_2, return_tensors="pt", max_length=max_token_length, truncation=True)
         generated_tokens_2 = model.generate(**input_ids_2.to(device))
         result_2 = tokenizer.batch_decode(generated_tokens_2, skip_special_tokens=True)
-        augmented_text += result_2[0]
+        augmented_text += result_2[0] + "\n"
     return augmented_text
 
-# Список для хранения аугментированных текстов и соответствующих им категорий
-augmented_texts = []
-augmented_categories = []
-
-# Проход по каждой паре текст-категория и создание аугментированных данных
-for text, category in zip(texts, categories):
-    # Оригинальный текст и его категория
-    augmented_texts.append(text)
-    augmented_categories.append(category)
-    
-    # Аугментация текста: перевод на три языка поочередно и добавление в список аугментированных данных
-    augmented_text_translate = augment_text_translate(text)
-    augmented_texts.append(augmented_text_translate)
-    augmented_categories.append(category)
-
-# Создание нового DataFrame с исходными и аугментированными данными
-augmented_data = pd.DataFrame({'MSG': augmented_texts, 'CATEGORY': augmented_categories})
-
-# Сохранение аугментированных данных в новый файл
-augmented_data.to_excel("augmented_data.xlsx", index=False)
+# Открываем файл для записи в режиме 'w' (заменяет существующий файл или создает новый)
+with open('augmented_data.csv', 'w', encoding='utf-8') as f:
+    # Записываем заголовок
+    f.write("MSG,CATEGORY\n")
+    # Проход по каждой паре текст-категория и запись аугментированных данных
+    for text, category in zip(texts, categories):
+        f.write(f"{text},{category}\n")
+        # Аугментация текста: перевод на три языка поочередно и запись в файл
+        augmented_text_translate = augment_text_translate(text)
+        f.write(f"{augmented_text_translate},{category}\n")
