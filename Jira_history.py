@@ -1,4 +1,3 @@
-if __name__ == '__main__':
-    import logging
-    logging.basicConfig(level=logging.DEBUG)
-    start_server(hello_world, host='127.0.0.1', port=8080)
+DEBUG:asyncio:Using proactor: IocpProactor
+Running on http://localhost:50908/
+INFO:tornado.access:200 GET / (::1) 2.00ms
