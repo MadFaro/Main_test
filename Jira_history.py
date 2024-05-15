@@ -1,13 +1,19 @@
-from pywebio.platform.tornado_http import start_server
-from pywebio import STATIC_PATH
+from pywebio import start_server, config
+from pywebio.output import *
+from pywebio.pin import *
+from pywebio.input import *
+from pywebio.session import run_js
+import logging
 
-# Путь к локальным статическим файлам PyWebIO
-LOCAL_STATIC_PATH = '/путь/к/папке/с/статическими/ресурсами/PyWebIO'
 
-# Запуск сервера PyWebIO с использованием локальных статических файлов
-start_server(
-    lambda: None, 
-    static_dir=STATIC_PATH, 
-    use_builtin_static=False, 
-    local_static_dir=LOCAL_STATIC_PATH
-)
+# Авторизация
+@config(description='shop', title='shop')
+async def main():
+    put_text("Привет")
+    print("Привет")
+
+
+# Вызов
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    start_server(main, host = 'localhost')
