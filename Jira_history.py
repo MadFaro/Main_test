@@ -1,16 +1,8 @@
-from flask import Flask, request
-from pywebio import start_server
-from pywebio.output import put_text
+import json
+from pywebio.session import info as session_info
 
-app = Flask(__name__)
-
-@app.route('/get_ip')
-def get_ip():
-    user_ip = request.remote_addr
-    return f'Your IP address is: {user_ip}'
-
-def main():
-    put_text("Check your IP address:").append(put_text('/get_ip'))
-
-if __name__ == '__main__':
-    start_server([main], port=8080, debug=True)
+put_code(json.dumps({
+    k: str(getattr(session_info, k))
+    for k in ['user_agent', 'user_language', 'server_host',
+              'origin', 'user_ip', 'backend', 'protocol', 'request']
+}, indent=4), 'json')
