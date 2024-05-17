@@ -1,20 +1,20 @@
     def user_exists_ip(self, ID):
         try:
             result = self.cursor.execute("SELECT `user_login` FROM `session` WHERE `user_ip` = ?", (ID,))
-            if bool(len(result.fetchall())) == False:
-                return None
-            else:
-                return result.fetchone()[0]
+            return result.fetchone()
         except sqlite3.Error:
             return None
+        
     def add_user_ip(self, login, ip):
         try:
-            self.cursor.execute('INSERT INTO `session` (`user_ip`, `user_login`) VALUES (?,?)', (login, ip))
+            self.cursor.execute('INSERT INTO `session` (`user_login`, `user_ip`) VALUES (?,?)', (login, ip))
             self.conn.commit()
             return True
         except sqlite3.Error:
             self.conn.rollback()
             return False
+
+
 async def main():
 
     session_info = json.dumps({
@@ -22,7 +22,7 @@ async def main():
         for k in ['user_agent', 'user_language', 'server_host',
                 'origin', 'user_ip', 'backend', 'protocol', 'request']
     }, indent=4)
-    user_login = BotDS.user_exists_ip(json.loads(session_info)['user_ip'])
+    user_login = BotDS.user_exists_ip(str(json.loads(session_info)['user_ip']))
     if user_login == None:
 
         invalid_password_attempts = 0
@@ -69,7 +69,7 @@ async def main():
                         user_info = BotDS.get_user_mot(ID=tab)
 
                         if user_info[2] == 'noadmin':
-                            BotDS.add_user_ip(login=tab, ip=json.loads(session_info)['user_ip'])
+                            BotDS.add_user_ip(login=tab, ip=str(json.loads(session_info)['user_ip']))
                             await noadmin(sdep='noadmin', tab=tab, fio=user_info[1], id = user_info[0])
 
                         elif user_info[2] == 'admin':
@@ -92,9 +92,9 @@ async def main():
             clear()
             toast('Нет прав', duration=0, position='center', color='error', onclick=lambda :run_js('window.location.reload()'))
     else:
-        user_info = BotDS.get_user_mot(ID=user_login)
+        user_info = BotDS.get_user_mot(ID=user_login[0])
         if user_info[2] == 'noadmin':
-            await noadmin(sdep='noadmin', tab=tab, fio=user_info[1], id = user_info[0])
+            await noadmin(sdep='noadmin', tab=user_login[0], fio=user_info[1], id = user_info[0])
         elif user_info[2] == 'admin':
             await admin(sdep='admin', tab=tab, fio=user_info[1], id = user_info[0])
         else:
