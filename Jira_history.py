@@ -5,11 +5,16 @@ Public Function sla(Agents As Single, ServiceTime As Single, CallsPerHour As Sin
     On Error GoTo SLAError
     
     BirthRate = CallsPerHour
-    DeathRate = 3600 / AHT  ' Исправлено: количество секунд в часе
+    DeathRate = 3600 / AHT  ' Количество секунд в часе
     TrafficRate = BirthRate / DeathRate
     Utilisation = TrafficRate / Agents
     
-    If Utilisation >= 1 Then Utilisation = 0.99
+    ' Ограничение утилизации до 0.75
+    If Utilisation > 0.75 Then
+        Agents = TrafficRate / 0.75
+        Utilisation = 0.75
+    End If
+    
     Server = Agents
     
     C = ErlangC(Server, TrafficRate)
