@@ -10,7 +10,7 @@ Public Function sla(Agents As Single, ServiceTime As Single, CallsPerHour As Sin
     
     ' Рассчитываем минимальное количество операторов для соблюдения утилизации <= 0.75
     If (TrafficRate / Agents) > 0.75 Then
-        Agents = TrafficRate / 0.75
+        Agents = TrafficRate * (1 / 0.75)
     End If
     
     Server = Fix(Agents)  ' Округляем количество операторов до ближайшего целого
