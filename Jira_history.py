@@ -6,16 +6,17 @@ Public Function sla(Agents As Single, ServiceTime As Single, CallsPerHour As Sin
     
     BirthRate = CallsPerHour
     DeathRate = 3600 / AHT  ' Количество секунд в часе
-    TrafficRate = BirthRate / DeathRate
-    Utilisation = TrafficRate / Agents
+    TrafficRate = BirthRate * AHT / 3600  ' Преобразуем AHT в часы для расчета TrafficRate
     
-    ' Ограничение утилизации до 0.75
-    If Utilisation > 0.75 Then
+    ' Рассчитываем минимальное количество операторов для соблюдения утилизации <= 0.75
+    If (TrafficRate / Agents) > 0.75 Then
         Agents = TrafficRate / 0.75
-        Utilisation = 0.75
     End If
     
-    Server = Agents
+    Server = Fix(Agents)  ' Округляем количество операторов до ближайшего целого
+    
+    ' Пересчитываем утилизацию с новым количеством операторов
+    Utilisation = TrafficRate / Server
     
     C = ErlangC(Server, TrafficRate)
     SLQueued = 1 - C * Exp(-((Server - TrafficRate) * ServiceTime / AHT))
