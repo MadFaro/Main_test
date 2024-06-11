@@ -1,5 +1,5 @@
 SUBSTR(
            your_column,
-           INSTR(your_column, '/*+') + 3,
-           INSTR(your_column, '*/') - INSTR(your_column, '/*+') - 3
+           INSTR(your_column, 'parallel') + LENGTH('parallel'),
+           4
        ) AS extracted_text
