@@ -1,1 +1,2 @@
-
+PARALLEL (4)
+/*+ APPEND PARALLEL(sales, 4) */
