@@ -1,2 +1,5 @@
-def strikethrough(text):
-    return ''.join([char + '\u0336' for char in text])
+def custom_strikethrough(text):
+    result = ""
+    for char in text:
+        result += char + "\u0336"
+    return result
