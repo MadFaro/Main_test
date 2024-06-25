@@ -1,29 +1,14 @@
-pip install openpyxl pdfkit xlsx2html
-
-import openpyxl
-from xlsx2html import xlsx2html
-import pdfkit
-
-# Загрузите ваш Excel файл
-wb = openpyxl.load_workbook('your_excel_file.xlsx')
-sheet = wb.active
-
-# Конвертируйте лист Excel в HTML
-with open('output.html', 'w', encoding='utf-8') as f:
+Traceback (most recent call last):
+  File "w.py", line 11, in <module>
     xlsx2html(wb, f)
-
-# Опции для pdfkit, чтобы установить правильный размер страницы и ориентацию
-options = {
-    'page-size': 'A4',
-    'orientation': 'Landscape',  # или 'Portrait'
-    'margin-top': '0.75in',
-    'margin-right': '0.75in',
-    'margin-bottom': '0.75in',
-    'margin-left': '0.75in',
-    'encoding': "UTF-8",
-    'no-outline': None
-}
-
-# Конвертируйте HTML в PDF
-pdfkit.from_file('output.html', 'output.pdf', options=options)
-
+  File "C:\Python38\lib\site-packages\xlsx2html\core.py", line 380, in xlsx2html
+    wb = openpyxl.load_workbook(filepath, data_only=True)
+  File "C:\Python38\lib\site-packages\openpyxl\reader\excel.py", line 344, in load_workbook
+    reader = ExcelReader(filename, read_only, keep_vba,
+  File "C:\Python38\lib\site-packages\openpyxl\reader\excel.py", line 123, in __init__
+    self.archive = _validate_archive(fn)
+  File "C:\Python38\lib\site-packages\openpyxl\reader\excel.py", line 77, in _validate_archive
+    file_format = os.path.splitext(filename)[-1].lower()
+  File "C:\Python38\lib\ntpath.py", line 196, in splitext
+    p = os.fspath(p)
+TypeError: expected str, bytes or os.PathLike object, not Workbook
