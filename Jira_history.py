@@ -1,25 +1,86 @@
-select a.*,
-case when to_char(DATE_BEGIN_CRIF, 'Day') in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)>=8 and extract (hour from DATE_BEGIN_CRIF)<20 then  DATE_BEGIN_CRIF  
- when to_char(DATE_BEGIN_CRIF, 'Day') in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)<8 then  trunc(DATE_BEGIN_CRIF)+8/24 
-  when to_char(DATE_BEGIN_CRIF, 'Day') in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)>=20 then  trunc(DATE_BEGIN_CRIF)+1+8/24 
- 
- when to_char(DATE_BEGIN_CRIF, 'Day') not in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)>=7 and extract (hour from DATE_BEGIN_CRIF)<20 then  DATE_BEGIN_CRIF  
- when to_char(DATE_BEGIN_CRIF, 'Day') not in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)<7 then  trunc(DATE_BEGIN_CRIF)+7/24 
-  when to_char(DATE_BEGIN_CRIF, 'Day') not in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)>=20 then  trunc(DATE_BEGIN_CRIF)+1+7/24 
-  else null end as DATE_BEGIN_CRIF_fix,
-
-case when DATE_IN_WORK>=DATE_BEGIN_CRIF and DATE_IN_WORK<case when to_char(DATE_BEGIN_CRIF, 'Day') in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)>=8 and extract (hour from DATE_BEGIN_CRIF)<20 then  DATE_BEGIN_CRIF  
- when to_char(DATE_BEGIN_CRIF, 'Day') in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)<8 then  trunc(DATE_BEGIN_CRIF)+8/24 
-  when to_char(DATE_BEGIN_CRIF, 'Day') in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)>=20 then  trunc(DATE_BEGIN_CRIF)+1+8/24 
- 
- when to_char(DATE_BEGIN_CRIF, 'Day') not in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)>=7 and extract (hour from DATE_BEGIN_CRIF)<20 then  DATE_BEGIN_CRIF  
- when to_char(DATE_BEGIN_CRIF, 'Day') not in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)<7 then  trunc(DATE_BEGIN_CRIF)+7/24 
-  when to_char(DATE_BEGIN_CRIF, 'Day') not in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)>=20 then  trunc(DATE_BEGIN_CRIF)+1+7/24 
-  else null end then 
-  case when to_char(DATE_BEGIN_CRIF, 'Day') in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)<8 then trunc(DATE_BEGIN_CRIF)+8/24+1/(24*60) 
-  when to_char(DATE_BEGIN_CRIF, 'Day') in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)>=8 then trunc(DATE_BEGIN_CRIF)+1+8/24+1/(24*60) 
-  when to_char(DATE_BEGIN_CRIF, 'Day') not in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)<7 then trunc(DATE_BEGIN_CRIF)+7/24+1/(24*60) 
-  when to_char(DATE_BEGIN_CRIF, 'Day') not in ('Воскресенье', 'Суббота    ') and extract (hour from DATE_BEGIN_CRIF)>=7 then trunc(DATE_BEGIN_CRIF)+1+7/24+1/(24*60) 
-   end
-   else DATE_IN_WORK end as DATE_IN_WORK_FIX
- from analytics.kdi_ipoteka_final a
+SELECT a.*,
+       CASE 
+           WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') IN ('Воскресенье', 'Суббота')
+                AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) >= 8 
+                AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) < 20 
+           THEN DATE_BEGIN_CRIF
+           
+           WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') IN ('Воскресенье', 'Суббота')
+                AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) < 8 
+           THEN TRUNC(DATE_BEGIN_CRIF) + 8/24
+           
+           WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') IN ('Воскресенье', 'Суббота')
+                AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) >= 20 
+           THEN TRUNC(DATE_BEGIN_CRIF) + 1 + 8/24
+           
+           WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') NOT IN ('Воскресенье', 'Суббота')
+                AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) >= 7 
+                AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) < 20 
+           THEN DATE_BEGIN_CRIF
+           
+           WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') NOT IN ('Воскресенье', 'Суббота')
+                AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) < 7 
+           THEN TRUNC(DATE_BEGIN_CRIF) + 7/24
+           
+           WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') NOT IN ('Воскресенье', 'Суббота')
+                AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) >= 20 
+           THEN TRUNC(DATE_BEGIN_CRIF) + 1 + 7/24
+           
+           ELSE NULL 
+       END AS DATE_BEGIN_CRIF_FIX,
+       
+       CASE 
+           WHEN DATE_IN_WORK >= DATE_BEGIN_CRIF 
+                AND DATE_IN_WORK < 
+                    CASE 
+                        WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') IN ('Воскресенье', 'Суббота')
+                             AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) >= 8 
+                             AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) < 20 
+                        THEN DATE_BEGIN_CRIF
+                        
+                        WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') IN ('Воскресенье', 'Суббота')
+                             AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) < 8 
+                        THEN TRUNC(DATE_BEGIN_CRIF) + 8/24
+                        
+                        WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') IN ('Воскресенье', 'Суббота')
+                             AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) >= 20 
+                        THEN TRUNC(DATE_BEGIN_CRIF) + 1 + 8/24
+                        
+                        WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') NOT IN ('Воскресенье', 'Суббота')
+                             AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) >= 7 
+                             AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) < 20 
+                        THEN DATE_BEGIN_CRIF
+                        
+                        WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') NOT IN ('Воскресенье', 'Суббота')
+                             AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) < 7 
+                        THEN TRUNC(DATE_BEGIN_CRIF) + 7/24
+                        
+                        WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') NOT IN ('Воскресенье', 'Суббота')
+                             AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) >= 20 
+                        THEN TRUNC(DATE_BEGIN_CRIF) + 1 + 7/24
+                        
+                        ELSE NULL 
+                    END 
+           THEN 
+               CASE 
+                   WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') IN ('Воскресенье', 'Суббота')
+                        AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) < 8 
+                   THEN TRUNC(DATE_BEGIN_CRIF) + 8/24 + 1/(24*60)
+                   
+                   WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') IN ('Воскресенье', 'Суббота')
+                        AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) >= 8 
+                   THEN TRUNC(DATE_BEGIN_CRIF) + 1 + 8/24 + 1/(24*60)
+                   
+                   WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') NOT IN ('Воскресенье', 'Суббота')
+                        AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) < 7 
+                   THEN TRUNC(DATE_BEGIN_CRIF) + 7/24 + 1/(24*60)
+                   
+                   WHEN TO_CHAR(DATE_BEGIN_CRIF, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') NOT IN ('Воскресенье', 'Суббота')
+                        AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF, 'HH24')) >= 7 
+                   THEN TRUNC(DATE_BEGIN_CRIF) + 1 + 7/24 + 1/(24*60)
+                   
+                   ELSE NULL 
+               END 
+           ELSE DATE_IN_WORK 
+       END AS DATE_IN_WORK_FIX
+FROM analytics.kdi_ipoteka_final a;
