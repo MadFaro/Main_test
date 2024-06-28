@@ -1,13 +1,20 @@
-update analytics.kdi_ipoteka_final_with_time_fix
-set DATE_BEGIN_CRIF_FIX=DATE_IN_WORK_FIX-
-(180-((extract (hour from DATE_BEGIN_CRIF_FIX)-17)*60+extract (minute from DATE_BEGIN_CRIF_FIX))+
-case when to_char(DATE_IN_WORK_FIX, 'Day') in ('Воскресенье', 'Суббота    ') 
-then (extract (hour from DATE_IN_WORK_FIX)-8)*60+extract (minute from DATE_IN_WORK_FIX)
-else (extract (hour from DATE_IN_WORK_FIX)-7)*60+extract (minute from DATE_IN_WORK_FIX) end)/24/60
-where extract (hour from (DATE_IN_WORK_FIX-DATE_BEGIN_CRIF_FIX))>2
-and extract (hour from (DATE_IN_WORK_FIX-DATE_BEGIN_CRIF_FIX))<18
-and extract (hour from DATE_BEGIN_CRIF_FIX)>=17
-and 180-((extract (hour from DATE_BEGIN_CRIF_FIX)-17)*60+extract (minute from DATE_BEGIN_CRIF_FIX))+
-case when to_char(DATE_IN_WORK_FIX, 'Day') in ('Воскресенье', 'Суббота    ') 
-then (extract (hour from DATE_IN_WORK_FIX)-8)*60+extract (minute from DATE_IN_WORK_FIX)
-else (extract (hour from DATE_IN_WORK_FIX)-7)*60+extract (minute from DATE_IN_WORK_FIX) end<180
+UPDATE analytics.kdi_ipoteka_final_with_time_fix
+SET DATE_BEGIN_CRIF_FIX = DATE_IN_WORK_FIX -
+    (180 - ((TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF_FIX, 'HH24')) - 17) * 60 + TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF_FIX, 'MI'))) +
+    CASE 
+        WHEN TO_CHAR(DATE_IN_WORK_FIX, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') IN ('Воскресенье', 'Суббота    ') THEN 
+            (TO_NUMBER(TO_CHAR(DATE_IN_WORK_FIX, 'HH24')) - 8) * 60 + TO_NUMBER(TO_CHAR(DATE_IN_WORK_FIX, 'MI'))
+        ELSE 
+            (TO_NUMBER(TO_CHAR(DATE_IN_WORK_FIX, 'HH24')) - 7) * 60 + TO_NUMBER(TO_CHAR(DATE_IN_WORK_FIX, 'MI'))
+    END) / 24 / 60
+WHERE 
+    TO_NUMBER(TO_CHAR(DATE_IN_WORK_FIX - DATE_BEGIN_CRIF_FIX, 'HH24')) > 2
+    AND TO_NUMBER(TO_CHAR(DATE_IN_WORK_FIX - DATE_BEGIN_CRIF_FIX, 'HH24')) < 18
+    AND TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF_FIX, 'HH24')) >= 17
+    AND 180 - ((TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF_FIX, 'HH24')) - 17) * 60 + TO_NUMBER(TO_CHAR(DATE_BEGIN_CRIF_FIX, 'MI'))) +
+    CASE 
+        WHEN TO_CHAR(DATE_IN_WORK_FIX, 'Day', 'NLS_DATE_LANGUAGE = ''RUSSIAN''') IN ('Воскресенье', 'Суббота    ') THEN 
+            (TO_NUMBER(TO_CHAR(DATE_IN_WORK_FIX, 'HH24')) - 8) * 60 + TO_NUMBER(TO_CHAR(DATE_IN_WORK_FIX, 'MI'))
+        ELSE 
+            (TO_NUMBER(TO_CHAR(DATE_IN_WORK_FIX, 'HH24')) - 7) * 60 + TO_NUMBER(TO_CHAR(DATE_IN_WORK_FIX, 'MI'))
+    END < 180;
