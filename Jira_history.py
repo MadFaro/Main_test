@@ -1,1 +1,1 @@
-permission denied for materialized view mv_main_metrics CONTEXT: remote SQL command: SELECT date_hour, ivr_time, queue_time, pending_time, talk_time, hold_time, acw_time, lost_calls, short_lost_calls, sl_count, count, work_time, total_handling_time, total_ready_time, transfer, count_oper FROM uralsib_in.mv_main_metrics 
+
