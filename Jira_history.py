@@ -1,1 +1,1 @@
-ActiveWorkbook.Queries("Start").Delete
+
