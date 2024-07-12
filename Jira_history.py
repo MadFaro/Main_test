@@ -1,3 +1,5 @@
-SELECT *
-FROM your_table@BK_NIGHT
-FETCH FIRST 1000 ROWS ONLY;
+ORA-00997: неверное использование типа данных LONG
+00997. 00000 -  "illegal use of LONG datatype"
+*Cause:    
+*Action:
+Error at Line: 7 Column: 15
