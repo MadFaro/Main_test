@@ -1,4 +1,3 @@
-Добрый день!
-
-Вы можете использовать линк SID=dg4ufa02bk   , пользователь RepRBBUser_n ?
-
+SELECT owner, db_link, username, host
+FROM dba_db_links
+WHERE username = 'RepRBBUser_n';
