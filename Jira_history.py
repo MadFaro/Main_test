@@ -1,1 +1,4 @@
-= Text.Combine(List.Select(Text.ToList([Column1]), each not List.Contains(Text.ToList([Column2]), _)), "")
+Expression.Error: Не удается применить доступ к полям в типе Text.
+Сведения:
+    Value=0
+    Key=IVR_KEY
