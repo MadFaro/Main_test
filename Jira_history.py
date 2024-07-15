@@ -1,2 +1,1 @@
-= Text.Combine(List.Select(Text.ToList([Column1]), each not Text.Contains([Column2], _)), "")
-
+= Text.Combine(List.Select(Text.ToList([Column1]), each not List.Contains(Text.ToList([Column2]), _)), "")
