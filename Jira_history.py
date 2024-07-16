@@ -1,1 +1,2 @@
-
+FIO, START_SCHEDULE, END_SCHEDULE, DATE_SCHEDULE
+Устьянцева Александра Павловна, 10:00, 19:00, 03.07.23 00:00:00
