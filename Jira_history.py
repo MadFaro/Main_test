@@ -1,4 +1,4 @@
-create or replace procedure                                         tolog_webim_sl (
+CREATE OR REPLACE PROCEDURE tolog_webim_sl (
     p_dtmfrom IN DATE,
     p_dtmto IN DATE,
     p_departmentid IN NUMBER,
@@ -11,7 +11,6 @@ create or replace procedure                                         tolog_webim_
     v_cur_time DATE;
     v_start_time DATE := NULL;
     v_end_time DATE := NULL;
-    l_done NUMBER := 0;
     CURSOR cur IS
         WITH cth_yesterday AS (
             SELECT threadid, departmentid, state, dtm
@@ -28,13 +27,17 @@ create or replace procedure                                         tolog_webim_
             SELECT threadid, created, kind
             FROM ODS.ODS_WIS_CHATMESSAGE@cdw.prod
             WHERE created BETWEEN TRUNC(SYSDATE - 1) AND TRUNC(SYSDATE)
+        ),
+        main_query AS (
+            SELECT cth.threadid, cth.departmentid, cth.state, cth.dtm 
+            FROM cth_yesterday cth
+            JOIN ct_yesterday ct ON ct.threadid = cth.threadid
         )
-        SELECT cth.threadid, cth.departmentid, cth.state, cth.dtm 
-        FROM cth_yesterday cth
-        JOIN ct_yesterday ct ON ct.threadid = cth.threadid
-        ORDER BY cth.threadid, cth.dtm;
-begin
-      OPEN cur;
+        SELECT threadid, departmentid, state, dtm
+        FROM main_query
+        ORDER BY threadid, dtm;
+BEGIN
+    OPEN cur;
     LOOP
         FETCH cur INTO v_cur_threadid, v_cur_department_id, v_cur_state, v_cur_time;
         EXIT WHEN cur%NOTFOUND;
@@ -57,6 +60,7 @@ begin
         END IF;
 
         IF v_cur_state = 'chatting' AND v_start_time IS NOT NULL THEN 
+            -- Получаем v_end_time из подзапроса с использованием CTE
             SELECT MIN(created)
             INTO v_end_time
             FROM cm_yesterday
@@ -80,9 +84,9 @@ begin
     END LOOP;
 
     -- Закрытие курсора
-    CLOSE cur;      
-end;
+    CLOSE cur;
 
-line, position
-60, 13 -PL/SQL: SQL Statement ignored
-62, 18 -PL/SQL: ORA-00942: таблица или представление пользователя не существует
+    -- Коммит изменений (для временной таблицы)
+    COMMIT;
+END;
+/
