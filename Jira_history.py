@@ -4,6 +4,7 @@ WITH chat_data AS (
             cth.departmentid,
             cth.state,
             cth.dtm,
+            LAG(cth.threadid) OVER (ORDER BY cth.threadid, cth.number) AS prev_threadid,
             LEAD(cth.state) OVER (PARTITION BY cth.threadid ORDER BY cth.number) AS next_state,
             LEAD(cth.dtm) OVER (PARTITION BY cth.threadid ORDER BY cth.number) AS next_dtm
         FROM chatthreadhistory cth
@@ -11,35 +12,26 @@ WITH chat_data AS (
         WHERE ct.offline = 0
           AND cth.dtm BETWEEN p_dtmfrom AND p_dtmto
     ),
-    filtered_chat_data AS (
+    queue_times AS (
         SELECT
             threadid,
             departmentid,
-            dtm,
-            next_dtm,
-            state,
+            dtm AS got_into_common_queue_time,
+            next_dtm AS end_time,
             next_state
         FROM chat_data
-        WHERE state IN ('queue', 'chatting_with_robot', 'closed_by_operator', 'chatting')
+        WHERE state = 'queue'
     ),
-    queue_to_chat AS (
+    chatting_times AS (
         SELECT
-            fcd.threadid,
-            fcd.departmentid,
-            fcd.dtm AS got_into_common_queue_time,
+            q.threadid,
+            q.departmentid,
+            q.got_into_common_queue_time,
             cm.created AS start_chatting_time
-        FROM filtered_chat_data fcd
-        JOIN chatmessage cm ON fcd.threadid = cm.threadid
-        WHERE fcd.state = 'queue'
-          AND fcd.next_state = 'chatting'
+        FROM queue_times q
+        JOIN chatmessage cm ON q.threadid = cm.threadid
+        WHERE q.next_state = 'chatting'
           AND cm.kind IN (2, 10, 13)
-          AND cm.created > fcd.dtm
+          AND cm.created > q.got_into_common_queue_time
+          AND cm.created <= q.end_time
     )
-    SELECT
-        threadid,
-        department_id,
-        MIN(got_into_common_queue_time) AS got_into_common_queue_time,
-        MIN(start_chatting_time) AS start_chatting_time
-    FROM queue_to_chat
-    GROUP BY threadid, department_id;
-/
