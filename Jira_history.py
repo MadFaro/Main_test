@@ -12,30 +12,13 @@ CREATE OR REPLACE PROCEDURE tolog_webim_sl (
     v_start_time DATE := NULL;
     v_end_time DATE := NULL;
     CURSOR cur IS
-        WITH cth_yesterday AS (
-            SELECT threadid, departmentid, state, dtm
-            FROM ODS.ODS_WIS_chatthreadhistory@cdw.prod
-            WHERE dtm BETWEEN TRUNC(SYSDATE - 1) AND TRUNC(SYSDATE)
-        ),
-        ct_yesterday AS (
-            SELECT threadid
-            FROM ODS.ODS_WIS_chatthread@cdw.prod 
-            WHERE created BETWEEN TRUNC(SYSDATE - 1) AND TRUNC(SYSDATE)
-              AND offline_ = 0
-        ),
-        cm_yesterday AS (
-            SELECT threadid, created, kind
-            FROM ODS.ODS_WIS_CHATMESSAGE@cdw.prod
-            WHERE created BETWEEN TRUNC(SYSDATE - 1) AND TRUNC(SYSDATE)
-        ),
-        main_query AS (
-            SELECT cth.threadid, cth.departmentid, cth.state, cth.dtm 
-            FROM cth_yesterday cth
-            JOIN ct_yesterday ct ON ct.threadid = cth.threadid
-        )
-        SELECT threadid, departmentid, state, dtm
-        FROM main_query
-        ORDER BY threadid, dtm;
+        SELECT cth.threadid, cth.departmentid, cth.state, cth.dtm 
+        FROM ODS.ODS_WIS_chatthreadhistory@cdw.prod cth
+        JOIN ODS.ODS_WIS_chatthread@cdw.prod ct ON ct.threadid = cth.threadid
+        WHERE ct.created BETWEEN TRUNC(SYSDATE - 1) AND TRUNC(SYSDATE)
+          AND ct.offline_ = 0
+          AND cth.dtm BETWEEN TRUNC(SYSDATE - 1) AND TRUNC(SYSDATE)
+        ORDER BY cth.threadid, cth.dtm;
 BEGIN
     OPEN cur;
     LOOP
@@ -60,13 +43,12 @@ BEGIN
         END IF;
 
         IF v_cur_state = 'chatting' AND v_start_time IS NOT NULL THEN 
-            -- Получаем v_end_time из подзапроса с использованием CTE
-            SELECT MIN(created)
+            SELECT MIN(cm.created)
             INTO v_end_time
-            FROM cm_yesterday
-            WHERE threadid = v_cur_threadid
-              AND kind IN (2, 10, 13)
-              AND created > v_cur_time;
+            FROM ODS.ODS_WIS_CHATMESSAGE@cdw.prod cm
+            WHERE cm.threadid = v_cur_threadid
+              AND cm.kind IN (2, 10, 13)
+              AND cm.created > v_cur_time;
 
             IF v_end_time IS NOT NULL THEN
                 INSERT INTO ANALYTICS.TOLOG_TMP_STATS_SERVICE_LEVEL (
