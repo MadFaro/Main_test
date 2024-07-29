@@ -1,21 +1,17 @@
-def download_file():
-    # Указываем путь и имя файла
-    filename = 'README.md'
-    filepath = 'path/to/your/files/README.md'
-
-    # Создаем кнопку для скачивания файла
-    put_button(f"Скачать {filename}", onclick=lambda: download_action(filepath, filename))
-
-def download_action(filepath, filename):
-    """Функция, которая вызывается при нажатии на кнопку скачивания."""
-    try:
-        # Читаем файл при нажатии на кнопку
-        with open(filepath, 'rb') as file:
-            content = file.read()
+async def my_rate(sdep, tab, fio, id):
+    filename = 'Команда № 1 Братский круг.pptx'
+    filepath = 'ppt/Команда № 1 Братский круг.pptx'
+    popup('ЗАДАНИЯ',[
+        put_collapse('Задание 1', [
+        put_table([
+        ['Команда', 'Презентация'],
+        ['БРАТСКИЙ КРУГ', put_button(f"Скачать", onclick=lambda: download_action(filepath, filename))]
+                    ])
+                                    ], open=True)                                 
         
-        # Отдаем файл для скачивания
-        put_file(filename, content)
-    except FileNotFoundError:
-        put_text(f"Ошибка: файл {filename} не найден.")
-    except Exception as e:
-        put_text(f"Произошла ошибка: {e}")
+        ], size='large')
+async def download_action(filepath, filename):
+    with open(filepath, 'rb') as file:
+        content = file.read()
+    print(content)
+    return put_file(filename, content)
