@@ -1,1 +1,5 @@
-put_button('Click to download', lambda: download('hello-world.txt', b'hello world!'))
+CREATE TABLE process_data (
+    proc VARCHAR2(100),  -- Название процесса (тип данных можно изменить по необходимости)
+    tab VARCHAR2(100),   -- Название таблицы (тип данных можно изменить по необходимости)
+    dt TIMESTAMP         -- Дата и время
+);
