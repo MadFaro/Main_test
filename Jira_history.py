@@ -1,16 +1,16 @@
 WITH monetary_conditions AS (
-    SELECT 'Отмена комиссии по 120 дней_КК' AS condition UNION ALL
-    SELECT 'Отмена комиссии по Прибыли' UNION ALL
-    SELECT 'Сниж.ставки на POS/ATM 3мес_КК' UNION ALL
-    SELECT 'Повыш. %на остаток 2мес._ДК' UNION ALL
-    SELECT 'Доп.2% УБ на 6мес_ДК' UNION ALL
-    SELECT 'Доп.2% по УБ на 6мес_КК' UNION ALL
-    SELECT 'Кэшбэк 10% на 1 мес_ДК' UNION ALL
-    SELECT 'Кэшбэк 10% на 1 мес_КК'
+    SELECT 'Отмена комиссии по 120 дней_КК' AS condition FROM DUAL UNION ALL
+    SELECT 'Отмена комиссии по Прибыли' FROM DUAL UNION ALL
+    SELECT 'Сниж.ставки на POS/ATM 3мес_КК' FROM DUAL UNION ALL
+    SELECT 'Повыш. %на остаток 2мес._ДК' FROM DUAL UNION ALL
+    SELECT 'Доп.2% УБ на 6мес_ДК' FROM DUAL UNION ALL
+    SELECT 'Доп.2% по УБ на 6мес_КК' FROM DUAL UNION ALL
+    SELECT 'Кэшбэк 10% на 1 мес_ДК' FROM DUAL UNION ALL
+    SELECT 'Кэшбэк 10% на 1 мес_КК' FROM DUAL
 ),
 non_monetary_conditions AS (
-    SELECT 'Сохранена без механики_ДК' AS condition UNION ALL
-    SELECT 'Сохранена без механики_КК'
+    SELECT 'Сохранена без механики_ДК' AS condition FROM DUAL UNION ALL
+    SELECT 'Сохранена без механики_КК' FROM DUAL
 ),
 all_conditions AS (
     SELECT condition FROM monetary_conditions
