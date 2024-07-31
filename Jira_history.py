@@ -1,39 +1,45 @@
-
-select distinct CALL_ID,
-case when (rez1 in ('Отмена комиссии по 120 дней_КК','Отмена комиссии по Прибыли','Сниж.ставки на POS/ATM 3мес_КК',
-'Повыш. %на остаток 2мес._ДК','Доп.2% УБ на 6мес_ДК','Доп.2% по УБ на 6мес_КК','Кэшбэк 10% на 1 мес_ДК',
-'Кэшбэк 10% на 1 мес_КК') or
-rez2 in ('Отмена комиссии по 120 дней_КК','Отмена комиссии по Прибыли','Сниж.ставки на POS/ATM 3мес_КК',
-'Повыш. %на остаток 2мес._ДК','Доп.2% УБ на 6мес_ДК','Доп.2% по УБ на 6мес_КК','Кэшбэк 10% на 1 мес_ДК',
-'Кэшбэк 10% на 1 мес_КК') or
-rez3 in ('Отмена комиссии по 120 дней_КК','Отмена комиссии по Прибыли','Сниж.ставки на POS/ATM 3мес_КК',
-'Повыш. %на остаток 2мес._ДК','Доп.2% УБ на 6мес_ДК','Доп.2% по УБ на 6мес_КК','Кэшбэк 10% на 1 мес_ДК',
-'Кэшбэк 10% на 1 мес_КК') or
-rez4 in ('Отмена комиссии по 120 дней_КК','Отмена комиссии по Прибыли','Сниж.ставки на POS/ATM 3мес_КК',
-'Повыш. %на остаток 2мес._ДК','Доп.2% УБ на 6мес_ДК','Доп.2% по УБ на 6мес_КК','Кэшбэк 10% на 1 мес_ДК',
-'Кэшбэк 10% на 1 мес_КК') or
-rez5 in ('Отмена комиссии по 120 дней_КК','Отмена комиссии по Прибыли','Сниж.ставки на POS/ATM 3мес_КК',
-'Повыш. %на остаток 2мес._ДК','Доп.2% УБ на 6мес_ДК','Доп.2% по УБ на 6мес_КК','Кэшбэк 10% на 1 мес_ДК',
-'Кэшбэк 10% на 1 мес_КК')) then 'Денежная механика' else null end as money,
-case when (rez1 in ('Сохранена без механики_ДК','Сохранена без механики_КК') or
-rez2 in ('Сохранена без механики_ДК','Сохранена без механики_КК') or
-rez3 in ('Сохранена без механики_ДК','Сохранена без механики_КК') or
-rez4 in ('Сохранена без механики_ДК','Сохранена без механики_КК') or
-rez5 in ('Сохранена без механики_ДК','Сохранена без механики_КК')) then 'Неденежная механика' else null end as no_money
-from ANALYTICS.KDI_SIEBEL_PAST
-where DIRECTION = 'ДТ' and 
-(rez1 in ('Отмена комиссии по 120 дней_КК','Отмена комиссии по Прибыли','Сниж.ставки на POS/ATM 3мес_КК',
-'Повыш. %на остаток 2мес._ДК','Доп.2% УБ на 6мес_ДК','Доп.2% по УБ на 6мес_КК','Кэшбэк 10% на 1 мес_ДК',
-'Кэшбэк 10% на 1 мес_КК','Сохранена без механики_ДК','Сохранена без механики_КК') or
-rez2 in ('Отмена комиссии по 120 дней_КК','Отмена комиссии по Прибыли','Сниж.ставки на POS/ATM 3мес_КК',
-'Повыш. %на остаток 2мес._ДК','Доп.2% УБ на 6мес_ДК','Доп.2% по УБ на 6мес_КК','Кэшбэк 10% на 1 мес_ДК',
-'Кэшбэк 10% на 1 мес_КК','Сохранена без механики_ДК','Сохранена без механики_КК') or
-rez3 in ('Отмена комиссии по 120 дней_КК','Отмена комиссии по Прибыли','Сниж.ставки на POS/ATM 3мес_КК',
-'Повыш. %на остаток 2мес._ДК','Доп.2% УБ на 6мес_ДК','Доп.2% по УБ на 6мес_КК','Кэшбэк 10% на 1 мес_ДК',
-'Кэшбэк 10% на 1 мес_КК','Сохранена без механики_ДК','Сохранена без механики_КК') or
-rez4 in ('Отмена комиссии по 120 дней_КК','Отмена комиссии по Прибыли','Сниж.ставки на POS/ATM 3мес_КК',
-'Повыш. %на остаток 2мес._ДК','Доп.2% УБ на 6мес_ДК','Доп.2% по УБ на 6мес_КК','Кэшбэк 10% на 1 мес_ДК',
-'Кэшбэк 10% на 1 мес_КК','Сохранена без механики_ДК','Сохранена без механики_КК') or
-rez5 in ('Отмена комиссии по 120 дней_КК','Отмена комиссии по Прибыли','Сниж.ставки на POS/ATM 3мес_КК',
-'Повыш. %на остаток 2мес._ДК','Доп.2% УБ на 6мес_ДК','Доп.2% по УБ на 6мес_КК','Кэшбэк 10% на 1 мес_ДК',
-'Кэшбэк 10% на 1 мес_КК','Сохранена без механики_ДК','Сохранена без механики_КК'))
+WITH monetary_conditions AS (
+    SELECT 'Отмена комиссии по 120 дней_КК' AS condition UNION ALL
+    SELECT 'Отмена комиссии по Прибыли' UNION ALL
+    SELECT 'Сниж.ставки на POS/ATM 3мес_КК' UNION ALL
+    SELECT 'Повыш. %на остаток 2мес._ДК' UNION ALL
+    SELECT 'Доп.2% УБ на 6мес_ДК' UNION ALL
+    SELECT 'Доп.2% по УБ на 6мес_КК' UNION ALL
+    SELECT 'Кэшбэк 10% на 1 мес_ДК' UNION ALL
+    SELECT 'Кэшбэк 10% на 1 мес_КК'
+),
+non_monetary_conditions AS (
+    SELECT 'Сохранена без механики_ДК' AS condition UNION ALL
+    SELECT 'Сохранена без механики_КК'
+),
+all_conditions AS (
+    SELECT condition FROM monetary_conditions
+    UNION ALL
+    SELECT condition FROM non_monetary_conditions
+)
+SELECT DISTINCT CALL_ID,
+    CASE 
+        WHEN rez1 IN (SELECT condition FROM monetary_conditions) OR
+             rez2 IN (SELECT condition FROM monetary_conditions) OR
+             rez3 IN (SELECT condition FROM monetary_conditions) OR
+             rez4 IN (SELECT condition FROM monetary_conditions) OR
+             rez5 IN (SELECT condition FROM monetary_conditions)
+        THEN 'Денежная механика'
+        ELSE NULL 
+    END AS money,
+    CASE 
+        WHEN rez1 IN (SELECT condition FROM non_monetary_conditions) OR
+             rez2 IN (SELECT condition FROM non_monetary_conditions) OR
+             rez3 IN (SELECT condition FROM non_monetary_conditions) OR
+             rez4 IN (SELECT condition FROM non_monetary_conditions) OR
+             rez5 IN (SELECT condition FROM non_monetary_conditions)
+        THEN 'Неденежная механика'
+        ELSE NULL 
+    END AS no_money
+FROM ANALYTICS.KDI_SIEBEL_PAST
+WHERE DIRECTION = 'ДТ'
+  AND (rez1 IN (SELECT condition FROM all_conditions) OR
+       rez2 IN (SELECT condition FROM all_conditions) OR
+       rez3 IN (SELECT condition FROM all_conditions) OR
+       rez4 IN (SELECT condition FROM all_conditions) OR
+       rez5 IN (SELECT condition FROM all_conditions))
