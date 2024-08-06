@@ -1,33 +1,4 @@
-from pywebio.output import put_widget
-
-# Определяем HTML шаблон
-tpl = '''
-<div class="product-inner">
-  <div class="product-wrap">
-    <img src="{{image_src}}">
-    <div class="actions">
-      <a href="{{add_to_cart_link}}" class="add-to-cart">Add to Cart</a>
-      <a href="{{quickview_link}}" class="quickview">Quick View</a>
-      <a href="{{wishlist_link}}" class="wishlist">Wishlist</a>
-    </div>
-  </div>
-  <div class="product-info">
-    <h3 class="product-title"><a href="{{product_link}}">{{product_title}}</a></h3>
-    <span class="price">{{price}}</span>
-  </div>
-</div>
-'''
-
-# Передаем данные в шаблон
-put_widget(tpl, {
-    "image_src": "https://html5book.ru/wp-content/uploads/2015/10/black-dress.jpg",
-    "add_to_cart_link": "#",  # Замените на реальную ссылку, если она доступна
-    "quickview_link": "#",    # Замените на реальную ссылку, если она доступна
-    "wishlist_link": "#",     # Замените на реальную ссылку, если она доступна
-    "product_link": "#",      # Ссылка на продукт
-    "product_title": "Маленькое черное платье",
-    "price": "₽ 1999"
-})
+ open('main_menu/img/ban.jpg', 'rb').read()
 
 
 .product-inner {
