@@ -1,7 +1,14 @@
-def get_image_base64(path):
-    with open(path, 'rb') as img_file:
-        return base64.b64encode(img_file.read()).decode('utf-8')
-
-# Пусть изображение находится по пути 'img/ban.jpg'
-image_path = 'img/ban.jpg'  # относительный путь
-image_data_url = f"data:image/jpeg;base64,{get_image_base64(image_path)}"
+tpl = '''
+<div class="product-inner">
+  <div class="product-wrap">
+    <img src="{{image_data_url}}" alt="Product Image">
+    <div class="actions">
+      {{& add_to_cart_button}}
+    </div>
+  </div>
+  <div class="product-info">
+    <h3 class="product-title"><a href="{{product_link}}">{{product_title}}</a></h3>
+    <span class="price">{{price}}</span>
+  </div>
+</div>
+'''
