@@ -1,2 +1,1 @@
-ThemeType.MACARONS — Цветная тема
-ThemeType.ESSOS
+, pos_bottom="5%"
