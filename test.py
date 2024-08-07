@@ -1,1 +1,2 @@
-from pyecharts.globals import ThemeType
+ThemeType.MACARONS — Цветная тема
+ThemeType.ESSOS
