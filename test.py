@@ -1,12 +1,52 @@
-SELECT id,
-       datetime_insert,
-       operation_type,
-       json,
-       login_customer,
-       value_operation,
-       status_operation
-  FROM operations;
-[{"product_id": "2", "name": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u043d\u043d\u044b\u0439 \u0442\u0435\u0440\u043c\u043e\u0441",
- "count": "2", "subtotal_price": "2000", "img": "img/\u0442\u0435\u0440\u043c\u043e\u0441 (1).png", "size": "-", "color": "-"}, 
- {"product_id": "3", "name": "\u0411\u0435\u043b\u0430\u044f \u043a\u0440\u0443\u0436\u043a\u0430 \"\u0423\u0440\u0430\u043b\u0441\u0438\u0431\"",
-  "count": "1", "subtotal_price": "500", "img": "img/\u043a\u0440\u0443\u0436\u043a\u0430 (2).png", "size": "-", "color": "-"}]
+WITH RECURSIVE
+json_data(id, datetime_insert, operation_type, json, login_customer, value_operation, status_operation, idx, product_id, count) AS (
+    -- Начальный запрос: извлечение первого элемента
+    SELECT
+        id,
+        datetime_insert,
+        operation_type,
+        json,
+        login_customer,
+        value_operation,
+        status_operation,
+        0 AS idx, -- Индекс элемента в массиве
+        json_extract(json, '$[0].product_id') AS product_id,
+        json_extract(json, '$[0].count') AS count
+    FROM
+        operations
+    WHERE
+        json_extract(json, '$[0].product_id') IS NOT NULL
+
+    UNION ALL
+
+    -- Рекурсивный запрос: извлечение последующих элементов
+    SELECT
+        id,
+        datetime_insert,
+        operation_type,
+        json,
+        login_customer,
+        value_operation,
+        status_operation,
+        idx + 1,
+        json_extract(json, printf('$[%d].product_id', idx + 1)) AS product_id,
+        json_extract(json, printf('$[%d].count', idx + 1)) AS count
+    FROM
+        json_data
+    WHERE
+        json_extract(json, printf('$[%d].product_id', idx + 1)) IS NOT NULL
+        AND idx < 4  -- Чтобы ограничить количество элементов (0-4 = до 5 элементов)
+)
+
+SELECT
+    id,
+    datetime_insert,
+    operation_type,
+    json,
+    login_customer,
+    value_operation,
+    status_operation,
+    product_id,
+    count
+FROM
+    json_data;
