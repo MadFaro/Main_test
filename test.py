@@ -11,3 +11,6 @@ def create_login_chart(dates, login_counts):
         )
     )
     return line
+
+    dates = df['date'].tolist()
+    login_counts = df['cnt'].tolist()
