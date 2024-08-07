@@ -1,1 +1,12 @@
-
+SELECT id,
+       datetime_insert,
+       operation_type,
+       json,
+       login_customer,
+       value_operation,
+       status_operation
+  FROM operations;
+[{"product_id": "2", "name": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u043d\u043d\u044b\u0439 \u0442\u0435\u0440\u043c\u043e\u0441",
+ "count": "2", "subtotal_price": "2000", "img": "img/\u0442\u0435\u0440\u043c\u043e\u0441 (1).png", "size": "-", "color": "-"}, 
+ {"product_id": "3", "name": "\u0411\u0435\u043b\u0430\u044f \u043a\u0440\u0443\u0436\u043a\u0430 \"\u0423\u0440\u0430\u043b\u0441\u0438\u0431\"",
+  "count": "1", "subtotal_price": "500", "img": "img/\u043a\u0440\u0443\u0436\u043a\u0430 (2).png", "size": "-", "color": "-"}]
