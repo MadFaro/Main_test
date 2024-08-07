@@ -11,6 +11,7 @@ def create_login_chart(dates, login_counts):
         )
     )
     return line
-
+from pyecharts.charts import Line
+from pyecharts import options as opts
     dates = df['date'].tolist()
     login_counts = df['cnt'].tolist()
