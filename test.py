@@ -1,4 +1,10 @@
-.set_series_opts(
-        areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
-        label_opts=opts.LabelOpts(is_show=False),
+    Bar()
+    .add_xaxis(Faker.choose())
+    .add_yaxis("商家A", Faker.values())
+    .add_yaxis("商家B", Faker.values())
+    .set_global_opts(
+        title_opts=opts.TitleOpts(title="Bar-Brush示例", subtitle="我是副标题"),
+        brush_opts=opts.BrushOpts(),
     )
+    
+)
