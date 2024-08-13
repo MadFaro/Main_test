@@ -1,1 +1,1 @@
-https://support.microsoft.com/ru-ru/topic/%D0%BE%D0%B1%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B4%D0%BB%D1%8F-microsoft-office-%D0%B7%D0%B0-%D0%B8%D1%8E%D0%BB%D1%8C-2024-%D0%B3-93b1cd15-3ed4-451b-a161-aca83e25c5c5
+https://support.microsoft.com/ru-ru/topic/%D0%BE%D0%B1%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B4%D0%BB%D1%8F-microsoft-office-%D0%B7%D0%B0-%D0%BC%D0%B0%D0%B9-2024-%D0%B3-4a6a9970-be68-47f6-9270-62b221d3fcb3
