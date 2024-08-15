@@ -1,5 +1,8 @@
 copy_button_html = '''
-<button onclick="copyTextToClipboard()">Копировать</button>
+<button onclick="copyTextToClipboard()" style="background-color: orange; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; text-align: center;">
+    <div style="font-size: 24px;">☎️</div>
+    Копировать
+</button>
 <script>
     function copyTextToClipboard() {
         var text = "Пример текста";
