@@ -3,11 +3,11 @@ copy_button_html = '''
     <div style="font-size: 24px; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); transition: top 0.3s ease;">
         ☎️
     </div>
-    Копировать
+    9 999 999 99 99
 </button>
 <script>
     function copyTextToClipboard() {
-        var text = "Пример текста";
+        var text = "9 999 999 99 99";
         navigator.clipboard.writeText(text).then(function() {
             alert("Текст скопирован: " + text);
         }, function(err) {
