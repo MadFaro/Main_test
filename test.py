@@ -1,21 +1,15 @@
-from pywebio.output import put_widget, put_markdown, put_table
-from pywebio.session import run_js
-
-# HTML шаблон для звездного рейтинга с использованием Mustache-синтаксиса
 tpl = '''
 <div class="star-rating">
     {{#stars}}
-    <input type="radio" id="{{id}}" name="rating" value="{{value}}">
+    <input type="radio" id="{{id}}" name="rating" value="{{value}}" onchange="sendRating('{{value}}')">
     <label for="{{id}}">★</label>
     {{/stars}}
 </div>
 
 <script>
-    document.querySelectorAll('.star-rating input').forEach(function(input) {
-        input.addEventListener('change', function() {
-            WebIO.pushData(this.value);
-        });
-    });
+    function sendRating(value) {
+        WebIO.pushData(value);  // Отправляем выбранное значение в Python
+    }
 </script>
 
 <style>
@@ -44,24 +38,3 @@ tpl = '''
     }
 </style>
 '''
-
-# Данные для виджета
-data = {
-    "stars": [
-        {"id": "5-stars", "value": "5"},
-        {"id": "4-stars", "value": "4"},
-        {"id": "3-stars", "value": "3"},
-        {"id": "2-stars", "value": "2"},
-        {"id": "1-star", "value": "1"}
-    ]
-}
-
-# Отображение виджета
-put_widget(tpl, data)
-
-# Получение результата выбранного рейтинга
-rating = run_js('await WebIO.waitForData()')
-
-# Отображение результата
-put_markdown(f'Вы выбрали рейтинг: **{rating}** звезд')
-
