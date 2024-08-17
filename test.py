@@ -1,43 +1,12 @@
-    tpl = '''
-    <div class="star-rating">
-        {{#stars}}
-        <input type="radio" id="{{id}}" name="rating" value="{{value}}" onchange="sendRating('{{value}}')">
-        <label for="{{id}}">★</label>
-        {{/stars}}
-    </div>
-
-    <script>
-        function sendRating(value) {
-            WebIO.pushData(value);  // Отправляем выбранное значение в Python
-        }
-    </script>
-
-    <style>
-        .star-rating {
-            font-size: 0;
-            direction: rtl;
-            display: inline-block;
-            position: relative;
-            cursor: pointer;
-        }
-        .star-rating input[type="radio"] {
-            display: none;
-        }
-        .star-rating label {
-            font-size: 2rem;
-            color: #ddd;
-            padding: 0 0.1rem;
-            transition: all 0.3s;
-        }
-        .star-rating input[type="radio"]:checked ~ label {
-            color: orange;
-        }
-        .star-rating label:hover,
-        .star-rating label:hover ~ label {
-            color: orange;
-        }
-    </style>
-    '''
-    # Получение результата выбранного рейтинга
-    rating = await eval_js('await WebIO.waitForData()')
-    print(f'Пользователь выбрал рейтинг: {rating} звезд')
+Uncaught exception GET /?app=index&session=NEW (::1)
+HTTPServerRequest(protocol='http', host='localhost:8080', method='GET', uri='/?app=index&session=NEW', version='HTTP/1.1', remote_ip='::1')
+Traceback (most recent call last):
+  File "C:\Python38\lib\site-packages\tornado\websocket.py", line 630, in _run_callback
+    result = callback(*args, **kwargs)
+  File "C:\Python38\lib\site-packages\pywebio\platform\tornado.py", line 152, in on_message
+    self._handler.send_client_data(message)
+  File "C:\Python38\lib\site-packages\pywebio\platform\adaptor\ws.py", line 200, in send_client_data
+    self.session.send_client_event(event)
+  File "C:\Python38\lib\site-packages\pywebio\session\coroutinebased.py", line 141, in send_client_event
+    coro_id = event['task_id']
+KeyError: 'task_id'
