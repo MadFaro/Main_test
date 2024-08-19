@@ -1,13 +1,28 @@
 put_column([
-        # Вставляем изображение
-        put_image(image_url, width='100%'),
-
-        # Вставляем название продукта и цену
+        # Внешняя обертка продукта
         put_column([
-            put_text(product_name, inline=True),  # Название продукта
-            put_text(f"₽ {price}", inline=True),  # Цена продукта
-        ], size='auto'),
+            # Блок с изображением продукта
+            put_image(image_url).style("width: 100%; display: block;"),
 
-        # Кнопка "В корзину"
-        put_button(button_text, onclick=button_action)
-    ], size='auto')
+            # Название продукта
+            put_text(product_name).style(
+                "color: #2e2e2e; font-weight: 600; margin: 15px 0 5px; padding-bottom: 7px; "
+                "display: block; position: relative; text-transform: uppercase; font-family: Lora, serif;"
+                "text-align: center; font-size: 14px;"
+            ),
+            
+            # Цена продукта
+            put_text(f"₽ {price}").style(
+                "font-size: 20px; color: #c0a97a; font-weight: 700; text-align: center;"
+            ),
+            
+            # Кнопка "В корзину"
+            put_button(button_text, onclick=button_action).style(
+                "text-decoration: none; color: #c0a97a; font-size: 12px; width: 140px; height: 40px; "
+                "line-height: 40px; border: 2px solid #c0a97a; display: block; margin: 10px auto; "
+                "background: transparent; text-align: center; transition: background .3s ease-in-out;"
+            ).onclick(button_action)
+        ]).style(
+            "width: 300px; margin: 0 auto; background: white; padding: 0 0 20px; text-align: center;"
+        )
+    ])
