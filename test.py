@@ -15,7 +15,7 @@ put_html("""
         }
     </style>
     
-    <button id="scroll-button" onclick="pywebio.scrollTo(scope='section1')">Наверх</button>
+    <button id="scroll-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Наверх</button>
 
     <script>
         window.onscroll = function() {
