@@ -1,21 +1,25 @@
-/* Подсветка верхнего левого угла */
+/* Подсветка границы верхнего левого угла */
 .card::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 50px; /* ширина подсветки */
-  height: 50px; /* высота подсветки */
-  background: linear-gradient(to bottom right, rgba(255, 255, 0, 0.5), transparent);
+  top: -1px;
+  left: -1px;
+  width: 50px; /* ширина границы */
+  height: 50px; /* высота границы */
+  border-top: 3px solid transparent;
+  border-left: 3px solid transparent;
+  background: linear-gradient(to bottom right, #8a2be2, transparent);
 }
 
-/* Подсветка нижнего правого угла */
+/* Подсветка границы нижнего правого угла */
 .card::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 50px; /* ширина подсветки */
-  height: 50px; /* высота подсветки */
-  background: linear-gradient(to top left, rgba(255, 255, 0, 0.5), transparent);
+  bottom: -1px;
+  right: -1px;
+  width: 50px; /* ширина границы */
+  height: 50px; /* высота границы */
+  border-bottom: 3px solid transparent;
+  border-right: 3px solid transparent;
+  background: linear-gradient(to top left, #8a2be2, transparent);
 }
