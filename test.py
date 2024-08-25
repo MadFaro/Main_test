@@ -1,8 +1,12 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bell Animation</title>
+from pywebio.output import put_widget, put_button, put_html
+
+def bell_widget():
+    template = '''
+    <div style="text-align: center;">
+        <div class="bell">🔔</div>
+        <div>{{& pywebio_output_parse}}</div>
+    </div>
+
     <style>
         .bell {
             font-size: 50px;
@@ -19,8 +23,8 @@
             100% { transform: rotate(0); }
         }
     </style>
-</head>
-<body>
-    <div class="bell">🔔</div>
-</body>
-</html>
+    '''
+
+    put_widget(template, data={"pywebio_output_parse": put_button("Click Me", onclick=lambda: print("Button clicked!"))})
+
+bell_widget()
