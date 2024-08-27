@@ -20,8 +20,8 @@
 
 <style>
     .copy-button:hover {
-        background-color: #ff8484;
-        color: white;
+        background-color: #ff8484 !important;
+        color: white !important;
     }
 
     .copy-button:hover .icon {
@@ -29,9 +29,9 @@
     }
 
     .copy-button:active {
-        background-color: #cc6b6b;
-        border-color: #cc6b6b;
-        color: white;
+        background-color: #cc6b6b !important;
+        border-color: #cc6b6b !important;
+        color: white !important;
     }
 
     .copy-button:active .icon {
