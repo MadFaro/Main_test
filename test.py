@@ -1,4 +1,6 @@
-
+from bokeh.plotting import figure
+from bokeh.embed import components
+from bokeh.models import ColumnDataSource
 
 async def dashboard_user(df_user, sdep, tab, fio, id):
     try:
@@ -8,9 +10,9 @@ async def dashboard_user(df_user, sdep, tab, fio, id):
 
     def create_login_chart(dates, login_counts):
         p = figure(x_range=dates, title="Входы", width=800, height=400,
-                   toolbar_location=None, tools="hover", tooltips="@x: @y")
-        p.line(x=dates, y=login_counts, line_width=2, legend_label="Кол-во", line_color="blue")
-        p.circle(x=dates, y=login_counts, size=8, color="blue", fill_alpha=0.6)
+                   toolbar_location=None, tools="xwheel_zoom,reset,save")
+        p.line(dates, login_counts, line_width=2, legend_label="Кол-во", color="blue")
+        p.circle(dates, login_counts, size=8, color="blue", fill_alpha=0.6)
         p.legend.location = "top_left"
         p.xaxis.axis_label = "Дата"
         p.yaxis.axis_label = "Количество"
@@ -19,10 +21,10 @@ async def dashboard_user(df_user, sdep, tab, fio, id):
 
     def create_multi_chart(dates, shop, game, box):
         p = figure(x_range=dates, title="Сервисы", width=800, height=400,
-                   toolbar_location=None, tools="hover", tooltips="@x: @y")
-        p.line(x=dates, y=shop, line_width=2, legend_label="Зашел в магазин", line_color="green")
-        p.line(x=dates, y=game, line_width=2, legend_label="Зашел в гейм", line_color="orange")
-        p.line(x=dates, y=box, line_width=2, legend_label="Воспользовался боксом", line_color="red")
+                   toolbar_location=None, tools="xwheel_zoom,reset,save")
+        p.line(dates, shop, line_width=2, legend_label="Зашел в магазин", color="green")
+        p.line(dates, game, line_width=2, legend_label="Зашел в гейм", color="orange")
+        p.line(dates, box, line_width=2, legend_label="Воспользовался боксом", color="red")
         p.legend.location = "top_left"
         p.xaxis.axis_label = "Дата"
         p.yaxis.axis_label = "Количество"
@@ -31,10 +33,10 @@ async def dashboard_user(df_user, sdep, tab, fio, id):
 
     def create_box_chart(dates, quest, offer, mood):
         p = figure(x_range=dates, title="Бокс ОС", width=800, height=400,
-                   toolbar_location=None, tools="hover", tooltips="@x: @y")
-        p.line(x=dates, y=quest, line_width=2, legend_label="Задал вопрос", line_color="purple")
-        p.line(x=dates, y=offer, line_width=2, legend_label="Предложил идею", line_color="brown")
-        p.line(x=dates, y=mood, line_width=2, legend_label="Отправил настроение", line_color="pink")
+                   toolbar_location=None, tools="xwheel_zoom,reset,save")
+        p.line(dates, quest, line_width=2, legend_label="Задал вопрос", color="purple")
+        p.line(dates, offer, line_width=2, legend_label="Предложил идею", color="brown")
+        p.line(dates, mood, line_width=2, legend_label="Отправил настроение", color="pink")
         p.legend.location = "top_left"
         p.xaxis.axis_label = "Дата"
         p.yaxis.axis_label = "Количество"
@@ -43,15 +45,15 @@ async def dashboard_user(df_user, sdep, tab, fio, id):
 
     def create_orders_cancellations_chart(dates, order_counts, cancellation_counts):
         p = figure(x_range=dates, title="Заказы", width=800, height=400,
-                   toolbar_location=None, tools="hover", tooltips="@x: @y")
-        p.line(x=dates, y=order_counts, line_width=2, legend_label="Сделал", line_color="blue")
-        p.line(x=dates, y=cancellation_counts, line_width=2, legend_label="Отменил", line_color="red")
+                   toolbar_location=None, tools="xwheel_zoom,reset,save")
+        p.line(dates, order_counts, line_width=2, legend_label="Сделал", color="blue")
+        p.line(dates, cancellation_counts, line_width=2, legend_label="Отменил", color="red")
         p.legend.location = "top_left"
         p.xaxis.axis_label = "Дата"
         p.yaxis.axis_label = "Количество"
         p.xaxis.major_label_orientation = 1.2
         return p
-    
+
     # Получение данных из базы данных
     df = pd.read_sql(sql.sql_dash_one, connect("Convert/db/shop.db"))
     df_online = pd.read_sql(sql.sql_online, connect("Convert/db/shop.db"))
@@ -115,8 +117,8 @@ async def dashboard_user(df_user, sdep, tab, fio, id):
         ]).style('display: flex; justify-content: center;'),
     ])
 
-    # Отображение скриптов для интерактивности графиков
-    put_html(f"<script>{script1}</script>")
-    put_html(f"<script>{script2}</script>")
-    put_html(f"<script>{script3}</script>")
-    put_html(f"<script>{script4}</script>")
+    # Отображение интерактивности графиков
+    put_html(script1)
+    put_html(script2)
+    put_html(script3)
+    put_html(script4)
