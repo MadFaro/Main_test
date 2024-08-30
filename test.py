@@ -1,7 +1,9 @@
-df = pd.read_sql(sql.sql_operations_one.replace('Замена', str(product_id)), connect("Convert/db/shop.db"))
-    # Загружаем данные о корзине из JSON
-    json_data = json.loads(df['json'].iloc[0]) 
+def json_to_html(json_data):
+    # Если json_data - это список словарей
+    if isinstance(json_data, list):
+        df = pd.DataFrame(json_data)
+    else:
+        raise ValueError("JSON data is not in the expected format")
     
-    items = [] 
-    total_price = 0
-    html_json = pd.read_json(json_data).to_html(index=False)
+    # Преобразование DataFrame в HTML
+    return df.to_html(index=False, escape=False)
