@@ -1,3 +1,7 @@
+import plotly.graph_objects as go
+import pandas as pd
+from pywebio.output import put_column, put_row, put_html, put_text, put_button, put_datatable, clear
+
 async def dashboard_user(df_user, sdep, tab, fio, id):
     try:
         clear()
@@ -5,86 +9,74 @@ async def dashboard_user(df_user, sdep, tab, fio, id):
         pass
 
     def create_login_chart(dates, login_counts):
-        line = (
-            Line(init_opts=opts.InitOpts(theme=ThemeType.WALDEN, width="100%", height="400px"))
-            .add_xaxis(dates)
-            .add_yaxis("Кол-во", login_counts, is_smooth=True)
-            .set_series_opts(
-                areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
-                label_opts=opts.LabelOpts(is_show=False),
-            )
-            .set_global_opts(
-                title_opts=opts.TitleOpts(title="Входы", pos_left="center"),
-                tooltip_opts=opts.TooltipOpts(trigger="axis"),
-                xaxis_opts=opts.AxisOpts(type_="category"),
-                yaxis_opts=opts.AxisOpts(type_="value"),
-                datazoom_opts=[
-                    opts.DataZoomOpts(type_="slider", range_start=80, range_end=100)
-                ],
-                legend_opts=opts.LegendOpts(is_show=True)
-            )
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=dates, y=login_counts, mode='lines+markers', name='Кол-во'))
+        fig.update_layout(
+            title='Входы',
+            xaxis_title='Дата',
+            yaxis_title='Количество',
+            template='plotly_white',
+            margin=dict(l=20, r=20, t=40, b=20),
+            width=800,  # можно настроить ширину
+            height=400,  # и высоту графика
+            xaxis=dict(tickmode='linear'),
+            yaxis=dict(tickmode='linear')
         )
-        return line
-    
+        return fig
+
     def create_multi_chart(dates, shop, game, box):
-        line = (
-            Line(init_opts=opts.InitOpts(theme=ThemeType.WALDEN, width="100%", height="400px"))
-            .add_xaxis(dates)
-            .add_yaxis("Зашел в магазин", shop, is_smooth=True)
-            .add_yaxis("Зашел в гейм", game, is_smooth=True)
-            .add_yaxis("Воспользовался боксом", box, is_smooth=True)
-            .set_global_opts(
-                title_opts=opts.TitleOpts(title="Сервисы", pos_left="center"),
-                tooltip_opts=opts.TooltipOpts(trigger="axis"),
-                xaxis_opts=opts.AxisOpts(type_="category"),
-                yaxis_opts=opts.AxisOpts(type_="value"),
-                datazoom_opts=[
-                    opts.DataZoomOpts(type_="slider", range_start=80, range_end=100)
-                ],
-                legend_opts=opts.LegendOpts(is_show=True)
-            )
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=dates, y=shop, mode='lines+markers', name='Зашел в магазин'))
+        fig.add_trace(go.Scatter(x=dates, y=game, mode='lines+markers', name='Зашел в гейм'))
+        fig.add_trace(go.Scatter(x=dates, y=box, mode='lines+markers', name='Воспользовался боксом'))
+        fig.update_layout(
+            title='Сервисы',
+            xaxis_title='Дата',
+            yaxis_title='Количество',
+            template='plotly_white',
+            margin=dict(l=20, r=20, t=40, b=20),
+            width=800,
+            height=400,
+            xaxis=dict(tickmode='linear'),
+            yaxis=dict(tickmode='linear')
         )
-        return line
+        return fig
 
     def create_box_chart(dates, quest, offer, mood):
-        line = (
-            Line(init_opts=opts.InitOpts(theme=ThemeType.WALDEN, width="100%", height="400px"))
-            .add_xaxis(dates)
-            .add_yaxis("Задал вопрос", quest, is_smooth=True)
-            .add_yaxis("Предложил идею", offer, is_smooth=True)
-            .add_yaxis("Отправил настроение", mood, is_smooth=True)
-            .set_global_opts(
-                title_opts=opts.TitleOpts(title="Бокс ОС", pos_left="center"),
-                tooltip_opts=opts.TooltipOpts(trigger="axis"),
-                xaxis_opts=opts.AxisOpts(type_="category"),
-                yaxis_opts=opts.AxisOpts(type_="value"),
-                datazoom_opts=[
-                    opts.DataZoomOpts(type_="slider", range_start=80, range_end=100)
-                ],
-                legend_opts=opts.LegendOpts(is_show=True)
-            )
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=dates, y=quest, mode='lines+markers', name='Задал вопрос'))
+        fig.add_trace(go.Scatter(x=dates, y=offer, mode='lines+markers', name='Предложил идею'))
+        fig.add_trace(go.Scatter(x=dates, y=mood, mode='lines+markers', name='Отправил настроение'))
+        fig.update_layout(
+            title='Бокс ОС',
+            xaxis_title='Дата',
+            yaxis_title='Количество',
+            template='plotly_white',
+            margin=dict(l=20, r=20, t=40, b=20),
+            width=800,
+            height=400,
+            xaxis=dict(tickmode='linear'),
+            yaxis=dict(tickmode='linear')
         )
-        return line
-    
+        return fig
+
     def create_orders_cancellations_chart(dates, order_counts, cancellation_counts):
-        line = (
-            Line(init_opts=opts.InitOpts(theme=ThemeType.WALDEN, width="100%", height="400px"))
-            .add_xaxis(dates)
-            .add_yaxis("Сделал", order_counts, is_smooth=True)
-            .add_yaxis("Отменил", cancellation_counts, is_smooth=True)
-            .set_global_opts(
-                title_opts=opts.TitleOpts(title="Заказы", pos_left="center"),
-                tooltip_opts=opts.TooltipOpts(trigger="axis"),
-                xaxis_opts=opts.AxisOpts(type_="category"),
-                yaxis_opts=opts.AxisOpts(type_="value"),
-                datazoom_opts=[
-                    opts.DataZoomOpts(type_="slider", range_start=80, range_end=100)
-                ],
-                legend_opts=opts.LegendOpts(is_show=True)
-            )
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=dates, y=order_counts, mode='lines+markers', name='Сделал'))
+        fig.add_trace(go.Scatter(x=dates, y=cancellation_counts, mode='lines+markers', name='Отменил'))
+        fig.update_layout(
+            title='Заказы',
+            xaxis_title='Дата',
+            yaxis_title='Количество',
+            template='plotly_white',
+            margin=dict(l=20, r=20, t=40, b=20),
+            width=800,
+            height=400,
+            xaxis=dict(tickmode='linear'),
+            yaxis=dict(tickmode='linear')
         )
-        return line
-    
+        return fig
+
     # Получение данных из базы данных
     df = pd.read_sql(sql.sql_dash_one, connect("Convert/db/shop.db"))
     df_online = pd.read_sql(sql.sql_online, connect("Convert/db/shop.db"))
@@ -108,7 +100,6 @@ async def dashboard_user(df_user, sdep, tab, fio, id):
 
     # Отображение контента на странице
     put_column([
-
         put_row([
             None,
             put_text("Статистика").style("text-align: center; font-size: xx-large;"),
@@ -118,15 +109,15 @@ async def dashboard_user(df_user, sdep, tab, fio, id):
         None,
 
         put_row([
-            put_html(chart.render_notebook()).style('width:100%'),
-            put_html(chart2.render_notebook()).style('width:100%'),
+            put_html(chart.to_html(full_html=False)).style('width:100%'),
+            put_html(chart2.to_html(full_html=False)).style('width:100%'),
         ]).style('display: flex; flex-direction: row; gap: 1em;'),
 
         None,
 
         put_row([
-            put_html(chart3.render_notebook()).style('width:100%'),
-            put_html(chart4.render_notebook()).style('width:100%'),
+            put_html(chart3.to_html(full_html=False)).style('width:100%'),
+            put_html(chart4.to_html(full_html=False)).style('width:100%'),
         ]).style('display: flex; flex-direction: row; gap: 1em;'),
 
         put_text("Активные сессии").style("text-align: center; font-size: xx-large;"),
