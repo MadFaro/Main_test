@@ -7,15 +7,11 @@ FROM (
         a.OPERATORID, 
         a.CREATED,
         a.VISITORID,
-        CASE 
-            WHEN COUNT(*) OVER (
-                PARTITION BY a.VISITORID 
-                ORDER BY a.CREATED 
-                RANGE BETWEEN INTERVAL '0' DAY PRECEDING AND INTERVAL '2' DAY FOLLOWING
-            ) = 1 
-            THEN 1 
-            ELSE 0 
-        END AS FCR
+        COUNT(*) OVER (
+            PARTITION BY a.VISITORID 
+            ORDER BY TRUNC(a.CREATED) 
+            RANGE BETWEEN INTERVAL '2' DAY PRECEDING AND CURRENT ROW
+        ) AS FCR
     FROM 
         ODS.ODS_WIS_CHATTHREAD@cdw.prod a
     WHERE 
