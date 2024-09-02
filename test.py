@@ -8,11 +8,9 @@ FROM (
         a.CREATED,
         a.VISITORID,
         CASE 
-            WHEN COUNT(TRUNC(CREATED)) 
-                 OVER (PARTITION BY TRUNC(CREATED), a.VISITORID 
-                       ORDER BY TRUNC(CREATED) 
-                       RANGE BETWEEN INTERVAL '2' DAY PRECEDING AND CURRENT ROW) = 1 
-            THEN 1 ELSE 0 
+            WHEN COUNT(*) OVER (PARTITION BY a.VISITORID ORDER BY a.CREATED RANGE BETWEEN INTERVAL '2' DAY FOLLOWING AND INTERVAL '0' DAY FOLLOWING) = 1 
+            THEN 1 
+            ELSE 0 
         END AS FCR
     FROM 
         ODS.ODS_WIS_CHATTHREAD@cdw.prod a
