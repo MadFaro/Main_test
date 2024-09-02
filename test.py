@@ -1,7 +1,17 @@
-WITH FirstContacts AS (
+SELECT 
+    TRUNC(CREATED, 'mm') AS created, 
+    SUM(CASE WHEN FCR = 1 THEN 1 ELSE 0 END) / COUNT(*) AS fcr 
+FROM (
     SELECT 
+        a.OPERATORFULLNAME, 
+        a.OPERATORID, 
+        a.CREATED,
         a.VISITORID,
-        MIN(a.CREATED) AS FirstContactDate
+        COUNT(*) OVER (
+            PARTITION BY a.VISITORID 
+            ORDER BY a.CREATED 
+            RANGE BETWEEN INTERVAL '2' DAY PRECEDING AND CURRENT ROW
+        ) AS FCR
     FROM 
         ODS.ODS_WIS_CHATTHREAD@cdw.prod a
     WHERE 
@@ -12,31 +22,8 @@ WITH FirstContacts AS (
             WHERE DTM >= DATE '2023-12-01' 
             AND DEPARTMENTID IN (22)
         )
-    GROUP BY 
-        a.VISITORID
-),
-RepeatedContacts AS (
-    SELECT 
-        fc.VISITORID,
-        COUNT(*) AS RepeatCount
-    FROM 
-        ODS.ODS_WIS_CHATTHREAD@cdw.prod a
-    JOIN 
-        FirstContacts fc ON a.VISITORID = fc.VISITORID
-    WHERE 
-        a.CREATED BETWEEN fc.FirstContactDate AND fc.FirstContactDate + INTERVAL '3' DAY
-        AND a.CREATED > fc.FirstContactDate
-    GROUP BY 
-        fc.VISITORID
 )
-SELECT 
-    TRUNC(fc.FirstContactDate, 'mm') AS created,
-    SUM(CASE WHEN rc.RepeatCount IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS fcr
-FROM 
-    FirstContacts fc
-LEFT JOIN 
-    RepeatedContacts rc ON fc.VISITORID = rc.VISITORID
 GROUP BY 
-    TRUNC(fc.FirstContactDate, 'mm')
+    TRUNC(CREATED, 'mm')
 ORDER BY 
-    created;
+    TRUNC(CREATED, 'mm');
