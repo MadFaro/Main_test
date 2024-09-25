@@ -1,13 +1,19 @@
-put_html("""
-    <div style="text-align: center; font-size: x-large;">
-    Привет! Добро пожаловать на страницу Геймификации 2024.<br>
-    Игра в стиле «Слово пацана» завершена и мы благодарим каждого, кто принял участие.<br>
-    Увидимся в следующем году, друзья. А пока можете посмотреть результаты Гейма во вкладке 
-    </div>
-""")
+Traceback (most recent call last):
+  File "C:\Python38\lib\site-packages\pywebio\io_ctrl.py", line 193, in inner
+    return func(*args, **kwargs)
+TypeError: span() got an unexpected keyword argument 'width'
 
-put_row([
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Python38\lib\site-packages\pywebio\session\coroutinebased.py", line 325, in step
+    coro_yield = self.coro.send(result)
+  File "main.py", line 617, in game_noadmin
     span("", width='auto'),
-    put_button("Итоги", onclick=lambda: ..., link_style=True),
-    span(".", width='auto')
-], size="auto").style("text-align: center; font-size: x-large;")
+  File "C:\Python38\lib\site-packages\pywebio\io_ctrl.py", line 197, in inner
+    bound = sig.bind(*args, **kwargs).arguments
+  File "C:\Python38\lib\inspect.py", line 3025, in bind
+    return self._bind(args, kwargs)
+  File "C:\Python38\lib\inspect.py", line 3014, in _bind
+    raise TypeError(
+TypeError: got an unexpected keyword argument 'width'
