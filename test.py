@@ -13,7 +13,7 @@ SELECT id as ID,
        json as JSON,
        login_customer as LOGIN
   FROM operations
-  where operation_type = 'Покупка'
+  WHERE operation_type = 'Покупка'
 """
 df = pd.read_sql_query(query, conn)
 
@@ -32,16 +32,43 @@ for idx, row in df.iterrows():
     expanded_df['ID'] = row['ID']
     expanded_df['DATE'] = row['DATE']
     expanded_df['TYPE'] = row['TYPE']
+    expanded_df['LOGIN'] = row['LOGIN']  # Добавляем LOGIN в каждую запись
     expanded_rows.append(expanded_df)
 
 # Объединяем все отдельные DataFrame в один
 final_df = pd.concat(expanded_rows, ignore_index=True)
 
 # Переупорядочиваем столбцы
-final_df = final_df[['ID', 'DATE', 'TYPE', 'product_id', 'name', 'count', 'subtotal_price', 'size', 'color']]
+final_df = final_df[['ID', 'DATE', 'TYPE', 'LOGIN', 'product_id', 'name', 'count', 'subtotal_price', 'size', 'color']]
 
-# Закрываем соединение с базой данных
+# Создаем (или пересоздаем) таблицу product_sale
+cursor = conn.cursor()
+
+# Удаляем таблицу, если она уже существует
+cursor.execute("DROP TABLE IF EXISTS product_sale")
+
+# Создаем новую таблицу product_sale
+cursor.execute('''
+    CREATE TABLE product_sale (
+        ID INTEGER,
+        DATE TEXT,
+        TYPE TEXT,
+        LOGIN TEXT,
+        product_id INTEGER,
+        name TEXT,
+        count INTEGER,
+        subtotal_price REAL,
+        size TEXT,
+        color TEXT
+    )
+''')
+
+# Вставляем данные из DataFrame в таблицу product_sale
+final_df.to_sql('product_sale', conn, if_exists='append', index=False)
+
+# Сохраняем изменения и закрываем соединение
+conn.commit()
 conn.close()
 
-# Выводим финальный DataFrame
+# Выводим финальный DataFrame для проверки
 print(final_df)
