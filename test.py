@@ -2,11 +2,19 @@ import sqlite3
 import pandas as pd
 import json
 
-# Подключаемся к базе данных SQLite
-conn = sqlite3.connect('database.db')
+db_path = r'C:\Users\TologonovAB\Desktop\shop_app\Convert\db\shop.db'
+conn = sqlite3.connect(db_path)
 
 # Выполняем запрос для получения данных из таблицы
-query = "SELECT ID, DATE, TYPE, JSON FROM your_table"
+query = """
+SELECT id as ID,
+       datetime_insert as DATE,
+       operation_type as TYPE,
+       json as JSON,
+       login_customer as LOGIN
+  FROM operations
+  where operation_type = 'Покупка'
+"""
 df = pd.read_sql_query(query, conn)
 
 # Функция для преобразования JSON-строки в DataFrame
