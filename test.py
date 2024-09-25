@@ -1,19 +1,17 @@
-Traceback (most recent call last):
-  File "C:\Python38\lib\site-packages\pywebio\io_ctrl.py", line 193, in inner
-    return func(*args, **kwargs)
-TypeError: span() got an unexpected keyword argument 'width'
+from pywebio.output import put_html, put_row, put_button
 
-During handling of the above exception, another exception occurred:
+# Основной текст
+put_html("""
+    <div style="text-align: center; font-size: x-large; white-space: pre-line;">
+    Привет! Добро пожаловать на страницу Геймификации 2024.<br>
+    Игра в стиле «Слово пацана» завершена и мы благодарим каждого, кто принял участие.<br>
+    Увидимся в следующем году, друзья. А пока можете посмотреть результаты Гейма во вкладке 
+    </div>
+""")
 
-Traceback (most recent call last):
-  File "C:\Python38\lib\site-packages\pywebio\session\coroutinebased.py", line 325, in step
-    coro_yield = self.coro.send(result)
-  File "main.py", line 617, in game_noadmin
-    span("", width='auto'),
-  File "C:\Python38\lib\site-packages\pywebio\io_ctrl.py", line 197, in inner
-    bound = sig.bind(*args, **kwargs).arguments
-  File "C:\Python38\lib\inspect.py", line 3025, in bind
-    return self._bind(args, kwargs)
-  File "C:\Python38\lib\inspect.py", line 3014, in _bind
-    raise TypeError(
-TypeError: got an unexpected keyword argument 'width'
+# Встраиваемое слово "Итоги" как кликабельная кнопка в тексте
+put_row([
+    put_html('<div style="font-size: x-large; display: inline-block;">«</div>'),  # Открывающая кавычка
+    put_button('Итоги', onclick=lambda: ..., link_style=True).style('font-size: x-large; display: inline-block;'),
+    put_html('<div style="font-size: x-large; display: inline-block;">».</div>')  # Закрывающая кавычка и точка
+], size="auto").style('text-align: center;')
