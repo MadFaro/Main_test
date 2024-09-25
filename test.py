@@ -1,1 +1,39 @@
-22	2024-06-06 15:16:12	Покупка	[{"product_id": "2", "name": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u043d\u043d\u044b\u0439 \u0442\u0435\u0440\u043c\u043e\u0441", "count": "2", "subtotal_price": "2000", "img": "img/\u0442\u0435\u0440\u043c\u043e\u0441 (1).png", "size": "-", "color": "-"}, {"product_id": "3", "name": "\u0411\u0435\u043b\u0430\u044f \u043a\u0440\u0443\u0436\u043a\u0430 \"\u0423\u0440\u0430\u043b\u0441\u0438\u0431\"", "count": "1", "subtotal_price": "500", "img": "img/\u043a\u0440\u0443\u0436\u043a\u0430 (2).png", "size": "-", "color": "-"}]
+import sqlite3
+import pandas as pd
+import json
+
+# Подключаемся к базе данных SQLite
+conn = sqlite3.connect('database.db')
+
+# Выполняем запрос для получения данных из таблицы
+query = "SELECT ID, DATE, TYPE, JSON FROM your_table"
+df = pd.read_sql_query(query, conn)
+
+# Функция для преобразования JSON-строки в DataFrame
+def expand_json(json_str):
+    products = json.loads(json_str)
+    return pd.DataFrame(products)
+
+# Создаем пустой список для сохранения новых строк
+expanded_rows = []
+
+# Проходим по каждой строке в исходном датафрейме
+for idx, row in df.iterrows():
+    json_data = row['JSON']
+    expanded_df = expand_json(json_data)
+    expanded_df['ID'] = row['ID']
+    expanded_df['DATE'] = row['DATE']
+    expanded_df['TYPE'] = row['TYPE']
+    expanded_rows.append(expanded_df)
+
+# Объединяем все отдельные DataFrame в один
+final_df = pd.concat(expanded_rows, ignore_index=True)
+
+# Переупорядочиваем столбцы
+final_df = final_df[['ID', 'DATE', 'TYPE', 'product_id', 'name', 'count', 'subtotal_price', 'size', 'color']]
+
+# Закрываем соединение с базой данных
+conn.close()
+
+# Выводим финальный DataFrame
+print(final_df)
