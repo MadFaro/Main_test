@@ -1,9 +1,15 @@
-WITH client_adds AS (
+with tab_1 as (
+select CLIENT_DID as client_id,
+INT_CREATE_DATE as date_added
+from analytics.rap_tech_voronka_polotn 
+where INT_CREATE_DATE >=date'2024-06-01' and TEMPLATE_CODE = ('pk_difrate_35', 'pk_topup_35, tm_cc_35')
+),
+client_adds AS (
     SELECT
         client_id,
         date_added,
         LAG(date_added) OVER (PARTITION BY client_id ORDER BY date_added) AS prev_date
-    FROM client_activity
+    FROM tab_1
 ),
 date_differences AS (
     SELECT
@@ -40,3 +46,8 @@ WHERE interval_category != 'More than 30 days or First entry'
 GROUP BY TO_CHAR(TRUNC(date_added, 'MM'), 'YYYY-MM'), interval_category
 ORDER BY month, interval_category;
 
+ORA-01797: после этого оператора должны быть ANY или ALL
+01797. 00000 -  "this operator must be followed by ANY or ALL"
+*Cause:    
+*Action:
+Error at Line: 5 Column: 60
