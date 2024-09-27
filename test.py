@@ -1,50 +1,41 @@
+ - учитывать деактвированные по причине или какие-от причины деактиваций вычесть из учета (поле DEACT_DESCRIPTION)
+- сегменты
+
+DEACT_DESCRIPTION, -  причины деактивации
+CLNT_SEGMENT, - сегмент клиента 
+
 WITH tab_1 AS (
-  SELECT CLIENT_DID AS client_id,
-         CAST(INT_CREATE_DATE AS DATE) AS date_added
-  FROM analytics.rap_tech_voronka_polotn 
-  WHERE INT_CREATE_DATE >= DATE '2024-06-01' 
-    AND TEMPLATE_CODE IN ('pk_difrate_35', 'pk_topup_35', 'tm_cc_35')
+SELECT CLIENT_DID AS client_id,
+DEACT_DESCRIPTION,
+CLNT_SEGMENT,
+CAST(INT_CREATE_DATE AS DATE) AS date_added
+FROM analytics.rap_tech_voronka_polotn 
+WHERE INT_CREATE_DATE >= DATE '2024-06-01' AND TEMPLATE_CODE IN ('pk_difrate_35', 'pk_topup_35', 'tm_cc_35')
 ),
-client_adds AS (
-  SELECT
-    client_id,
-    date_added,
-    LAG(date_added) OVER (PARTITION BY client_id ORDER BY date_added) AS prev_date
-  FROM tab_1
+tab_2 AS (
+SELECT client_id, date_added,
+LAG(date_added) OVER (PARTITION BY client_id ORDER BY date_added) AS prev_date
+FROM tab_1
 ),
-date_differences AS (
-  SELECT
-    client_id,
-    date_added,
-    prev_date,
-    CASE
-      WHEN prev_date IS NOT NULL THEN (date_added - prev_date)
-      ELSE NULL
-    END AS day_diff
-  FROM client_adds
+tab_3 AS (
+SELECT client_id, date_added, prev_date,
+CASE WHEN prev_date IS NOT NULL THEN (date_added - prev_date) ELSE NULL END AS day_diff
+FROM tab_2
 ),
-categorized_diffs AS (
-  SELECT
-    client_id,
-    date_added,
-    prev_date,
-    day_diff,
-    CASE
-      -- Для клиентов, у которых нет предыдущей даты (это первое добавление)
-      WHEN prev_date IS NULL THEN '0 повторений'
-      WHEN day_diff BETWEEN 1 AND 14 THEN '1-14 дней'
-      WHEN day_diff BETWEEN 15 AND 20 THEN '15-20 дней'
-      WHEN day_diff BETWEEN 21 AND 25 THEN '21-25 дней'
-      WHEN day_diff BETWEEN 26 AND 30 THEN '26-30 дней'
-      ELSE 'Больше 30 дней'
-    END AS interval_category
-  FROM date_differences
+tab_4 AS (
+SELECT client_id, date_added, prev_date, day_diff,
+CASE WHEN prev_date IS NULL THEN '0 повторений'
+WHEN day_diff BETWEEN 1 AND 14 THEN '1-14 дней'
+WHEN day_diff BETWEEN 15 AND 20 THEN '15-20 дней'
+WHEN day_diff BETWEEN 21 AND 25 THEN '21-25 дней'
+WHEN day_diff BETWEEN 26 AND 30 THEN '26-30 дней'
+ELSE 'Больше 30 дней' END AS interval_category
+FROM tab_3
 )
 SELECT
   TO_CHAR(TRUNC(date_added, 'MM'), 'YYYY-MM') AS month,
   interval_category,
   COUNT(*) AS count_of_repeats
-FROM categorized_diffs
+FROM tab_4
 GROUP BY TO_CHAR(TRUNC(date_added, 'MM'), 'YYYY-MM'), interval_category
 ORDER BY month, interval_category;
-
