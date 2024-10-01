@@ -1,4 +1,4 @@
-WITH ranked_data AS (
+WITH aggregated_data AS (
     SELECT 
         trunc(DT, 'mm') AS DT, 
         TABEL, 
@@ -8,9 +8,7 @@ WITH ranked_data AS (
         SUBJ1, 
         PRODUCT1, 
         REZ1, 
-        count(distinct CALL_ID) AS cnt,
-        ROW_NUMBER() OVER (PARTITION BY trunc(DT, 'mm'), OPERATOR 
-                           ORDER BY count(distinct CALL_ID) DESC) AS rn
+        count(distinct CALL_ID) AS cnt
     FROM 
         ANALYTICS.KDI_SIEBEL_PAST
     WHERE 
@@ -18,6 +16,21 @@ WITH ranked_data AS (
         AND TYPE = 'Вызов - входящий'
     GROUP BY 
         trunc(DT, 'mm'), TABEL, DIRECTION, PODRAZDELENIE, OPERATOR, SUBJ1, PRODUCT1, REZ1
+),
+ranked_data AS (
+    SELECT 
+        DT, 
+        TABEL, 
+        DIRECTION, 
+        PODRAZDELENIE, 
+        OPERATOR,  
+        SUBJ1, 
+        PRODUCT1, 
+        REZ1, 
+        cnt,
+        ROW_NUMBER() OVER (PARTITION BY DT, OPERATOR ORDER BY cnt DESC) AS rn
+    FROM 
+        aggregated_data
 )
 SELECT 
     DT, 
