@@ -1,1 +1,1 @@
-https://www.cisco.com/c/en/us/td/docs/voice_ip_comm/cust_contact/contact_center/icm_enterprise/icm_enterprise_11_6_1/Reference/Guide/ucce_b_database-schema-handbook-for-cisco/ucce_b_database-schema-handbook-for-cisco_chapter_0100.html#UCCE_RF_TABEDB07_00
+
