@@ -1,32 +1,26 @@
 WITH last_call_events AS (
-    -- Определяем последний EVENT_TIME для каждого CALL_ID (завершение вызова)
+    -- Определяем последнее событие (по времени) для каждого вызова (это завершение вызова)
     SELECT 
         CALL_ID,
         NUMBER_,
-        MAX(EVENT_TIME) AS end_time
+        MAX(EVENT_TIME) AS end_time -- Завершаем вызов (последнее событие)
     FROM ods.ods_bpu_int_ivrchd_events@cdw.prod
-    WHERE NUMBER_ = '9063705301' -- Здесь можно указать конкретный номер или убрать это условие для всех номеров
-    GROUP BY CALL_ID, NUMBER_ -- Необходимо группировать по всем неагрегируемым полям
+    WHERE NUMBER_ = '9063705301' -- Номер клиента (можно убрать это условие для всех номеров)
+    GROUP BY CALL_ID, NUMBER_
 ),
 next_call_times AS (
-    -- Определяем начало следующего звонка для каждого клиента
+    -- Используем оконную функцию для поиска следующего вызова того же клиента
     SELECT 
-        t1.CALL_ID AS prev_call_id,
-        t1.end_time AS prev_end_time,
-        t2.CALL_ID AS next_call_id,
-        MIN(t2.end_time) AS next_start_time,
-        t1.NUMBER_
-    FROM last_call_events t1
-    LEFT JOIN last_call_events t2 
-        ON t1.NUMBER_ = t2.NUMBER_ 
-        AND t1.end_time < t2.end_time -- Следующий вызов должен быть после предыдущего
-    GROUP BY t1.CALL_ID, t1.end_time, t1.NUMBER_
+        CALL_ID AS prev_call_id,
+        NUMBER_,
+        end_time AS prev_end_time,
+        LEAD(end_time) OVER (PARTITION BY NUMBER_ ORDER BY end_time) AS next_start_time -- Следующее событие (окном)
+    FROM last_call_events
 )
 SELECT 
     NUMBER_, 
     prev_call_id, 
     prev_end_time, 
-    next_call_id, 
     next_start_time,
     ROUND((next_start_time - prev_end_time) * 1440) AS diff_minutes, -- Разница во времени в минутах
     CASE 
