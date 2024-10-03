@@ -24,3 +24,17 @@ df = pd.read_sql(sql.sql_operations_one_money.replace('Замена', str(produc
 
                     FROM operations
                     where id = Замена
+
+async def money_open(sdep, tab, product_id, fio, id, img_logo):
+    try:
+        close_popup()
+    except:
+        pass
+    
+    df = pd.read_sql(sql.sql_operations_one_money.replace('Замена', str(product_id)), connect("Convert/db/shop.db"))
+
+    items = [] 
+
+    total_text = put_column([put_text(f'Всего начислено: {df["value_operation"][0]}')])
+    items.append(total_text)
+    popup(f'Начисление {product_id}', items)
