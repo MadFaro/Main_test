@@ -1,4 +1,3 @@
-
 async def money_open(sdep, tab, product_id, fio, id, img_logo):
     try:
         close_popup()  # Закрываем возможное открытое popup окно
@@ -14,23 +13,26 @@ async def money_open(sdep, tab, product_id, fio, id, img_logo):
     # Преобразуем справочник в словарь для удобного доступа
     case_dict = dict(zip(df_dict['name_case'], df_dict['name_directory']))
 
-    items = []  # Список элементов для вывода в popup
+    # Инициализируем список для строк таблицы
+    table_data = [['Сколько начислено', 'Причина начисления']]  # Заголовки таблицы
 
     # Собираем все case столбцы (от case1 до case13)
     case_columns = [f"case{i}" for i in range(1, 14)]
 
-    # Проходим по каждому case столбцу и выводим те, которые заполнены
+    # Проходим по каждому case столбцу и добавляем строки в таблицу
     for case in case_columns:
         case_value = df[case].iloc[0]
         if pd.notna(case_value):  # Если значение не NaN
             # Получаем расшифровку из словаря case_dict
             case_description = case_dict.get(case, case)  # Если расшифровки нет, оставляем оригинальное имя case
-            case_text = put_text(f"{case_description} - {case_value}")
-            items.append(case_text)  # Добавляем текст в список items
+            # Добавляем строку в таблицу
+            table_data.append([case_value, case_description])
 
-    # Добавляем итоговое значение value_operation в items
-    total_text = put_column([put_text(f'Всего начислено: {df["value_operation"][0]}')])
-    items.append(total_text)
+    # Добавляем таблицу в items
+    table_output = put_table(table_data)
 
-    # Показываем popup с начислениями и case
-    popup(f'Начисление {product_id}', items)
+    # Добавляем итоговое значение value_operation
+    total_text = put_text(f'Всего начислено: {df["value_operation"][0]}')
+
+    # Отображаем popup с таблицей и итогом
+    popup(f'Начисление {product_id}', [table_output, total_text])
