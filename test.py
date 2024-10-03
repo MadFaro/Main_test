@@ -1,27 +1,36 @@
-async def money_open(sdep, tab, product_id, fio, id, img_logo):
-    try:
-        close_popup()  # Закрываем возможное открытое popup окно
-    except:
-        pass
+SELECT name_case,
+       name_directory
+FROM directory;
 
-    # Получаем данные из базы
-    df = pd.read_sql(sql.sql_operations_one_money.replace('Замена', str(product_id)), connect("Convert/db/shop.db"))
-
-    items = []  # Список элементов для вывода в popup
-
-    # Собираем все case столбцы (от case1 до case13)
-    case_columns = [f"case{i}" for i in range(1, 14)]
-
-    # Проходим по каждому case столбцу и выводим те, которые заполнены
-    for case in case_columns:
-        case_value = df[case].iloc[0]
-        if pd.notna(case_value):  # Если значение не NaN
-            case_text = put_text(f"{case} - {case_value}")
-            items.append(case_text)  # Добавляем текст в список items
-
-    # Добавляем итоговое значение value_operation в items
-    total_text = put_column([put_text(f'Всего начислено: {df["value_operation"][0]}')])
-    items.append(total_text)
-
-    # Показываем popup с начислениями и case
-    popup(f'Начисление {product_id}', items)
+case1	"Светофор ДТ:
+Желтая зона - 30 
+Зеленая 1 раз - 50
+Зеленая 2 раза - 75
+Зеленая 3 раза - 100"
+case2	"Светофор ДДО:
+Желтая зона - 30 
+Зеленая 1 раз - 50
+Зеленая 2 раза - 75
+Зеленая 3 раза - 100"
+case3	"РВ ДДО:
+20 часов - 10
+40 часов - 15
+60+ часов - 20"
+case4	"ДКСиМ. 
+Минимизация оттока на обучении - 20"
+case5	"ДКСиМ Коучинги
+1 коучинг - 10
+2 коучинга - 15
+3 коучинга -20"
+case6	"ДКСиМ. Вклад в развитие КЦ
+Общий банк - 75"
+case7	"РВ ДКСиМ:
+4 часа - 10
+8 часов - 15
+16+ часов - 20"
+case8	Приведи друга - 50
+case9	Идея на портале КЦ -20 
+case10	Организация скидки для КЦ- 100
+case11	Дополнительное обучение - 2
+case12	Благодарность - 20
+case13	Победа в конкурсах КЦ - 5
