@@ -1,1 +1,10 @@
-
+case when next_start_time is null then 'не вернулся вообще'
+when round((next_start_time - prev_end_time) * 1440) <= 1 then '1 минута'
+when round((next_start_time - prev_end_time) * 1440) <= 2 then '2 минуты'
+when round((next_start_time - prev_end_time) * 1440) <= 5 then '5 минут'
+when round((next_start_time - prev_end_time) * 1440) <= 10 then '10 минут'
+when round((next_start_time - prev_end_time) * 1440) <= 15 then '15 минут'
+when round((next_start_time - prev_end_time) * 1440) <= 20 then '20 минут'
+when round((next_start_time - prev_end_time) * 1440) <= 30 then '30 минут'
+else 'более 30 минут'
+end as return_time_category
