@@ -1,20 +1,19 @@
-Traceback (most recent call last):
-  File "3.py", line 13, in <module>
-    data[4] = (data[4] * 1.4).round(0).astype(int)
-  File "C:\Python38\lib\site-packages\pandas\core\generic.py", line 6324, in astype
-    new_data = self._mgr.astype(dtype=dtype, copy=copy, errors=errors)
-  File "C:\Python38\lib\site-packages\pandas\core\internals\managers.py", line 451, in astype
-    return self.apply(
-  File "C:\Python38\lib\site-packages\pandas\core\internals\managers.py", line 352, in apply
-    applied = getattr(b, f)(**kwargs)
-  File "C:\Python38\lib\site-packages\pandas\core\internals\blocks.py", line 511, in astype
-    new_values = astype_array_safe(values, dtype, copy=copy, errors=errors)
-  File "C:\Python38\lib\site-packages\pandas\core\dtypes\astype.py", line 242, in astype_array_safe
-    new_values = astype_array(values, dtype, copy=copy)
-  File "C:\Python38\lib\site-packages\pandas\core\dtypes\astype.py", line 187, in astype_array
-    values = _astype_nansafe(values, dtype, copy=copy)
-  File "C:\Python38\lib\site-packages\pandas\core\dtypes\astype.py", line 105, in _astype_nansafe
-    return _astype_float_to_int_nansafe(arr, dtype, copy)
-  File "C:\Python38\lib\site-packages\pandas\core\dtypes\astype.py", line 150, in _astype_float_to_int_nansafe
-    raise IntCastingNaNError(
-pandas.errors.IntCastingNaNError: Cannot convert non-finite values (NA or inf) to integer
+import pandas as pd
+
+# Чтение исходного файла
+filename = "data.txt"
+
+# Чтение данных из файла (пропускаем первые две строки и задаем разделитель как табуляцию)
+data = pd.read_csv(filename, delimiter='\t', skiprows=2, header=None)
+
+# Преобразование столбца 5 (индекс 4) в числовой формат
+data[4] = pd.to_numeric(data[4], errors='coerce')
+
+# Заменяем NaN на 0
+data[4] = data[4].fillna(0)
+
+# Умножаем значения 5-го столбца (объём) на 140% (или 1.4) и округляем до целого
+data[4] = (data[4] * 1.4).round(0).astype(int)
+
+# Сохранение измененного файла
+data.to_csv("data_updated.txt", sep='\t', index=False, header=False)
