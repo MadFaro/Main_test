@@ -1,7 +1,1 @@
-df['SALES'] = df['SALES'].astype(float)
-df['ATT'] = df['ATT'].astype(float)
-df['CSI'] = df['CSI'].astype(float)
-df['SCORE'] = df['SCORE'].astype(float)
-df['DISCIPLINE'] = df['DISCIPLINE'].astype(float)
-df['EST'] = df['EST'].astype(float)
-df['SUM'] = df['SUM'].astype(float)
+
