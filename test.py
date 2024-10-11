@@ -1,1 +1,1 @@
-
+sqlalchemy.exc.ArgumentError: Oracle FLOAT types use 'binary precision', which does not convert cleanly from decimal 'precision'.  Please specify this type with a separate Oracle variant, such as Float(precision=53).with_variant(oracle.FLOAT(binary_precision=176), 'oracle'), so that the Oracle specific 'binary_precision' may be specified accurately.
