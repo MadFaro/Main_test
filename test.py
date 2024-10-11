@@ -1,1 +1,7 @@
-sqlalchemy.exc.ArgumentError: Oracle FLOAT types use 'binary precision', which does not convert cleanly from decimal 'precision'.  Please specify this type with a separate Oracle variant, such as Float(precision=53).with_variant(oracle.FLOAT(binary_precision=176), 'oracle'), so that the Oracle specific 'binary_precision' may be specified accurately.
+data_type = {
+'MONTH':VARCHAR(50), 'TABNUM': VARCHAR(50), 'FIO': VARCHAR(100), 'PODRAZDELENIE':VARCHAR(50), 
+'DOLZHHNOST':VARCHAR(50), 'STAG':VARCHAR(50), 'TYPE_CODE':VARCHAR(50), 'STATUS':VARCHAR(50), 'DIRECT':VARCHAR(50), 
+'SALES':FLOAT, 'ATT':FLOAT, 'CSI':FLOAT, 'SCORE':FLOAT, 
+'DISCIPLINE':FLOAT, 'EST':FLOAT, 'SUM':FLOAT
+}
+df.to_sql('TOLOG_LIGHTS_STEP_INTERIM', connect, if_exists='replace', schema='analytics', index=False, dtype=data_type)
