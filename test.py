@@ -1,28 +1,5 @@
-import pymysql
-
-# Параметры подключения
-config = {
-    'user': 'your_username',
-    'password': 'your_password',
-    'host': 'localhost',
-    'database': 'your_database'
-}
-
-# Подключение
-try:
-    connection = pymysql.connect(user=config['user'], password=config['password'],
-                                 host=config['host'], database=config['database'])
-
-    with connection.cursor() as cursor:
-        # Пример запроса
-        cursor.execute("SELECT DATABASE();")
-        result = cursor.fetchone()
-        print("Вы подключены к базе данных:", result)
-
-except pymysql.MySQLError as error:
-    print("Ошибка подключения к MariaDB:", error)
-
-finally:
+Ошибка подключения к MariaDB: (2003, "Can't connect to MySQL server on '10.000.100.00' (timed out)")
+Traceback (most recent call last):
+  File "marina.py", line 27, in <module>
     connection.close()
-    print("Соединение закрыто")
-
+NameError: name 'connection' is not defined
