@@ -76,7 +76,7 @@ while 1 == 1:
 			time.sleep(10)
 			try:
 				try:
-				form_mail = format_tasks_for_email(get_running_tasks_from_root())
+					form_mail = format_tasks_for_email(get_running_tasks_from_root())
                 		except:
 					form_mail = ""
 		
