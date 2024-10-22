@@ -1,13 +1,15 @@
-def get_user_aut(self, ID):
-    try:
-        # Выполняем запрос и получаем одну строку
-        result = self.cursor.execute("SELECT `dt`, `authen_key` FROM `authen` WHERE `login` = ?", (ID,))
-        row = result.fetchone()
-        
-        if row:
-            # Возвращаем дату (row[0]) и код (row[1])
-            return row[0], row[1]
-        
-        return None
-    except sqlite3.Error:
-        return None
+def validate_aut_key_reg(aut_key):
+    # Получаем сгенерированный код и время его создания для данного email
+    result = BotDS.get_user_aut(email)
+
+    if result is None:
+        return 'Ошибка при получении данных. Попробуйте снова.'
+
+    dt, stored_code = result
+
+    # Проверяем, совпадает ли введённый код с тем, что хранится в базе
+    if aut_key != stored_code:
+        return 'Неверный код. Проверьте почту и введите код повторно'
+
+    # Если код совпадает, возвращаем None, что означает успешную валидацию
+    return None
