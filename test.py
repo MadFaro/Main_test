@@ -1,4 +1,5 @@
 import pymysql
+import pandas as pd
 
 # Параметры подключения
 config = {
@@ -14,11 +15,14 @@ try:
     connection = pymysql.connect(user=config['user'], password=config['password'],
                                  host=config['host'], port=config['port'], database=config['database'])
 
-    with connection.cursor() as cursor:
-        # Пример запроса
-        cursor.execute("select * from chatthread where created >= date(now());")
-        result = cursor.fetchone()
-        print("Вы подключены к базе данных:", result)
+    # Пример запроса через pandas
+    query = "select * from chatthread where created >= date(now());"
+    
+    # Выполнение запроса и сохранение результата в DataFrame
+    df = pd.read_sql(query, connection)
+    
+    print("Результаты запроса:")
+    print(df)
 
 except pymysql.MySQLError as error:
     print("Ошибка подключения к MariaDB:", error)
