@@ -38,7 +38,6 @@ async def register():
                 BotDS.delete_aut(email)
                 return 'Истекло время. Повторите регистрацию.'
             
-
         code = ''.join(random.choice('0123456789') for _ in range(6))  # Генерация 6-значного кода
         BotDS.delete_aut(email)
         BotDS.add_aut(login=email, code=code)
@@ -56,21 +55,38 @@ async def register():
         except Exception as e:
             toast(f"Не удалось отправить email: {e}", duration=15)
 
-        id_select_aut = await input_group("Подтверждение почты", [
-            input('Код', name='aut_key', type=TEXT, validate=validate_aut_key_reg),
-            actions(name='action', buttons=[
-                {'label': 'Подтвердить', 'value': 'aut', 'color': 'success'},
+        # Ограничение на количество попыток
+        max_attempts = 5
+        attempts = 0
+
+        while attempts < max_attempts:
+            id_select_aut = await input_group("Подтверждение почты", [
+                input('Код', name='aut_key', type=TEXT, validate=validate_aut_key_reg),
+                actions(name='action', buttons=[
+                    {'label': 'Подтвердить', 'value': 'aut', 'color': 'success'},
+                ])
             ])
-        ])
-        
-        if id_select_aut['action'] == 'aut':
-            BotDS.register_user(
-                password=str(hashlib.sha256(str(id_select_reg['password_reg']).encode()).hexdigest()),
-                sdep='noadmin',
-                login=email,
-                fio=id_select_reg['fio_reg'],
-                status=1,
-                gender=id_select_reg['gender']
-            )
-            BotDS.delete_aut(email)
-            toast('Регистрация прошла успешно', duration=10, position='center', color='success', onclick=lambda: run_js('window.location.reload()'))
+
+            if id_select_aut['action'] == 'aut':
+                validate_result = validate_aut_key_reg(id_select_aut['aut_key'])
+                
+                if validate_result is None:
+                    BotDS.register_user(
+                        password=str(hashlib.sha256(str(id_select_reg['password_reg']).encode()).hexdigest()),
+                        sdep='noadmin',
+                        login=email,
+                        fio=id_select_reg['fio_reg'],
+                        status=1,
+                        gender=id_select_reg['gender']
+                    )
+                    BotDS.delete_aut(email)
+                    toast('Регистрация прошла успешно', duration=10, position='center', color='success', onclick=lambda: run_js('window.location.reload()'))
+                    break
+                else:
+                    attempts += 1
+                    toast(validate_result, duration=10, color='error')
+
+            if attempts >= max_attempts:
+                BotDS.delete_aut(email)
+                toast('Превышено количество попыток. Повторите регистрацию позже.', duration=10, color='error')
+                break
