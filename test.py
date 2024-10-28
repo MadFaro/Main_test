@@ -8,7 +8,6 @@ value_operation = 100
 status_operation = "Исполнен"
 on_read = 1
 
-
 db_path = r'C:\Users\TologonovAB\Desktop\shop_app\Convert\db\shop.db'
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
@@ -21,4 +20,16 @@ WHERE strftime('%m-%d', birth_date) = strftime('%m-%d', 'now')
 """
 df = pd.read_sql_query(query, conn)
 
+# Добавляем операцию для каждого пользователя
+for login in df['login']:
+    insert_query = """
+    INSERT INTO operations (login, operation_type, json, value_operation, status_operation, on_read)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """
+    cursor.execute(insert_query, (login, operation_type, json, value_operation, status_operation, on_read))
 
+# Сохраняем изменения в БД
+conn.commit()
+
+# Закрываем соединение с БД
+conn.close()
