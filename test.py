@@ -1,2 +1,1 @@
-Обрабатываем запись: {'threadid': 3770386, 'operatorfullname': 'Кулешова Юлия Игоревна', 'operatorid': 176549, 'created': datetime.datetime(2024, 10, 30, 21, 32, 55), 'modified': datetime.datetime(2024, 10, 31, 1, 12, 21), 'state': 'closed', 'offline_': 0, 'category': 'РБ_Кредитная карта_карта с кэшбеком_минимальный платеж', 'subcategory': 'РБ_Условия обслуживания_кредитная карта с кэшбеком', 'threadkind': {'missed'}}
-Ошибка подключения к Oracle: Python value of type set not supported.
+
