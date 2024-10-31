@@ -1,14 +1,1 @@
-SELECT 
-    JOB_NAME,
-    LOG_DATE,
-    STATUS,
-    RUN_DURATION,
-    ERROR#,
-    ADDITIONAL_INFO
-FROM 
-    DBA_SCHEDULER_JOB_RUN_DETAILS
-WHERE 
-    JOB_NAME = 'Имя_вашей_задачи'
-ORDER BY 
-    LOG_DATE DESC;
 
