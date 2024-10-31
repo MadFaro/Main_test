@@ -1,6 +1,6 @@
 import mysql.connector
 import cx_Oracle
-from sqlalchemy import create_engine, VARCHAR, FLOAT, NUMERIC
+import pandas as pd
 import schedule
 import time
 from datetime import datetime, timedelta
@@ -60,8 +60,8 @@ def fetch_data_from_mariadb(last_load_timestamp):
             cursor.close()
             mariadb_conn.close()
 
-def fetch_history_data_from_mariadb(last_load_timestamp):
-    """Извлекаем данные из chatthreadhistory в MariaDB с учётом метки времени."""
+def fetch_history_data_from_mariadb(max_dtm):
+    """Извлекаем данные из chatthreadhistory в MariaDB с учётом максимальной даты DTM."""
     try:
         mariadb_conn = mysql.connector.connect(**mariadb_config)
         cursor = mariadb_conn.cursor(dictionary=True)
@@ -70,9 +70,9 @@ def fetch_history_data_from_mariadb(last_load_timestamp):
         query = """
         SELECT THREADHISTORYID, THREADID, NUMBER AS NUMBER_, DTM, STATE, OPERATORID, DEPARTMENTID, EVENT 
         FROM chatthreadhistory 
-        WHERE DTM >= %s;
+        WHERE DTM > %s;
         """
-        cursor.execute(query, (last_load_timestamp,))
+        cursor.execute(query, (max_dtm,))
         rows = cursor.fetchall()
         
         print(f"{len(rows)} записей извлечено из chatthreadhistory.")
@@ -108,10 +108,37 @@ def get_max_dtm_from_oracle():
         cursor.close()
         oracle_conn.close()
 
-def upsert_history_data_to_oracle(rows):
-    """Добавляем или обновляем историю чатов в Oracle с использованием MERGE и пакетной обработки."""
+def insert_history_data_to_oracle(rows):
+    """Вставляем новые записи истории в Oracle."""
     if not rows:
         print("Нет данных для загрузки истории.")
+        return False
+
+    try:
+        # Создаем DataFrame для вставки данных
+        df = pd.DataFrame(rows)
+
+        oracle_conn = cx_Oracle.connect(user='', password='', dsn='')
+        cursor = oracle_conn.cursor()
+
+        # Используем to_sql для вставки данных в Oracle
+        df.to_sql('TOLOG_BI_WEBIM_CHATTHREADHISTORY', con=oracle_conn, if_exists='append', index=False)
+        
+        oracle_conn.commit()
+        print("Данные истории успешно загружены в Oracle.")
+        return True 
+
+    except cx_Oracle.DatabaseError as e:
+        print("Ошибка подключения к Oracle:", e)
+        return False
+
+    finally:
+        cursor.close()
+        oracle_conn.close()
+
+def upsert_data_to_oracle(rows):
+    if not rows:
+        print("Нет данных для загрузки.")
         return False
 
     try:
@@ -120,47 +147,56 @@ def upsert_history_data_to_oracle(rows):
 
         # Формируем SQL-запрос для MERGE
         merge_query = """
-        MERGE INTO ANALYTICS.TOLOG_BI_WEBIM_CHATTHREADHISTORY target
+        MERGE INTO ANALYTICS.TOLOG_BI_WEBIM_CHATTHREAD target
         USING (
-            SELECT :threadhistoryid AS threadhistoryid,
-                   :threadid AS threadid,
-                   :number_ AS number_,
-                   :dtm AS dtm,
-                   :state AS state,
+            SELECT :threadid AS threadid,
+                   :operatorfullname AS operatorfullname,
                    :operatorid AS operatorid,
-                   :departmentid AS departmentid,
-                   :event AS event
+                   :created AS created,
+                   :modified AS modified,
+                   :state AS state,
+                   :offline_ AS offline_,
+                   :category AS category,
+                   :subcategory AS subcategory,
+                   :threadkind AS threadkind
             FROM dual
         ) source
-        ON (target.threadhistoryid = source.threadhistoryid)
+        ON (target.threadid = source.threadid)
         WHEN MATCHED THEN
             UPDATE SET 
-                target.threadid = source.threadid,
-                target.number_ = source.number_,
-                target.dtm = source.dtm,
-                target.state = source.state,
+                target.operatorfullname = source.operatorfullname,
                 target.operatorid = source.operatorid,
-                target.departmentid = source.departmentid,
-                target.event = source.event
+                target.created = source.created,
+                target.modified = source.modified,
+                target.state = source.state,
+                target.offline_ = source.offline_,
+                target.category = source.category,
+                target.subcategory = source.subcategory,
+                target.threadkind = source.threadkind
         WHEN NOT MATCHED THEN
-            INSERT (threadhistoryid, threadid, number_, dtm, state, operatorid, departmentid, event)
-            VALUES (source.threadhistoryid, source.threadid, source.number_, source.dtm, source.state, source.operatorid, source.departmentid, source.event)
+            INSERT (threadid, operatorfullname, operatorid, created, modified, state, offline_, category, subcategory, threadkind)
+            VALUES (source.threadid, source.operatorfullname, source.operatorid, source.created, source.modified, source.state, source.offline_, source.category, source.subcategory, source.threadkind)
         """
 
         for row in rows:
+            if isinstance(row['threadkind'], set):
+                row['threadkind'] = ', '.join(row['threadkind'])
+
             cursor.execute(merge_query, {
-                'threadhistoryid': row['THREADHISTORYID'],
-                'threadid': row['THREADID'],
-                'number_': row['NUMBER_'],
-                'dtm': row['DTM'],
-                'state': row['STATE'],
-                'operatorid': row['OPERATORID'],
-                'departmentid': row['DEPARTMENTID'],
-                'event': row['EVENT']
+                'threadid': row['threadid'],
+                'operatorfullname': row['operatorfullname'],
+                'operatorid': row['operatorid'],
+                'created': row['created'],
+                'modified': row['modified'],
+                'state': row['state'],
+                'offline_': row['offline_'],
+                'category': row['category'],
+                'subcategory': row['subcategory'],
+                'threadkind': row['threadkind']
             })
 
         oracle_conn.commit()
-        print("Данные истории успешно загружены в Oracle.")
+        print("Данные успешно загружены в Oracle.")
         return True 
 
     except cx_Oracle.DatabaseError as e:
@@ -200,11 +236,8 @@ def job():
     history_rows = fetch_history_data_from_mariadb(last_load_timestamp_history)
 
     # Загружаем данные истории в Oracle
-    if upsert_history_data_to_oracle(history_rows):
-        # Обновляем метку времени для истории
-        new_timestamp_history = (datetime.now() - timedelta(minutes=2)).strftime('%Y-%m-%d %H:%M:%S')
-        update_last_load_timestamp(new_timestamp_history)
-        print("Метка времени для истории обновлена:", new_timestamp_history)
+    if insert_history_data_to_oracle(history_rows):
+        print("Данные истории успешно загружены.")
 
     print(f"Задача завершена: {datetime.now()}")
 
@@ -215,4 +248,3 @@ schedule.every(5).minutes.do(job)
 while True:
     schedule.run_pending()
     time.sleep(1)
-
