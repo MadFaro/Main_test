@@ -1,2 +1,1 @@
-max_dtm_sl.strftime('%Y-%m-%d %H:%M:%S')
-2024-11-01 13:20:34
+v_last_updated TIMESTAMP := TO_TIMESTAMP(:max_dtm, 'YYYY-MM-DD HH24:MI:SS');
