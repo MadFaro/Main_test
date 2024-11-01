@@ -1,2 +1,1 @@
-error connect Oracle:ORA-01843: not a valid month
-ORA-06512: at line 10
+max_dtm_sl.strftime('%Y-%m-%d %H:%M:%S')
