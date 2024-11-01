@@ -1,4 +1,4 @@
-create or replace procedure           tolog_proc_test as 
+DECLARE
     v_cur_threadid NUMBER;
     v_prev_threadid NUMBER := NULL;
     v_cur_department_id NUMBER;
@@ -14,7 +14,7 @@ create or replace procedure           tolog_proc_test as
           AND ct.offline_ = 0
           AND cth.dtm BETWEEN TRUNC(SYSDATE - 1) AND TRUNC(SYSDATE)
         ORDER BY cth.threadid, cth.dtm;
-begin
+BEGIN
     OPEN cur;
     LOOP
         FETCH cur INTO v_cur_threadid, v_cur_department_id, v_cur_state, v_cur_time;
@@ -53,7 +53,8 @@ begin
         END IF;
 
         v_prev_threadid := v_cur_threadid;
-END LOOP;
-CLOSE cur;
-COMMIT;
-end;
+    END LOOP;
+    CLOSE cur;
+    COMMIT;
+END;
+/
