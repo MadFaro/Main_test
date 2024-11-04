@@ -5,7 +5,7 @@ async def my_monitoring(sdep, tab, fio, id, img_logo):
     except:
         pass
 
-    connect_str = lambda: cx_Oracle.connect(user='Reports_msk', password='Reports!', dsn = 'msk-as03math.fc.uralsibbank.ru/space.prod.msk.usb')
+    connect_str = lambda: cx_Oracle.connect(user='', password='', dsn = '')
     connect = create_engine("oracle://", creator=connect_str)
     
     while True:
