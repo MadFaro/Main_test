@@ -1,1 +1,2 @@
-
+SELECT TRUNC(SYSDATE, 'HH') - INTERVAL '1' HOUR AS prev_hour_start
+FROM DUAL;
