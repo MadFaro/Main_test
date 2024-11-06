@@ -1,37 +1,45 @@
-conn = cx_Oracle.connect(user='', password='', dsn = '')
+import cx_Oracle
+import win32com.client
+import datetime
+
+# Подключение к базе данных
+conn = cx_Oracle.connect(user='', password='', dsn='')
 cursor = conn.cursor()
+
+# Попытка удаления таблицы
 try:
     cursor.execute("drop table analytics.NP_application_tech_voronka")
 except:
-    pass
+    pass  # Игнорируем ошибку, если таблица не существует
 
-table_count = 0
-count = 1
-while table_count < 4:
+# Попытка создания таблицы, максимум 5 попыток
+max_attempts = 5
+success = False
+
+for attempt in range(1, max_attempts + 1):
     try:
         cursor.execute(f"create table analytics.NP_application_tech_voronka as Select /*+ PARALLEL(4) */ * from cmdm2.application")
-        table_count = table_count + 11
-    except:
-        count = count + 1
-        table_count = table_count + 1
+        success = True
+        break  # Выход из цикла при успешном выполнении
+    except Exception as e:
+        last_error = e  # Сохраняем последнюю ошибку
 
-try:
-    cursor.execute("select /*+ PARALLEL(4) */ * from analytics.NP_application_tech_voronka")
-    outlook = win32com.client.Dispatch("Outlook.Application")
-    mail = outlook.CreateItem(0)
-    mail.To = 'Pop'
-    mail.Subject = f'Обновление таблицы analytics.NP_application_tech_voronka {datetime.date.today().strftime("%d.%m.%Y")}'
-    mail.HTMLBody = f"Привет!<BR>Таблица обновлена.<BR>Попыток было: {count}"
-    mail.Send()
-except Exception as errors:
-    outlook = win32com.client.Dispatch("Outlook.Application")
-    mail = outlook.CreateItem(0)
-    mail.To = 'Pop'
-    mail.Subject = f'Ошибка при обновлении analytics.NP_application_tech_voronka {datetime.date.today().strftime("%d.%m.%Y")}'
-    mail.HTMLBody = f'Ошибка - {str(errors)}<BR>Попыток было: {count}'
-    mail.Send()        
+# Создание и отправка письма через Outlook
+outlook = win32com.client.Dispatch("Outlook.Application")
+mail = outlook.CreateItem(0)
+mail.To = 'Pop'
+current_date = datetime.date.today().strftime("%d.%m.%Y")
 
-# Принимаем изменения и закрываем коннект
+if success:
+    mail.Subject = f'Обновление таблицы analytics.NP_application_tech_voronka {current_date}'
+    mail.HTMLBody = f"Привет!<BR>Таблица обновлена.<BR>Попыток было: {attempt}"
+else:
+    mail.Subject = f'Ошибка при обновлении analytics.NP_application_tech_vоронка {current_date}'
+    mail.HTMLBody = f'Ошибка - {str(last_error)}<BR>Попыток было: {max_attempts}'
+
+mail.Send()
+
+# Закрываем курсор и соединение
 cursor.close()
 conn.commit()
 conn.close()
