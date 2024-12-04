@@ -17,24 +17,42 @@ where rn = 1
 group by trunc(CREATED, 'HH24'), DEPARTMENT
 )
 select 
-a.DATE_UPDATE, a.DTM, a.DTM_CHAR, a.DEPARTMENT, a.CNT_60, a.SL_COUNT + coalesce(b.cnt, 0) as SL_COUNT, a.CNT + coalesce(b.cnt, 0) as CNT
+    coalesce(a.DATE_UPDATE, sysdate + interval '50' second) as date_update,
+    coalesce(a.DTM, b.DTM) as dtm,
+    coalesce(a.DTM_CHAR, to_char(b.DTM, 'HH24:MI:SS')) as dtm_char,
+    coalesce(a.DEPARTMENT, b.DEPARTMENT) as department,
+    coalesce(a.CNT_60, 0) as cnt_60,
+    coalesce(a.SL_COUNT, 0) + coalesce(b.cnt, 0) as sl_count,
+    coalesce(a.CNT, 0) + coalesce(b.cnt, 0) as cnt
 from (
-select 
-sysdate + interval '50' second as date_update,
-trunc(GOT_INTO_COMMON_QUEUE_TIME, 'HH24') as dtm,
-to_char(trunc(GOT_INTO_COMMON_QUEUE_TIME, 'HH24'), 'HH24:MI:SS') as dtm_char,
-case when DEPARTMENT_ID in (16, 21, 26, 28) then 'mass'
-when DEPARTMENT_ID = 22 then 'vip'
-when DEPARTMENT_ID = 31 then '2line'
-when DEPARTMENT_ID = 23 then 'reten' else 'ckk' end as DEPARTMENT,
-sum(case when (START_CHATTING_TIME-GOT_INTO_COMMON_QUEUE_TIME)*24*60*60<=60 then 1 else 0 end) as cnt_60, 
-count(threadid) as sl_count,
-count(distinct threadid) as cnt
-from ANALYTICS.TOLOG_BI_WEBIM_STATS_SERVICE_LEVEL a
-where DEPARTMENT_ID in (16, 21, 26, 28, 22, 23, 31, 34) and GOT_INTO_COMMON_QUEUE_TIME >= trunc(sysdate)
-group by trunc(GOT_INTO_COMMON_QUEUE_TIME, 'HH24'), to_char(trunc(GOT_INTO_COMMON_QUEUE_TIME, 'HH24'), 'HH24:MI:SS'),
-case when DEPARTMENT_ID in (16, 21, 26, 28) then 'mass'
-when DEPARTMENT_ID = 22 then 'vip'
-when DEPARTMENT_ID = 31 then '2line'
-when DEPARTMENT_ID = 23 then 'reten' else 'ckk' end) a
-left join tab_1 b on a.dtm=b.dtm and a.DEPARTMENT=b.DEPARTMENT
+    select 
+        sysdate + interval '50' second as date_update,
+        trunc(GOT_INTO_COMMON_QUEUE_TIME, 'HH24') as dtm,
+        to_char(trunc(GOT_INTO_COMMON_QUEUE_TIME, 'HH24'), 'HH24:MI:SS') as dtm_char,
+        case 
+            when DEPARTMENT_ID in (16, 21, 26, 28) then 'mass'
+            when DEPARTMENT_ID = 22 then 'vip'
+            when DEPARTMENT_ID = 31 then '2line'
+            when DEPARTMENT_ID = 23 then 'reten' 
+            else 'ckk' 
+        end as department,
+        sum(case when (START_CHATTING_TIME - GOT_INTO_COMMON_QUEUE_TIME) * 24 * 60 * 60 <= 60 then 1 else 0 end) as cnt_60, 
+        count(threadid) as sl_count,
+        count(distinct threadid) as cnt
+    from ANALYTICS.TOLOG_BI_WEBIM_STATS_SERVICE_LEVEL a
+    where DEPARTMENT_ID in (16, 21, 26, 28, 22, 23, 31, 34) 
+      and GOT_INTO_COMMON_QUEUE_TIME >= trunc(sysdate)
+    group by 
+        trunc(GOT_INTO_COMMON_QUEUE_TIME, 'HH24'), 
+        to_char(trunc(GOT_INTO_COMMON_QUEUE_TIME, 'HH24'), 'HH24:MI:SS'),
+        case 
+            when DEPARTMENT_ID in (16, 21, 26, 28) then 'mass'
+            when DEPARTMENT_ID = 22 then 'vip'
+            when DEPARTMENT_ID = 31 then '2line'
+            when DEPARTMENT_ID = 23 then 'reten' 
+            else 'ckk' 
+        end
+) a
+full outer join tab_1 b 
+on a.dtm = b.dtm and a.DEPARTMENT = b.DEPARTMENT;
+
