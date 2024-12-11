@@ -1,2 +1,2 @@
-SELECT JSON_EXTRACT(marinadb, '$.max_chats_per_operator') AS max_chats
-FROM your_table;
+WHERE JSON_EXTRACT(marinadb, '$.max_chats_per_operator') IS NOT NULL
+  AND JSON_UNQUOTE(JSON_EXTRACT(marinadb, '$.max_chats_per_operator')) != 'null';
