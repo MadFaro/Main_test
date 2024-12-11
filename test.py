@@ -1,8 +1,1 @@
-SELECT *
-FROM your_table
-WHERE THREADID IN (
-    SELECT THREADID
-    FROM your_table
-    GROUP BY THREADID
-    HAVING COUNT(CASE WHEN EVENT LIKE '%closed%' THEN 1 END) = 0
-);
+
