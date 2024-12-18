@@ -1,7 +1,47 @@
-ORA-30483: функции окна в данном месте запрещены
-30483. 00000 -  "window  functions are not allowed here"
-*Cause:    Window functions are allowed only in the SELECT list of a query.
-           And, window function cannot be an argument to another window or group
-           function.
-*Action:
-Error at Line: 5 Column: 29
+with grouped_periods as (
+    select
+        fi_,
+        type_,
+        group_,
+        start_,
+        end_,
+        direction_,
+        day_,
+        extract(year from day_) as year_,
+        extract(month from day_) as month_,
+        case 
+            when trunc(day_) - lag(trunc(day_)) over (partition by fi_, type_, group_, extract(year from day_), extract(month from day_) order by day_) > 1 then 1 
+            else 0 
+        end as is_new_group
+    from 
+        your_table
+),
+group_ids as (
+    select
+        fi_,
+        type_,
+        group_,
+        year_,
+        month_,
+        day_,
+        sum(is_new_group) over (partition by fi_, type_, group_, year_, month_ order by day_) as group_id
+    from 
+        grouped_periods
+)
+select 
+    fi_,
+    type_,
+    group_,
+    year_,
+    month_,
+    count(distinct group_id) as status_count
+from 
+    group_ids
+group by 
+    fi_,
+    type_,
+    group_,
+    year_,
+    month_
+order by 
+    fi_, year_, month_;
