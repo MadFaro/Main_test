@@ -1,36 +1,36 @@
-WITH grouped_periods AS (
-    SELECT
-        FI_,
-        Type_,
-        Group_,
-        Start_,
-        End_,
-        Direction_,
-        Day_,
-        EXTRACT(YEAR FROM Day_) AS year_,
-        EXTRACT(MONTH FROM Day_) AS month_,
-        SUM(CASE 
-                WHEN TRUNC(Day_) - LAG(TRUNC(Day_)) OVER (PARTITION BY FI_, Type_, Group_, EXTRACT(YEAR FROM Day_), EXTRACT(MONTH FROM Day_) ORDER BY Day_) > 1 THEN 1 
-                ELSE 0 
-            END) OVER (PARTITION BY FI_, Type_, Group_, EXTRACT(YEAR FROM Day_), EXTRACT(MONTH FROM Day_) ORDER BY Day_) AS group_id
-    FROM 
+with grouped_periods as (
+    select
+        fi_,
+        type_,
+        group_,
+        start_,
+        end_,
+        direction_,
+        day_,
+        extract(year from day_) as year_,
+        extract(month from day_) as month_,
+        sum(case 
+                when trunc(day_) - lag(trunc(day_)) over (partition by fi_, type_, group_, extract(year from day_), extract(month from day_) order by day_) > 1 then 1 
+                else 0 
+            end) over (partition by fi_, type_, group_, extract(year from day_), extract(month from day_) order by day_) as group_id
+    from 
         your_table
 )
-SELECT 
-    FI_,
-    Type_,
-    Group_,
+select 
+    fi_,
+    type_,
+    group_,
     year_,
     month_,
-    COUNT(DISTINCT group_id) AS status_count
-FROM 
+    count(distinct group_id) as status_count
+from 
     grouped_periods
-GROUP BY 
-    FI_,
-    Type_,
-    Group_,
+group by 
+    fi_,
+    type_,
+    group_,
     year_,
     month_
-ORDER BY 
-    FI_, year_, month_;
+order by 
+    fi_, year_, month_;
 
