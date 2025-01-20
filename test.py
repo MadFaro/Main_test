@@ -1,1 +1,2 @@
-=?UTF-8?B?dG9sb2dfb3B0aW1pemVyOiDQv9GA0L7RhtC10LTRg9GA0LAg0YLQtdGB0YIyMC4w
+p_headers => 'Content-Type: text/plain; charset=UTF-8' || CHR(13) || CHR(10) ||
+                     'Content-Transfer-Encoding: base64'
