@@ -1,19 +1,21 @@
-create or replace PROCEDURE             "KUZ_SEND_MAIL"(addressee in varchar2, text in varchar2, theme in varchar2)
-is
-cnt number;
-FUNCTION MIMEHEADER_ENCODE( s_string VARCHAR2 )
-    RETURN VARCHAR2
-  IS
-  BEGIN
-    RETURN '=?windows-1251?B?' || utl_raw.cast_to_varchar2( utl_encode.base64_encode
-    ( utl_raw.cast_to_raw( convert( s_string, 'CL8MSWIN1251' ) ) ) ) || '?=';
-  END;
-begin
-  
-  
-  sys.send_mail_cvm2_new(p_to => addressee,
-  p_from => 'DirBO-DWH',
-  p_subject => theme,
-  p_text_msg =>  translate(text, 'йцукенгшщзхъфывапролджэячсмитьбю', 'icukengsszx_fivaproldjaacsmit_bu'),
-  p_smtp_host => '0.0.0.0');
-end ;
+CREATE OR REPLACE PROCEDURE KUZ_SEND_MAIL (
+    addressee IN VARCHAR2,
+    text IN VARCHAR2,
+    theme IN VARCHAR2
+) IS
+    FUNCTION MIMEHEADER_ENCODE(s_string VARCHAR2) RETURN VARCHAR2 IS
+    BEGIN
+        RETURN '=?UTF-8?B?' || UTL_RAW.CAST_TO_VARCHAR2(
+            UTL_ENCODE.BASE64_ENCODE(UTL_RAW.CAST_TO_RAW(s_string))
+        ) || '?=';
+    END;
+BEGIN
+    -- Конвертация темы в MIME-заголовок для корректной кодировки
+    sys.send_mail_cvm2_new(
+        p_to => addressee,
+        p_from => 'DirBO-DWH',
+        p_subject => MIMEHEADER_ENCODE(theme), -- Кодируем тему письма
+        p_text_msg => text,                     -- Используем текст без трансляции
+        p_smtp_host => '0.0.0.0'
+    );
+END;
