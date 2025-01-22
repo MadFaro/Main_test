@@ -1,1 +1,1 @@
-
+TRUNC(DT, 'WW') + 1 - TO_NUMBER(TO_CHAR(TRUNC(DT, 'WW'), 'D'))
