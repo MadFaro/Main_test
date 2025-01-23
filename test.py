@@ -1,5 +1,5 @@
 let
-    Источник = Oracle.Database("msk-as03math.fc.uralsibbank.ru/space.prod.msk.usb", [Query="select * from analytics.tolog_fcr_call_them", CreateNavigationProperties=false, CommandTimeout=#duration(0, 0, 5, 0)]),
+    Источник = Oracle.Database("", [Query="select * from analytics.tolog_fcr_call_them", CreateNavigationProperties=false, CommandTimeout=#duration(0, 0, 5, 0)]),
     #"Измененный тип" = Table.TransformColumnTypes(Источник,{{"DT", type date}}),
     #"Добавлен пользовательский объект1" = Table.AddColumn(#"Измененный тип", "Неделя", each Date.ToText(Date.StartOfWeek([DT]), "dd")&"-"&Date.ToText(Date.EndOfWeek([DT]), "dd.MM")),
     #"Добавлен пользовательский объект2" = Table.AddColumn(#"Добавлен пользовательский объект1", "Месяц", each Date.ToText([DT], "yy")&"."&Date.ToText([DT],"MMM")),
