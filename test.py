@@ -1,20 +1,32 @@
-let
-    Источник = Oracle.Database("", [Query="SELECT * FROM analytics.tolog_call_evaluations_scores", CreateNavigationProperties=false]),
-    #"Измененный тип" = Table.TransformColumnTypes(Источник,{{"DTM", type date}}),
-    #"Добавлен пользовательский объект" = Table.AddColumn(#"Измененный тип", "Группа", each if [DESCRIPTION] = "ДДО АктивКредит" or 
-[DESCRIPTION] = "ДДО Группа 1" or 
-[DESCRIPTION] = "ДДО Группа 2" or 
-[DESCRIPTION] = "ДДО Группа 5" or 
-[DESCRIPTION] = "ДДО Группа 8" or 
-[DESCRIPTION] = "ДДО Группа 9" or 
-[DESCRIPTION] = "ДДО Группа 10" or
-[DESCRIPTION] = "ДДО Группа 11" or
-[DESCRIPTION] = "ДДО Группа 12" or
-[DESCRIPTION] = "ДДО Группа 13" or
-[DESCRIPTION] = "ДДО Группа 14"
-then "Общая" else if 
-[DESCRIPTION] = "ДДО Премиум" and ([FIRSTNAME] <> "Шекеринская Екатерина Евгеньевна" and [FIRSTNAME] <> "Сатарова Сайера Алиевна" and [FIRSTNAME] <> "Максимов Дмитрий Владимирович") then "Премиум" else [DESCRIPTION]),
-    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Добавлен пользовательский объект", "Неделя", each Date.ToText(Date.StartOfWeek([DTM]), "dd")&"-"&Date.ToText(Date.EndOfWeek([DTM]), "dd.MM")),
-    #"Добавлен пользовательский объект2" = Table.AddColumn(#"Добавлен пользовательский объект1", "Месяц", each Date.ToText([DTM], "yy")& "." &Date.ToText([DTM], "MMM"))
-in
-    #"Добавлен пользовательский объект2"
+WITH SourceData AS (
+    SELECT 
+        *,
+        TRUNC(DTM) AS DTM_DATE,
+        CASE 
+            WHEN DESCRIPTION IN (
+                'ДДО АктивКредит', 
+                'ДДО Группа 1', 
+                'ДДО Группа 2', 
+                'ДДО Группа 5', 
+                'ДДО Группа 8', 
+                'ДДО Группа 9', 
+                'ДДО Группа 10', 
+                'ДДО Группа 11', 
+                'ДДО Группа 12', 
+                'ДДО Группа 13', 
+                'ДДО Группа 14'
+            ) THEN 'Общая'
+            WHEN DESCRIPTION = 'ДДО Премиум' 
+                AND FIRSTNAME NOT IN (
+                    'Шекеринская Екатерина Евгеньевна', 
+                    'Сатарова Сайера Алиевна', 
+                    'Максимов Дмитрий Владимирович'
+                ) THEN 'Премиум'
+            ELSE DESCRIPTION
+        END AS Группа,
+        TO_CHAR(TRUNC(DTM, 'IW'), 'DD') || '-' || TO_CHAR(TRUNC(DTM + 6, 'IW'), 'DD.MM') AS Неделя,
+        TO_CHAR(DTM, 'YY') || '.' || TO_CHAR(DTM, 'MON', 'NLS_DATE_LANGUAGE=RUSSIAN') AS Месяц
+    FROM analytics.tolog_call_evaluations_scores
+)
+SELECT *
+FROM SourceData;
