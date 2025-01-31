@@ -4,32 +4,30 @@ import pandas as pd
 file_path = "your_file.xlsx"  # Укажите путь к вашему файлу
 data = pd.read_excel(file_path, skiprows=1, usecols=range(28, 54))  # Столбцы AC-BC (28-53)
 
-# Удаляем строки, где 14-й столбец (индекс 13) пустой
-data = data[data.iloc[:, 13].notna()]
+# Удаляем ненужные столбцы (второй и третий)
+data = data.drop(columns=data.columns[[1, 2]])
 
-# Преобразуем все названия столбцов в строки
-new_columns = ['дата/часы', 'день нед.'] + [str(i) for i in range(24)]  # Добавляем день недели
-data.columns = new_columns
+# Преобразуем все числовые значения в таблице в целые числа
+data = data.applymap(lambda x: int(x) if pd.notnull(x) else 0)
 
-# Преобразуем столбец 'дата/часы' в datetime и оставляем только дату в формате DD.MM.YYYY
-data['дата/часы'] = pd.to_datetime(data['дата/часы'], format='%d.%m.%Y').dt.strftime('%d.%m.%Y')
-
-# Преобразуем все числовые значения в таблице в целые числа (кроме даты и дня недели)
-data.iloc[:, 2:] = data.iloc[:, 2:].applymap(lambda x: int(x) if pd.notnull(x) else 0)
+# Получаем даты из первого столбца (с датой и временем)
+dates = pd.read_excel(file_path, usecols=[0], skiprows=1)  # Первый столбец — дата
 
 # Создаем список строк для вывода
 rows = []
 
-# Перебираем строки в DataFrame
-for _, row in data.iterrows():
-    date = row['дата/часы']  # Дата из первого столбца
+# Перебираем все строки
+for i, row in data.iterrows():
+    # Извлекаем дату для текущей строки
+    date = dates.iloc[i, 0].strftime("%d.%m.%Y")  # Форматируем дату в нужный формат (DD.MM.YYYY)
+    
+    # Перебираем данные по часам
     for hour in range(24):
         time = f"{hour:02d}:00"
-        interval = "01:00"
-        value = row[str(hour)]  # Значение из соответствующего часа
-        rows.append(["WEBIM_Chat", date, time, interval, value])
+        value = row.iloc[hour]  # Получаем значение для этого часа
+        rows.append(["WEBIM_Chat", date, time, "01:00", value])
 
-# Создаем DataFrame для результатов
+# Создаем DataFrame для результата
 output_df = pd.DataFrame(rows, columns=["Имя очереди", "Дата", "Время", "Интервал времени", "Требования ЭПЗ"])
 
 # Сохраняем в текстовый файл с нужным форматом
