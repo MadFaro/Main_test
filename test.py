@@ -4,6 +4,9 @@ from datetime import datetime, timedelta
 # Читаем Excel-файл с пропуском первой строки и выбором первых 27 столбцов
 data = pd.read_excel("your_file.xlsx", skiprows=1, usecols=range(27))  # Замените 'your_file.xlsx' на имя вашего файла
 
+# Удаляем строки, где 14-й столбец пустой (индекс столбца - 13)
+data = data[data.iloc[:, 13].notna()]
+
 # Преобразуем таблицу в длинный формат
 rows = []
 for _, row in data.iterrows():
