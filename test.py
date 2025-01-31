@@ -2,8 +2,8 @@ import pandas as pd
 
 file_path = r"V:\VOL2\Contact-center\Файлы\Аналитика\Численность ДДО\022025\3.Чаты\Профиль нагрузки_чаты_022025.xlsx"
 data = pd.read_excel(file_path, skiprows=1, usecols=range(28, 54))  # Столбцы AC-BC (28-53)
-data = data.drop(columns=data.columns[[1, 2]])
-data = data[data.iloc[:, 13].notna()]
+data = data.drop(columns=data.columns[[1, 2]])  # Убираем столбцы с индексацией, как указано
+data = data[data.iloc[:, 13].notna()]  # Оставляем только те строки, где не пустое значение в 14-м столбце
 
 # Получаем даты из первого столбца
 dates = pd.read_excel(file_path, usecols=[0], skiprows=1)  # Первый столбец — дата
@@ -19,10 +19,12 @@ for i, row in data.iterrows():
     # Преобразуем все значения в строках (если они числа)
     values = row.apply(pd.to_numeric, errors='coerce').fillna(0).astype(int).values  # Все значения в целые числа
     
-    # Перебираем данные по часам (с 0 до 23)
-    for hour in range(24):  # Теперь перебираем все часы с 0 до 23
-        time = f"{hour:02d}:00"
-        value = values[hour]  # Получаем значение для текущего часа
+    # Перебираем данные по часам, но с учетом правильной индексации столбцов
+    for hour in range(24):  # Для всех часов с 0 до 23
+        time = f"{hour:02d}:00"  # Формируем строку для часа (например, 00:00, 01:00)
+        value = values[hour]  # Получаем значение для текущего часа из данных
+        
+        # Добавляем строку с данными
         rows.append(["WEBIM_Chat", date, time, "01:00", value])  # Формируем строку для записи
 
 # Создаем DataFrame для результата
