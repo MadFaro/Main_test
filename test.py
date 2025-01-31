@@ -1,19 +1,46 @@
-Traceback (most recent call last):
-  File "test.py", line 12, in <module>
-    data = data.applymap(lambda x: int(x) if pd.notnull(x) else 0)
-  File "C:\Python38\lib\site-packages\pandas\core\frame.py", line 9518, in applymap
-    return self.apply(infer).__finalize__(self, "applymap")
-  File "C:\Python38\lib\site-packages\pandas\core\frame.py", line 9433, in apply
-    return op.apply().__finalize__(self, method="apply")
-  File "C:\Python38\lib\site-packages\pandas\core\apply.py", line 678, in apply
-    return self.apply_standard()
-  File "C:\Python38\lib\site-packages\pandas\core\apply.py", line 798, in apply_standard
-    results, res_index = self.apply_series_generator()
-  File "C:\Python38\lib\site-packages\pandas\core\apply.py", line 814, in apply_series_generator
-    results[i] = self.f(v)
-  File "C:\Python38\lib\site-packages\pandas\core\frame.py", line 9516, in infer
-    return lib.map_infer(x.astype(object)._values, func, ignore_na=ignore_na)
-  File "pandas\_libs\lib.pyx", line 2834, in pandas._libs.lib.map_infer
-  File "test.py", line 12, in <lambda>
-    data = data.applymap(lambda x: int(x) if pd.notnull(x) else 0)
-TypeError: int() argument must be a string, a bytes-like object or a number, not 'Timestamp'
+import pandas as pd
+
+# Читаем Excel-файл
+file_path = "your_file.xlsx"  # Укажите путь к вашему файлу
+data = pd.read_excel(file_path, skiprows=1, usecols=range(28, 54))  # Столбцы AC-BC (28-53)
+
+# Удаляем ненужные столбцы (второй и третий)
+data = data.drop(columns=data.columns[[1, 2]])
+
+# Преобразуем все числовые значения в таблице в целые числа, пропуская даты
+data = data.applymap(lambda x: int(x) if isinstance(x, (int, float)) else 0)
+
+# Получаем даты из первого столбца (с датой и временем)
+dates = pd.read_excel(file_path, usecols=[0], skiprows=1)  # Первый столбец — дата
+
+# Создаем список строк для вывода
+rows = []
+
+# Перебираем все строки
+for i, row in data.iterrows():
+    # Извлекаем дату для текущей строки
+    date = dates.iloc[i, 0].strftime("%d.%m.%Y")  # Форматируем дату в нужный формат (DD.MM.YYYY)
+    
+    # Перебираем данные по часам
+    for hour in range(24):
+        time = f"{hour:02d}:00"
+        value = row.iloc[hour]  # Получаем значение для этого часа
+        rows.append(["WEBIM_Chat", date, time, "01:00", value])
+
+# Создаем DataFrame для результата
+output_df = pd.DataFrame(rows, columns=["Имя очереди", "Дата", "Время", "Интервал времени", "Требования ЭПЗ"])
+
+# Сохраняем в текстовый файл с нужным форматом
+output_file = "output.txt"
+with open(output_file, "w", encoding="utf-8") as f:
+    # Пишем заголовок
+    f.write("DATE_TIME_FORMAT\n")
+    f.write("DD.MM.YYYY HH:mm\n")
+    f.write("Имя очереди\tДата\tВремя\tИнтервал времени\tТребования ЭПЗ\n")
+    
+    # Записываем данные построчно
+    for _, row in output_df.iterrows():
+        line = "\t".join(str(value) for value in row)  # Преобразуем все значения в строку с табуляцией
+        f.write(line + "\n")  # Записываем строку с новой строкой в конце
+
+print(f"Данные успешно преобразованы и сохранены в {output_file}")
