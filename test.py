@@ -1,29 +1,32 @@
 import pandas as pd
 
-# Читаем Excel-файл, выбирая нужные столбцы
+# Читаем Excel-файл, выбирая нужные столбцы (AC-BC)
 file_path = "your_file.xlsx"  # Укажите путь к вашему файлу
 data = pd.read_excel(file_path, skiprows=1, usecols=range(29, 55))  # Столбцы AC-BC (29-54)
 
-# Проверяем названия столбцов, преобразуем их в строки, а затем в целые числа (если возможно)
-data.columns = [str(col).split('.')[0] if isinstance(col, (int, float)) else col for col in data.columns]
-
 # Удаляем строки, где 14-й столбец (индекс 13) пустой
-if "13" in data.columns:
-    data = data[data["13"].notna()]
-else:
-    raise ValueError("14-й столбец (индекс 13) отсутствует в данных!")
+data = data[data.iloc[:, 13].notna()]
 
-# Преобразуем значения в целые числа (если возможно)
-data = data.apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+# Преобразуем все названия столбцов в строки, а потом в целые числа, если это возможно
+new_columns = []
+for col in data.columns:
+    try:
+        new_columns.append(int(float(col)))
+    except ValueError:
+        new_columns.append(col)
+data.columns = new_columns
+
+# Преобразуем значения внутри таблицы в целые числа
+data = data.applymap(lambda x: int(x) if pd.notnull(x) else 0)
 
 # Преобразуем таблицу в длинный формат
 rows = []
 for _, row in data.iterrows():
-    date = row["дата/часы"]  # Убедитесь, что название этого столбца корректно
+    date = row.get("дата/часы")  # Убедитесь, что название столбца корректное
     for hour in range(24):
         time = f"{hour:02d}:00"
         interval = "01:00"
-        value = row[str(hour)]  # Значение из соответствующего часа
+        value = row.get(hour, 0)  # Берем значение из соответствующего часа
         rows.append(["WEBIM_Chat", date, time, interval, value])
 
 # Создаем DataFrame из собранных данных
