@@ -2,7 +2,7 @@ import pandas as pd
 
 # Читаем Excel-файл, выбирая нужные столбцы (AC-BC)
 file_path = "your_file.xlsx"  # Укажите путь к вашему файлу
-data = pd.read_excel(file_path, skiprows=1, usecols=range(29, 55))  # Столбцы AC-BC (29-54)
+data = pd.read_excel(file_path, skiprows=1, usecols=range(28, 55))  # Столбцы AC-BC (28-54)
 
 # Удаляем строки, где 14-й столбец (индекс 13) пустой
 data = data[data.iloc[:, 13].notna()]
