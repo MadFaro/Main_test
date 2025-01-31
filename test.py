@@ -1,3 +1,16 @@
+import pandas as pd
+
+file_path = r"V:\VOL2\Contact-center\Файлы\Аналитика\Численность ДДО\022025\3.Чаты\Профиль нагрузки_чаты_022025.xlsx"
+data = pd.read_excel(file_path, skiprows=1, usecols=range(28, 54))  # Столбцы AC-BC (28-53)
+data = data.drop(columns=data.columns[[1, 2]])
+data = data[data.iloc[:, 13].notna()]
+
+# Получаем даты из первого столбца
+dates = pd.read_excel(file_path, usecols=[0], skiprows=1)  # Первый столбец — дата
+
+# Создаем список строк для вывода
+rows = []
+
 # Перебираем все строки
 for i, row in data.iterrows():
     # Извлекаем дату для текущей строки
@@ -6,8 +19,26 @@ for i, row in data.iterrows():
     # Преобразуем все значения в строках (если они числа)
     values = row.apply(pd.to_numeric, errors='coerce').fillna(0).astype(int).values  # Все значения в целые числа
     
-    # Перебираем данные по часам, начиная с 7:00 (индекс 0 в данных = 7:00)
-    for hour in range(7, 24):  # Начинаем с 7:00
+    # Перебираем данные по часам (с 0 до 23)
+    for hour in range(24):  # Теперь перебираем все часы с 0 до 23
         time = f"{hour:02d}:00"
-        value = values[hour - 7]  # Получаем значение для текущего часа (сдвиг на 7)
+        value = values[hour]  # Получаем значение для текущего часа
         rows.append(["WEBIM_Chat", date, time, "01:00", value])  # Формируем строку для записи
+
+# Создаем DataFrame для результата
+output_df = pd.DataFrame(rows, columns=["Имя очереди", "Дата", "Время", "Интервал времени", "Требования ЭПЗ"])
+
+# Сохраняем в текстовый файл с нужным форматом
+output_file = "output.txt"
+with open(output_file, "w", encoding="utf-8") as f:
+    # Пишем заголовок
+    f.write("DATE_TIME_FORMAT\n")
+    f.write("DD.MM.YYYY HH:mm\n")
+    f.write("Имя очереди\tДата\tВремя\tИнтервал времени\tТребования ЭПЗ\n")
+    
+    # Записываем данные построчно
+    for _, row in output_df.iterrows():
+        line = "\t".join(str(value) for value in row)  # Преобразуем все значения в строку с табуляцией
+        f.write(line + "\n")  # Записываем строку с новой строкой в конце
+
+print(f"Данные успешно преобразованы и сохранены в {output_file}")
