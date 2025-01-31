@@ -1,8 +1,8 @@
 import pandas as pd
 from datetime import datetime, timedelta
 
-# Читаем Excel-файл
-data = pd.read_excel("your_file.xlsx")  # Замените 'your_file.xlsx' на имя вашего файла
+# Читаем Excel-файл с пропуском первой строки и выбором первых 27 столбцов
+data = pd.read_excel("your_file.xlsx", skiprows=1, usecols=range(27))  # Замените 'your_file.xlsx' на имя вашего файла
 
 # Преобразуем таблицу в длинный формат
 rows = []
