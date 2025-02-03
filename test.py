@@ -1,13 +1,22 @@
-	datetime	hour	day_of_week	minute	day	start	end	month	holidays	predictions
-0	2025-01-01 00:00:00	0	2	0	1	1	0	1	1	30,68968773
-1	2025-01-01 00:30:00	0	2	30	1	1	0	1	1	14,21517086
-2	2025-01-01 01:00:00	1	2	0	1	1	0	1	1	31,95409012
-3	2025-01-01 01:30:00	1	2	30	1	1	0	1	1	17,31354904
-4	2025-01-01 02:00:00	2	2	0	1	1	0	1	1	33,49020386
-5	2025-01-01 02:30:00	2	2	30	1	1	0	1	1	20,69115067
-6	2025-01-01 03:00:00	3	2	0	1	1	0	1	1	35,32297897
-7	2025-01-01 03:30:00	3	2	30	1	1	0	1	1	24,36797905
-8	2025-01-01 04:00:00	4	2	0	1	1	0	1	1	37,47917557
-9	2025-01-01 04:30:00	4	2	30	1	1	0	1	1	28,36228943
-10	2025-01-01 05:00:00	5	2	0	1	1	0	1	1	39,98753357
+import pandas as pd
 
+# Загружаем данные
+df = pd.read_excel("your_file.xlsx")  # замените на актуальное имя файла
+
+# Группируем по часу
+df_grouped = df.groupby(df['datetime'].dt.floor('H')).agg({
+    'hour': 'first',
+    'day_of_week': 'first',
+    'minute': 'first',
+    'day': 'first',
+    'start': 'first',
+    'end': 'first',
+    'month': 'first',
+    'holidays': 'first',
+    'predictions': 'sum'
+}).reset_index()
+
+# Сохраняем результат
+df_grouped.to_excel("grouped_file.xlsx", index=False)
+
+print(df_grouped.head())
