@@ -1,2 +1,1 @@
-host    all             all             ваш_публичный_ип_адрес/32         md5
-
+SELECT pg_reload_conf();
