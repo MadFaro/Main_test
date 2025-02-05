@@ -1,79 +1,81 @@
-import psycopg2
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+from email.mime.image import MIMEImage
+import smtplib
+import sqlite3
 import pandas as pd
-import json
 
-# Подключаемся к базе данных PostgreSQL
-conn = psycopg2.connect(
-    dbname="your_database_name", 
-    user="your_username", 
-    password="your_password", 
-    host="localhost"
-)
+# Данные для отправки уведомлений на почту
+smtp_server = ""
+port = 25
+sender_email = ""
+shop_url = ""
 
-# Выполняем запрос для получения данных из таблицы
+# Данные для начисления
+operation_type = "Начисление"
+json = None
+value_operation = 50
+status_operation = "Исполнен"
+on_read = 1
+
+# Коннект в БД
+db_path = r'C:\Users\TologonovAB\Desktop\shop_app\Convert\db\shop.db'
+conn = sqlite3.connect(db_path)
+cursor = conn.cursor()
+
+# Выгружаем тех, у кого сегодня ДР
 query = """
-SELECT id as id,
-       datetime_insert as date,
-       operation_type as type,
-       json as json,
-       login_customer as login
-  FROM operations
-  WHERE operation_type = 'Покупка' and status_operation = 'Исполнен'
+SELECT login
+FROM users
+WHERE strftime('%m-%d', birth_date) = strftime('%m-%d', 'now')
 """
 df = pd.read_sql_query(query, conn)
 
-# Проверяем столбцы в датафрейме
-print("Columns in the DataFrame:", df.columns)
+# Путь к баннеру
+banner_path = r'C:\Users\TologonovAB\Desktop\shop_app\sys_img\ban_birth.jpg'
 
-# Функция для преобразования JSON-строки в DataFrame
-def expand_json(json_str):
-    products = json.loads(json_str)
-    return pd.DataFrame(products)
+# Добавляем операцию для каждого пользователя и отправляем уведомление на почту
+for login_customer in df['login']:
 
-# Создаем пустой список для сохранения новых строк
-expanded_rows = []
+    # Добавляем запись в таблицу операций
+    insert_query = """
+        INSERT INTO operations (operation_type, json, login_customer, value_operation, status_operation, on_read)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """
+    cursor.execute(insert_query, (operation_type, json, login_customer, value_operation, status_operation, on_read))
+    conn.commit()
 
-# Проходим по каждой строке в исходном датафрейме
-for idx, row in df.iterrows():
-    json_data = row['json']
-    expanded_df = expand_json(json_data)
-    expanded_df['id'] = row['id']
-    expanded_df['date'] = row['date']
-    expanded_df['type'] = row['type']
-    expanded_df['login'] = row['login']  # Добавляем login в каждую запись
-    expanded_rows.append(expanded_df)
+    try:
+        # Формируем письмо
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = login_customer
+        msg['Subject'] = 'С Днем Рождения!'
+        
+        # HTML-контент письма с динамическим URL
+        email_content = f"""<html>
+                            <body>
+                                <img src="cid:banner"><br>
+                                <a href="{shop_url}" target="_blank">Перейти в интернет магазин</a>
+                                </p>
+                            </body>
+                            </html>
+                        """
+        msg.attach(MIMEText(email_content, 'html'))
 
-# Объединяем все отдельные DataFrame в один
-final_df = pd.concat(expanded_rows, ignore_index=True)
+        # Добавляем баннер в письмо
+        with open(banner_path, 'rb') as banner_file:
+            img = MIMEImage(banner_file.read())
+            img.add_header('Content-ID', '<banner>')
+            msg.attach(img)
 
-# Переупорядочиваем столбцы
-final_df = final_df[['id', 'date', 'type', 'login', 'product_id', 'name', 'count', 'subtotal_price', 'size', 'color']]
+        # Отправка письма
+        with smtplib.SMTP(smtp_server, port) as server:
+            server.sendmail(sender_email, login_customer, msg.as_string())
+    except:
+        pass
 
-# Приводим все столбцы с числовыми значениями к стандартным типам Python
-final_df['id'] = final_df['id'].astype(int)
-final_df['product_id'] = final_df['product_id'].astype(int)
-final_df['count'] = final_df['count'].astype(int)
-final_df['subtotal_price'] = final_df['subtotal_price'].astype(float)
-
-# Преобразуем DataFrame в список кортежей, чтобы psycopg2 мог вставить данные
-records = [tuple(x) for x in final_df.to_numpy()]
-
-# Подключаемся к базе для выполнения SQL-запросов
-cursor = conn.cursor()
-
-# Очищаем таблицу product_sale перед вставкой новых данных
-cursor.execute("TRUNCATE TABLE product_sale RESTART IDENTITY")
-
-# SQL-запрос для вставки данных
-insert_query = """
-    INSERT INTO product_sale (id, date, type, login, product_id, name, count, subtotal_price, size, color)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-"""
-
-# Вставляем все записи за один раз
-cursor.executemany(insert_query, records)
-
-# Сохраняем изменения и закрываем соединение
-conn.commit()
-cursor.close()
+# Закрываем соединение с БД
 conn.close()
