@@ -1,29 +1,5 @@
-Traceback (most recent call last):
-  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pywebio\session\coroutinebased.py", line 325, in step
-    coro_yield = self.coro.send(result)
-  File "main.py", line 2198, in dashboard_user
-    put_datatable(
-  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pywebio\output.py", line 1692, in put_datatable
-    return Output(spec)
-  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pywebio\io_ctrl.py", line 69, in __init__
-    self.spec = type(self).dump_dict(spec)  # this may raise TypeError
-  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pywebio\io_ctrl.py", line 55, in dump_dict
-    return json.loads(json.dumps(data, default=cls.json_encoder))
-  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\json\__init__.py", line 234, in dumps
-    return cls(
-  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\json\encoder.py", line 199, in encode
-    chunks = self.iterencode(o, _one_shot=True)
-  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\json\encoder.py", line 257, in iterencode
-    return _iterencode(o, 0)
-  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pywebio\io_ctrl.py", line 50, in json_encoder
-    raise TypeError('Object of type  %s is not JSON serializable' % obj.__class__.__name__)
-TypeError: Object of type  Timestamp is not JSON serializable
-Unhandled error in pywebio app
-
-
-
 class sql:
-    sql_product =   """
+    sql_product = """
                SELECT 
                     id,
                     name,
@@ -53,7 +29,7 @@ class sql:
     
     sql_operations = """
                SELECT id,
-                    datetime_insert,
+                    TO_CHAR(datetime_insert, 'YYYY-MM-DD HH24:MI:SS') AS datetime_insert,
                     operation_type,
                     json,
                     login_customer,
@@ -66,7 +42,7 @@ class sql:
     
     sql_operations_one = """
                SELECT id,
-                    datetime_insert,
+                    TO_CHAR(datetime_insert, 'YYYY-MM-DD HH24:MI:SS') AS datetime_insert,
                     operation_type,
                     json,
                     login_customer,
@@ -79,7 +55,7 @@ class sql:
     
     sql_order = """
                SELECT id,
-                    datetime_insert,
+                    TO_CHAR(datetime_insert, 'YYYY-MM-DD HH24:MI:SS') AS datetime_insert,
                     operation_type,
                     json,
                     login_customer,
@@ -99,7 +75,7 @@ class sql:
     
     sql_balance = """
                SELECT id,
-                    datetime_insert,
+                    TO_CHAR(datetime_insert, 'YYYY-MM-DD HH24:MI:SS') AS datetime_insert,
                     operation_type,
                     login_customer,
                     value_operation,
@@ -123,7 +99,7 @@ class sql:
     
     sql_question = """
                SELECT id,
-                    date_time,
+                    TO_CHAR(date_time, 'YYYY-MM-DD HH24:MI:SS') AS date_time,
                     login,
                     fio,
                     state,
@@ -136,7 +112,7 @@ class sql:
     
     sql_question_one = """
                SELECT id,
-                    date_time,
+                    TO_CHAR(date_time, 'YYYY-MM-DD HH24:MI:SS') AS date_time,
                     login,
                     fio,
                     msg,
@@ -149,7 +125,7 @@ class sql:
     
     sql_offer = """
                SELECT id,
-                    date_time,
+                    TO_CHAR(date_time, 'YYYY-MM-DD HH24:MI:SS') AS date_time,
                     login,
                     fio_bd,
                     fio,
@@ -162,7 +138,7 @@ class sql:
     
     sql_offer_one = """
                SELECT id,
-                    date_time,
+                    TO_CHAR(date_time, 'YYYY-MM-DD HH24:MI:SS') AS date_time,
                     login,
                     fio_bd,
                     fio,
@@ -175,7 +151,7 @@ class sql:
     
     sql_mood = """
                SELECT id,
-                    date_time,
+                    TO_CHAR(date_time, 'YYYY-MM-DD HH24:MI:SS') AS date_time,
                     login,
                     fio,
                     state,
@@ -187,7 +163,7 @@ class sql:
     
     sql_mood_one = """
                SELECT id,
-                    date_time,
+                    TO_CHAR(date_time, 'YYYY-MM-DD HH24:MI:SS') AS date_time,
                     login,
                     fio,
                     mood,
@@ -200,8 +176,8 @@ class sql:
     sql_dash_one = """
                SELECT * FROM (
                    SELECT 
-                       DATE_TRUNC('month', date_time) AS "Месяц",
-                       DATE(date_time) AS "Дата",
+                       TO_CHAR(date_time, 'YYYY-MM-DD') AS "Месяц",
+                       TO_CHAR(date_time, 'YYYY-MM-DD') AS "Дата",
                        COUNT(DISTINCT CASE WHEN type_log = 'Вход' THEN login END) AS "Входы",
                        COUNT(DISTINCT CASE WHEN type_log = 'Открыл магазин' THEN login END) AS "Открыл магазин",
                        COUNT(DISTINCT CASE WHEN type_log = 'Открыл гейм' THEN login END) AS "Открыл гейм",
@@ -215,13 +191,13 @@ class sql:
                        COUNT(CASE WHEN type_log = 'Заказ отменен' THEN 1 END) AS "Отменил заказ"
                    FROM log
                    WHERE login != 'ADMIN' AND date_time >= CURRENT_DATE - INTERVAL '60 days'
-                   GROUP BY DATE_TRUNC('month', date_time), DATE(date_time)
-                   ORDER BY DATE_TRUNC('month', date_time), DATE(date_time)
+                   GROUP BY TO_CHAR(date_time, 'YYYY-MM-DD'), TO_CHAR(date_time, 'YYYY-MM-DD')
+                   ORDER BY TO_CHAR(date_time, 'YYYY-MM-DD'), TO_CHAR(date_time, 'YYYY-MM-DD')
                ) AS subquery
                """
     
     sql_online = """
-               SELECT date_time AS "Дата",
+               SELECT TO_CHAR(date_time, 'YYYY-MM-DD HH24:MI:SS') AS "Дата",
                     user_ip AS "IP",
                     user_login AS "Логин"
                FROM session
@@ -233,14 +209,14 @@ class sql:
                     operation_type,
                     status_operation,
                     value_operation,
-                    datetime_insert
+                    TO_CHAR(datetime_insert, 'YYYY-MM-DD HH24:MI:SS') AS datetime_insert
                FROM operations
                WHERE login_customer = 'Замена' AND operation_type != 'test' AND on_read = 1
                """
     
     sql_full_log = """
                SELECT id AS "ИД",
-                    date_time AS "Дата",
+                    TO_CHAR(date_time, 'YYYY-MM-DD HH24:MI:SS') AS "Дата",
                     login AS "Логин",
                     type_log AS "Событие"
                FROM log
@@ -248,7 +224,7 @@ class sql:
     
     sql_operations_one_money = """
                SELECT id,
-                    datetime_insert,
+                    TO_CHAR(datetime_insert, 'YYYY-MM-DD HH24:MI:SS') AS datetime_insert,
                     operation_type,
                     json,
                     login_customer,
@@ -282,7 +258,7 @@ class sql:
     sql_box_history = """
                SELECT id,
                     'Идея' AS type,
-                    date_time,
+                    TO_CHAR(date_time, 'YYYY-MM-DD HH24:MI:SS') AS date_time,
                     fio,
                     offer AS question,
                     state,
@@ -293,7 +269,7 @@ class sql:
                UNION ALL
                SELECT id,
                     'Настроение' AS type,
-                    date_time,
+                    TO_CHAR(date_time, 'YYYY-MM-DD HH24:MI:SS') AS date_time,
                     fio,
                     mood AS question,
                     state,
@@ -304,7 +280,7 @@ class sql:
                UNION ALL
                SELECT id,
                     'Вопрос' AS type,
-                    date_time,
+                    TO_CHAR(date_time, 'YYYY-MM-DD HH24:MI:SS') AS date_time,
                     fio,
                     msg AS question,
                     state,
@@ -316,7 +292,7 @@ class sql:
     
     sql_advt = """
                SELECT id,
-                    date_ad AS "Дата",
+                    TO_CHAR(date_ad, 'YYYY-MM-DD') AS "Дата",
                     fio,
                     login,
                     phone,
@@ -332,7 +308,7 @@ class sql:
     
     sql_advt_moderation = """
                SELECT id,
-                    date_ad AS "Дата",
+                    TO_CHAR(date_ad, 'YYYY-MM-DD') AS "Дата",
                     fio,
                     login,
                     phone,
@@ -348,7 +324,7 @@ class sql:
     
     sql_advt_main = """
                SELECT id,
-                    date_ad AS "Дата",
+                    TO_CHAR(date_ad, 'YYYY-MM-DD') AS "Дата",
                     fio,
                     login,
                     phone,
@@ -359,5 +335,5 @@ class sql:
                     file_ad,
                     moderation
                FROM advt
-               WHERE moderation = 1 AND login = 'Замена'
+               WHERE date_ad >= CURRENT_DATE - INTERVAL '30 days'
                """
