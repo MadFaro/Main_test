@@ -1,6 +1,11 @@
-prod.py:25: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
-  df = pd.read_sql_query(query, conn)
-Traceback (most recent call last):
-  File "prod.py", line 65, in <module>
-    cursor.executemany(insert_query, records)
-psycopg2.ProgrammingError: can't adapt type 'numpy.int64'
+# Объединяем все отдельные DataFrame в один
+final_df = pd.concat(expanded_rows, ignore_index=True)
+
+# Переупорядочиваем столбцы
+final_df = final_df[['id', 'date', 'type', 'login', 'product_id', 'name', 'count', 'subtotal_price', 'size', 'color']]
+
+# Преобразуем все числовые столбцы в типы Python
+final_df['id'] = final_df['id'].astype(int)
+final_df['product_id'] = final_df['product_id'].astype(int)
+final_df['count'] = final_df['count'].astype(int)
+final_df['subtotal_price'] = final_df['subtotal_price'].astype(float)
