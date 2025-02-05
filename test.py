@@ -1,25 +1,20 @@
-sqlalchemy.exc.ProgrammingError: (psycopg2.errors.GroupingError) ОШИБКА:  столбец "log.date_time" должен фигурировать в предложении GROUP BY или использоваться в агрегатной функции
-LINE 4:                        DATE_TRUNC('month', date_time) AS "Ме...
-                                                   ^
-
-[SQL:
-               SELECT * FROM (
-                   SELECT
-                       DATE_TRUNC('month', date_time) AS "Месяц",
-                       DATE(date_time) AS "Дата",
-                       COUNT(DISTINCT CASE WHEN type_log = 'Вход' THEN login END) AS "Входы",
-                       COUNT(DISTINCT CASE WHEN type_log = 'Открыл магазин' THEN login END) AS "Открыл магазин",
-                       COUNT(DISTINCT CASE WHEN type_log = 'Открыл гейм' THEN login END) AS "Открыл гейм",
-                       COUNT(DISTINCT CASE WHEN type_log = 'Открыл скидки' THEN login END) AS "Открыл скидки",
-                       COUNT(DISTINCT CASE WHEN type_log = 'Открыл объявления' THEN login END) AS "Открыл объявления",
-                       COUNT(CASE WHEN type_log IN ('Задал вопрос', 'Отправил предложение', 'Отправил настроение') THEN 1 END) AS "Воспользовался боксом",
-                       COUNT(CASE WHEN type_log = 'Задал вопрос' THEN 1 END) AS "Задал вопрос",
-                       COUNT(CASE WHEN type_log = 'Отправил предложение' THEN 1 END) AS "Отправил предложение",
-                       COUNT(CASE WHEN type_log = 'Отправил настроение' THEN 1 END) AS "Отправил настроение",
-                       COUNT(CASE WHEN type_log = 'Сделал заказ' THEN 1 END) AS "Сделал заказ",
-                       COUNT(CASE WHEN type_log = 'Заказ отменен' THEN 1 END) AS "Отменил заказ"
-                   FROM log
-                   WHERE login != 'ADMIN' AND date_time >= CURRENT_DATE - INTERVAL '60 days'
-                   GROUP BY DATE(date_time)
-                   ORDER BY DATE(date_time)
-               ) AS subquery
+Traceback (most recent call last):
+  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pywebio\session\coroutinebased.py", line 325, in step
+    coro_yield = self.coro.send(result)
+  File "main.py", line 2198, in dashboard_user
+    put_datatable(
+  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pywebio\output.py", line 1692, in put_datatable
+    return Output(spec)
+  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pywebio\io_ctrl.py", line 69, in __init__
+    self.spec = type(self).dump_dict(spec)  # this may raise TypeError
+  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pywebio\io_ctrl.py", line 55, in dump_dict
+    return json.loads(json.dumps(data, default=cls.json_encoder))
+  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\json\__init__.py", line 234, in dumps
+    return cls(
+  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pywebio\io_ctrl.py", line 50, in json_encoder
+    raise TypeError('Object of type  %s is not JSON serializable' % obj.__class__.__name__)
+TypeError: Object of type  Timestamp is not JSON serializable
