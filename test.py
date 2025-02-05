@@ -1,1 +1,1 @@
-SELECT setval('table_name_column_name_seq', (SELECT MAX(id) FROM table_name));
+SELECT max(`datetime_insert`), `operation_type`, `value_operation` FROM `operations` WHERE `login_customer` = 'TOLOGONOVAB@URALSIB.RU'
