@@ -1,10 +1,8 @@
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
 from email.mime.image import MIMEImage
 import smtplib
-import sqlite3
+import psycopg2
 import pandas as pd
 
 # Данные для отправки уведомлений на почту
@@ -20,16 +18,20 @@ value_operation = 50
 status_operation = "Исполнен"
 on_read = 1
 
-# Коннект в БД
-db_path = r'C:\Users\TologonovAB\Desktop\shop_app\Convert\db\shop.db'
-conn = sqlite3.connect(db_path)
+# Подключение к базе данных PostgreSQL
+conn = psycopg2.connect(
+    dbname="your_database_name", 
+    user="your_username", 
+    password="your_password", 
+    host="localhost"
+)
 cursor = conn.cursor()
 
 # Выгружаем тех, у кого сегодня ДР
 query = """
 SELECT login
 FROM users
-WHERE strftime('%m-%d', birth_date) = strftime('%m-%d', 'now')
+WHERE TO_CHAR(birth_date, 'MM-DD') = TO_CHAR(NOW(), 'MM-DD')
 """
 df = pd.read_sql_query(query, conn)
 
@@ -42,7 +44,7 @@ for login_customer in df['login']:
     # Добавляем запись в таблицу операций
     insert_query = """
         INSERT INTO operations (operation_type, json, login_customer, value_operation, status_operation, on_read)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s)
         """
     cursor.execute(insert_query, (operation_type, json, login_customer, value_operation, status_operation, on_read))
     conn.commit()
@@ -53,13 +55,12 @@ for login_customer in df['login']:
         msg['From'] = sender_email
         msg['To'] = login_customer
         msg['Subject'] = 'С Днем Рождения!'
-        
+
         # HTML-контент письма с динамическим URL
         email_content = f"""<html>
                             <body>
                                 <img src="cid:banner"><br>
                                 <a href="{shop_url}" target="_blank">Перейти в интернет магазин</a>
-                                </p>
                             </body>
                             </html>
                         """
@@ -74,7 +75,8 @@ for login_customer in df['login']:
         # Отправка письма
         with smtplib.SMTP(smtp_server, port) as server:
             server.sendmail(sender_email, login_customer, msg.as_string())
-    except:
+    except Exception as e:
+        print(f"Ошибка при отправке письма пользователю {login_customer}: {e}")
         pass
 
 # Закрываем соединение с БД
