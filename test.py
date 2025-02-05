@@ -1,68 +1,24 @@
-import psycopg2
-import pandas as pd
-import json
+C:\Users\TologonovAB\Desktop>Python prod.py
+prod.py:24: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  df = pd.read_sql_query(query, conn)
+Traceback (most recent call last):
+  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pandas\core\indexes\base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas\_libs\index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas\_libs\hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'JSON'
 
-# Подключаемся к базе данных PostgreSQL
-conn = psycopg2.connect(
-    dbname="your_database_name", 
-    user="your_username", 
-    password="your_password", 
-    host="localhost"
-)
+The above exception was the direct cause of the following exception:
 
-# Выполняем запрос для получения данных из таблицы
-query = """
-SELECT id as ID,
-       datetime_insert as DATE,
-       operation_type as TYPE,
-       json as JSON,
-       login_customer as LOGIN
-  FROM operations
-  WHERE operation_type = 'Покупка' and status_operation = 'Исполнен'
-"""
-df = pd.read_sql_query(query, conn)
-
-# Функция для преобразования JSON-строки в DataFrame
-def expand_json(json_str):
-    products = json.loads(json_str)
-    return pd.DataFrame(products)
-
-# Создаем пустой список для сохранения новых строк
-expanded_rows = []
-
-# Проходим по каждой строке в исходном датафрейме
-for idx, row in df.iterrows():
+Traceback (most recent call last):
+  File "prod.py", line 36, in <module>
     json_data = row['JSON']
-    expanded_df = expand_json(json_data)
-    expanded_df['ID'] = row['ID']
-    expanded_df['DATE'] = row['DATE']
-    expanded_df['TYPE'] = row['TYPE']
-    expanded_df['LOGIN'] = row['LOGIN']  # Добавляем LOGIN в каждую запись
-    expanded_rows.append(expanded_df)
-
-# Объединяем все отдельные DataFrame в один
-final_df = pd.concat(expanded_rows, ignore_index=True)
-
-# Переупорядочиваем столбцы
-final_df = final_df[['ID', 'DATE', 'TYPE', 'LOGIN', 'product_id', 'name', 'count', 'subtotal_price', 'size', 'color']]
-
-# Подключаемся к базе для выполнения SQL-запросов
-cursor = conn.cursor()
-
-# Очищаем таблицу product_sale перед вставкой новых данных
-cursor.execute("TRUNCATE TABLE product_sale RESTART IDENTITY")
-
-# Преобразуем данные из DataFrame в список кортежей для вставки в базу
-records = final_df.to_records(index=False)
-insert_query = """
-    INSERT INTO product_sale (ID, DATE, TYPE, LOGIN, product_id, name, count, subtotal_price, size, color)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-"""
-
-# Вставляем все записи за один раз
-cursor.executemany(insert_query, records)
-
-# Сохраняем изменения и закрываем соединение
-conn.commit()
-cursor.close()
-conn.close()
+  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pandas\core\series.py", line 1007, in __getitem__
+    return self._get_value(key)
+  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pandas\core\series.py", line 1116, in _get_value
+    loc = self.index.get_loc(label)
+  File "C:\Users\TologonovAB\AppData\Local\Programs\Python\Python38\lib\site-packages\pandas\core\indexes\base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 'JSON'
