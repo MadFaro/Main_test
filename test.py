@@ -1,8 +1,6 @@
-CREATE TABLE "" (
-    id         INTEGER  PRIMARY KEY ON CONFLICT ROLLBACK AUTOINCREMENT
-                        UNIQUE ON CONFLICT ROLLBACK
-                        NOT NULL,
-    date_ad    DATETIME DEFAULT (DATETIME() ),
+CREATE TABLE my_table (
+    id         SERIAL PRIMARY KEY,
+    date_ad    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fio        TEXT,
     login      TEXT,
     phone      TEXT,
@@ -13,4 +11,3 @@ CREATE TABLE "" (
     file_ad    TEXT,
     moderation INTEGER
 );
-
