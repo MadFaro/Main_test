@@ -1,9 +1,14 @@
-import sqlite3
+import psycopg2
 import pandas as pd
 import json
 
-db_path = r'C:\Users\TologonovAB\Desktop\shop_app\Convert\db\shop.db'
-conn = sqlite3.connect(db_path)
+# Подключаемся к базе данных PostgreSQL
+conn = psycopg2.connect(
+    dbname="your_database_name", 
+    user="your_username", 
+    password="your_password", 
+    host="localhost"
+)
 
 # Выполняем запрос для получения данных из таблицы
 query = """
@@ -41,7 +46,7 @@ final_df = pd.concat(expanded_rows, ignore_index=True)
 # Переупорядочиваем столбцы
 final_df = final_df[['ID', 'DATE', 'TYPE', 'LOGIN', 'product_id', 'name', 'count', 'subtotal_price', 'size', 'color']]
 
-# Создаем (или пересоздаем) таблицу product_sale
+# Подключаемся к базе для выполнения SQL-запросов
 cursor = conn.cursor()
 
 # Удаляем таблицу, если она уже существует
@@ -64,8 +69,8 @@ cursor.execute('''
 ''')
 
 # Вставляем данные из DataFrame в таблицу product_sale
-final_df.to_sql('product_sale', conn, if_exists='append', index=False)
-
-# Сохраняем изменения и закрываем соединение
-conn.commit()
-conn.close()
+# Преобразуем данные из DataFrame в список кортежей для вставки в базу
+records = final_df.to_records(index=False)
+insert_query = """
+    INSERT INTO product_sale (ID, DATE, TYPE, LOGIN, product_id, name, count, subtotal_price, size, color)
+   
