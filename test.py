@@ -1,2 +1,1 @@
-    EXTRACT(YEAR FROM DATE_CREATED),  -- Группировка по году
-    EXTRACT(MONTH FROM DATE_CREATED), 
+
