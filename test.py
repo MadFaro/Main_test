@@ -1,13 +1,7 @@
-@font-face {
-    font-family: 'Material Icons';
-    src: url('/static/fonts/MaterialIcons-Regular.woff2') format('woff2'),
-         url('/static/fonts/MaterialIcons-Regular.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
+C:\Python38\Lib\site-packages\pywebio\html\font\MaterialIconsOutlined-Regular.otf
+C:\Python38\Lib\site-packages\pywebio\html\font\MaterialIcons-Regular.ttf
 
-.material-icons {
-    font-family: 'Material Icons';
-    font-size: 48px;
-    color: red;
-}
+Файл тут:
+C:\Python38\Lib\site-packages\pywebio\html\css\MaterialIcons.css
+
+C:\Python38\Lib\site-packages\pywebio\platform\tpl\index.html
