@@ -1,4 +1,19 @@
-WITH RankedData AS (
+SELECT 
+    MAX(TYPE) KEEP (DENSE_RANK LAST ORDER BY DATE_CREATED) AS TYPE, 
+    MAX(DATE_CREATED) AS DATE_CREATED, 
+    MAX(ID) KEEP (DENSE_RANK LAST ORDER BY DATE_CREATED) AS ID, 
+    CLIENT_FIO, 
+    CLIENT_DID,
+    MAX(IBSO_ID_OR_CALLED_FROM_NUM) KEEP (DENSE_RANK LAST ORDER BY DATE_CREATED) AS IBSO_ID_OR_CALLED_FROM_NUM, 
+    -- Используем LISTAGG для объединения значений CARD_TYPE
+    CASE 
+        WHEN LISTAGG(CARD_TYPE, ', ') WITHIN GROUP (ORDER BY CARD_TYPE) LIKE '%Кредитная карта%' THEN 'Кредитная карта'
+        WHEN LISTAGG(CARD_TYPE, ', ') WITHIN GROUP (ORDER BY CARD_TYPE) LIKE '%Дебетовая карта%' THEN 'Дебетовая карта'
+        ELSE 'Не определено'
+    END AS CARD_TYPE, 
+    MAX(HAVE_REDIRECT) AS HAVE_REDIRECT,  -- Максимальное значение HAVE_REDIRECT
+    MAX(MONEY) AS MONEY
+FROM (
     SELECT 
         TYPE, 
         DATE_CREATED, 
@@ -11,14 +26,10 @@ WITH RankedData AS (
         MONEY,
         EXTRACT(YEAR FROM DATE_CREATED) AS YEAR,
         EXTRACT(MONTH FROM DATE_CREATED) AS MONTH,
-        ROW_NUMBER() OVER (PARTITION BY CLIENT_DID, EXTRACT(YEAR FROM DATE_CREATED), EXTRACT(MONTH FROM DATE_CREATED)
-                           ORDER BY 
-                               CASE 
-                                   WHEN CARD_TYPE = 'Кредитная карта' THEN 1  -- Приоритет для Кредитной карты
-                                   WHEN CARD_TYPE = 'Дебетовая карта' THEN 2  -- Приоритет для Дебетовой карты
-                                   ELSE 3  -- Для "Не определено" минимальный приоритет
-                               END, 
-                               DATE_CREATED DESC) AS RN
+        ROW_NUMBER() OVER (
+            PARTITION BY CLIENT_DID, EXTRACT(YEAR FROM DATE_CREATED), EXTRACT(MONTH FROM DATE_CREATED)
+            ORDER BY DATE_CREATED DESC
+        ) AS RN
     FROM (
         -- Чаты
         SELECT 
@@ -69,31 +80,12 @@ WITH RankedData AS (
         WHERE d.client_did IS NOT NULL
     )
 )
-SELECT 
-    MAX(TYPE) AS TYPE, 
-    MAX(DATE_CREATED) AS DATE_CREATED, 
-    MAX(ID) AS ID, 
-    CLIENT_FIO, 
-    CLIENT_DID,
-    MAX(IBSO_ID_OR_CALLED_FROM_NUM) AS IBSO_ID_OR_CALLED_FROM_NUM, 
-    CASE 
-        WHEN MAX(CARD_TYPE) = 'Не определено' AND 
-             EXISTS (SELECT 1 FROM RankedData rd2 
-                     WHERE rd2.CLIENT_DID = RankedData.CLIENT_DID 
-                       AND rd2.CARD_TYPE = 'Дебетовая карта' 
-                       AND rd2.RN = 1) THEN 'Дебетовая карта'
-        WHEN MAX(CARD_TYPE) = 'Не определено' AND 
-             EXISTS (SELECT 1 FROM RankedData rd2 
-                     WHERE rd2.CLIENT_DID = RankedData.CLIENT_DID 
-                       AND rd2.CARD_TYPE = 'Кредитная карта' 
-                       AND rd2.RN = 1) THEN 'Кредитная карта'
-        ELSE MAX(CARD_TYPE)
-    END AS CARD_TYPE, 
-    MAX(HAVE_REDIRECT) AS HAVE_REDIRECT,
-    MAX(MONEY) AS MONEY,
-    YEAR, 
-    MONTH
-FROM RankedData
-WHERE RN = 1  -- Выбираем только первую строку для каждого клиента и месяца
-GROUP BY CLIENT_FIO, CLIENT_DID, YEAR, MONTH
-ORDER BY YEAR, MONTH, CLIENT_FIO, CLIENT_DID
+-- Группируем по клиенту и месяцу
+GROUP BY 
+    EXTRACT(YEAR FROM DATE_CREATED),
+    EXTRACT(MONTH FROM DATE_CREATED),
+    CLIENT_FIO, CLIENT_DID
+ORDER BY 
+    EXTRACT(YEAR FROM DATE_CREATED),
+    EXTRACT(MONTH FROM DATE_CREATED),
+    CLIENT_FIO, CLIENT_DID
