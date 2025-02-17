@@ -76,12 +76,24 @@ SELECT
     CLIENT_FIO, 
     CLIENT_DID,
     MAX(IBSO_ID_OR_CALLED_FROM_NUM) AS IBSO_ID_OR_CALLED_FROM_NUM, 
-    MAX(CARD_TYPE) AS CARD_TYPE, 
+    CASE 
+        WHEN MAX(CARD_TYPE) = 'Не определено' AND 
+             EXISTS (SELECT 1 FROM RankedData rd2 
+                     WHERE rd2.CLIENT_DID = RankedData.CLIENT_DID 
+                       AND rd2.CARD_TYPE = 'Дебетовая карта' 
+                       AND rd2.RN = 1) THEN 'Дебетовая карта'
+        WHEN MAX(CARD_TYPE) = 'Не определено' AND 
+             EXISTS (SELECT 1 FROM RankedData rd2 
+                     WHERE rd2.CLIENT_DID = RankedData.CLIENT_DID 
+                       AND rd2.CARD_TYPE = 'Кредитная карта' 
+                       AND rd2.RN = 1) THEN 'Кредитная карта'
+        ELSE MAX(CARD_TYPE)
+    END AS CARD_TYPE, 
     MAX(HAVE_REDIRECT) AS HAVE_REDIRECT,
     MAX(MONEY) AS MONEY,
     YEAR, 
     MONTH
 FROM RankedData
-WHERE RN = 1  -- Выбираем только первую строку для каждого клиента в пределах месяца
+WHERE RN = 1  -- Выбираем только первую строку для каждого клиента и месяца
 GROUP BY CLIENT_FIO, CLIENT_DID, YEAR, MONTH
 ORDER BY YEAR, MONTH, CLIENT_FIO, CLIENT_DID
