@@ -9,13 +9,16 @@ WITH RankedData AS (
         CARD_TYPE, 
         HAVE_REDIRECT, 
         MONEY,
-        ROW_NUMBER() OVER (PARTITION BY CLIENT_DID ORDER BY 
-            CASE 
-                WHEN CARD_TYPE = 'Кредитная карта' THEN 1  -- Приоритет для Кредитной карты
-                WHEN CARD_TYPE = 'Дебетовая карта' THEN 2  -- Приоритет для Дебетовой карты
-                ELSE 3  -- Для "Не определено" минимальный приоритет
-            END, 
-            DATE_CREATED DESC) AS RN  -- Второй уровень сортировки по дате
+        EXTRACT(YEAR FROM DATE_CREATED) AS YEAR,
+        EXTRACT(MONTH FROM DATE_CREATED) AS MONTH,
+        ROW_NUMBER() OVER (PARTITION BY CLIENT_DID, EXTRACT(YEAR FROM DATE_CREATED), EXTRACT(MONTH FROM DATE_CREATED)
+                           ORDER BY 
+                               CASE 
+                                   WHEN CARD_TYPE = 'Кредитная карта' THEN 1  -- Приоритет для Кредитной карты
+                                   WHEN CARD_TYPE = 'Дебетовая карта' THEN 2  -- Приоритет для Дебетовой карты
+                                   ELSE 3  -- Для "Не определено" минимальный приоритет
+                               END, 
+                               DATE_CREATED DESC) AS RN
     FROM (
         -- Чаты
         SELECT 
@@ -75,7 +78,10 @@ SELECT
     MAX(IBSO_ID_OR_CALLED_FROM_NUM) AS IBSO_ID_OR_CALLED_FROM_NUM, 
     MAX(CARD_TYPE) AS CARD_TYPE, 
     MAX(HAVE_REDIRECT) AS HAVE_REDIRECT,
-    MAX(MONEY) AS MONEY
+    MAX(MONEY) AS MONEY,
+    YEAR, 
+    MONTH
 FROM RankedData
-WHERE RN = 1  -- Выбираем только первую строку для каждого клиента
-GROUP BY CLIENT_FIO, CLIENT_DID
+WHERE RN = 1  -- Выбираем только первую строку для каждого клиента в пределах месяца
+GROUP BY CLIENT_FIO, CLIENT_DID, YEAR, MONTH
+ORDER BY YEAR, MONTH, CLIENT_FIO, CLIENT_DID
