@@ -1,25 +1,37 @@
-select 
-THREADID, CREATED, MODIFIED, STATE, OFFLINE_, DEPARTMENT, case when 
-DEPARTMENT in ('ckk', '2line') then (sysdate + interval '50' second-DTM) * 1440 else
-(sysdate + interval '50' second-CREATED) * 1440 end as AWAIT_TIME
-from (
-select 
-a.THREADID, a.CREATED, a.MODIFIED, a.OFFLINE_,
-case when DEPARTMENTID in (16, 21, 26, 28) then 'mass'
-when DEPARTMENTID = 22 then 'vip'
-when DEPARTMENTID = 31 then '2line'
-when DEPARTMENTID = 23 then 'reten' 
-when DEPARTMENTID = 34 then 'ckk' else 'other' end as DEPARTMENT,
-b.dtm,
-b.STATE,
-ROW_NUMBER() OVER (PARTITION BY a.THREADID ORDER BY b.DTM desc) rn
-from ANALYTICS.TOLOG_BI_WEBIM_CHATTHREAD a
-left join ANALYTICS.TOLOG_BI_WEBIM_CHATTHREADHISTORY b on a.THREADID = b.THREADID
-where a.STATE = 'queue' and a.CREATED>=trunc(sysdate))
-where rn = 1 and STATE = 'queue'
-
-THREADID, CREATED, MODIFIED, STATE, OFFLINE_, DEPARTMENT, AWAIT_TIME
-81	18.02.25 04:59:09	18.02.25 04:59:09	queue	1	mass	441,616666666666666666666666666666666667
-59	18.02.25 11:31:51	18.02.25 12:19:55	queue	0	2line	2,9
-97	18.02.25 11:45:28	18.02.25 12:06:09	queue	0	ckk	14,61666666666666666666666666666666666672
-18	18.02.25 11:47:59	18.02.25 12:08:04	queue	0	ckk	12,7
+WITH base_data AS (
+    select 
+        THREADID, CREATED, MODIFIED, STATE, OFFLINE_, DEPARTMENT, 
+        case 
+            when DEPARTMENT in ('ckk', '2line') then (sysdate + interval '50' second - DTM) * 1440 
+            else (sysdate + interval '50' second - CREATED) * 1440 
+        end as AWAIT_TIME
+    from (
+        select 
+            a.THREADID, a.CREATED, a.MODIFIED, a.OFFLINE_,
+            case 
+                when DEPARTMENTID in (16, 21, 26, 28) then 'mass'
+                when DEPARTMENTID = 22 then 'vip'
+                when DEPARTMENTID = 31 then '2line'
+                when DEPARTMENTID = 23 then 'reten' 
+                when DEPARTMENTID = 34 then 'ckk' 
+                else 'other' 
+            end as DEPARTMENT,
+            b.dtm,
+            b.STATE,
+            ROW_NUMBER() OVER (PARTITION BY a.THREADID ORDER BY b.DTM desc) rn
+        from ANALYTICS.TOLOG_BI_WEBIM_CHATTHREAD a
+        left join ANALYTICS.TOLOG_BI_WEBIM_CHATTHREADHISTORY b 
+            on a.THREADID = b.THREADID
+        where a.STATE = 'queue' and a.CREATED >= trunc(sysdate)
+    ) 
+    where rn = 1 and STATE = 'queue'
+),
+high_await_chats AS (
+    SELECT COUNT(*) as cnt 
+    FROM base_data 
+    WHERE AWAIT_TIME > 150
+)
+SELECT * 
+FROM base_data
+WHERE (SELECT cnt FROM high_await_chats) > 3 
+    OR AWAIT_TIME <= 150;
