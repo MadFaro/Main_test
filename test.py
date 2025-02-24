@@ -27,30 +27,50 @@ with base as (
     ) b on a.tabnum = b.person_number
 ),
 category_entry as (
-    -- Находим дату первого попадания в категорию для каждого сотрудника
+    -- Дата первого попадания в категорию
     select tabnum, cnt_category, min(month) as category_start_month
     from base
     group by tabnum, cnt_category
 ),
 work_duration as (
-    -- Считаем количество месяцев, отработанных после попадания в категорию
+    -- Считаем месяцы работы:
+    -- если dt есть и меньше month -> считаем до даты увольнения
+    -- если dt = null -> считаем до month и отмечаем "не уволен"
     select 
         base.tabnum,
         base.month,
         base.cnt_category,
+        base.dt,
         category_entry.category_start_month,
-        trunc(months_between(base.month, category_entry.category_start_month)) as months_worked
+        trunc(
+            months_between(
+                case 
+                    when base.dt is not null and base.dt < base.month then base.dt
+                    else base.month
+                end,
+                category_entry.category_start_month
+            )
+        ) as months_worked,
+        case 
+            when base.dt is null then 'не уволен'
+            else 'уволен'
+        end as termination_status
     from base
-    join category_entry on base.tabnum = category_entry.tabnum and base.cnt_category = category_entry.cnt_category
+    join category_entry 
+        on base.tabnum = category_entry.tabnum 
+       and base.cnt_category = category_entry.cnt_category
 ),
 final as (
-    -- Присваиваем группы по отработанным месяцам
+    -- Присваиваем группу по отработанным месяцам
     select 
         tabnum,
         month,
         cnt_category,
+        dt,
+        termination_status,
         months_worked,
         case 
+            when termination_status = 'не уволен' then 'не уволен'
             when months_worked >= 6 then 'отработали 6 месяцев'
             when months_worked >= 3 then 'отработали 3 месяца'
             else 'менее 3 месяцев'
@@ -60,4 +80,3 @@ final as (
 select *
 from final
 order by month, cnt_category, tabnum;
-
