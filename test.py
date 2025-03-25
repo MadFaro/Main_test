@@ -1,2 +1,5 @@
-select cast('Хвуст Владислав Валерьевич' as varchar2(100)) as FIO,  
-       cast('Группа №10' as varchar2(100)) as DEP from dual
+ORA-00997: неверное использование типа данных LONG
+00997. 00000 -  "illegal use of LONG datatype"
+*Cause:    
+*Action:
+Error at Line: 1 Column: 115
